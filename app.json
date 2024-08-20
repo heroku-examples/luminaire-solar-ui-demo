@@ -1,0 +1,7 @@
+{
+  "name": "Lumina Solar - Data Cloud",
+  "description": "Integrate Heroku and Data Cloud using the Heroku Postgres Connector and the Web SDK",
+  "repository": "https://github.com/heroku-reference-apps/lumina-solar-datacloud",
+  "keywords": ["nodejs", "postgres", "fastify", "vite"],
+  "addons": ["heroku-postgresql:essential-0"]
+}

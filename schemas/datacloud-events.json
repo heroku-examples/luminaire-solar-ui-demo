@@ -1,0 +1,208 @@
+{
+  "records": [
+    {
+      "developerName": "luminaAddProduct",
+      "masterLabel": "Lumina Add Product Interaction",
+      "category": "Engagement",
+      "externalDataTranFields": [
+        {
+          "masterLabel": "Product ID",
+          "dataType": "Text",
+          "developerName": "productId",
+          "isDataRequired": true
+        },
+        {
+          "masterLabel": "Product Name",
+          "dataType": "Text",
+          "developerName": "productName",
+          "isDataRequired": true
+        },
+        {
+          "masterLabel": "eventId",
+          "dataType": "Text",
+          "developerName": "eventId",
+          "isDataRequired": true,
+          "primaryIndexOrder": 1
+        },
+        {
+          "masterLabel": "category",
+          "dataType": "Text",
+          "developerName": "category",
+          "isDataRequired": true
+        },
+        {
+          "masterLabel": "dateTime",
+          "dataType": "DateTime",
+          "developerName": "dateTime",
+          "isDataRequired": true
+        },
+        {
+          "masterLabel": "deviceId",
+          "dataType": "Text",
+          "developerName": "deviceId",
+          "isDataRequired": true
+        },
+        {
+          "masterLabel": "eventType",
+          "dataType": "Text",
+          "developerName": "eventType",
+          "isDataRequired": true
+        },
+        {
+          "masterLabel": "sessionId",
+          "dataType": "Text",
+          "developerName": "sessionId",
+          "isDataRequired": true
+        }
+      ]
+    },
+    {
+      "developerName": "luminaRemoveProduct",
+      "masterLabel": "Lumina Remove Product Interaction",
+      "category": "Engagement",
+      "externalDataTranFields": [
+        {
+          "masterLabel": "Product ID",
+          "dataType": "Text",
+          "developerName": "productId",
+          "isDataRequired": true
+        },
+        {
+          "masterLabel": "Product Name",
+          "dataType": "Text",
+          "developerName": "productName",
+          "isDataRequired": true
+        },
+        {
+          "masterLabel": "eventId",
+          "dataType": "Text",
+          "developerName": "eventId",
+          "isDataRequired": true,
+          "primaryIndexOrder": 1
+        },
+        {
+          "masterLabel": "category",
+          "dataType": "Text",
+          "developerName": "category",
+          "isDataRequired": true
+        },
+        {
+          "masterLabel": "dateTime",
+          "dataType": "DateTime",
+          "developerName": "dateTime",
+          "isDataRequired": true
+        },
+        {
+          "masterLabel": "deviceId",
+          "dataType": "Text",
+          "developerName": "deviceId",
+          "isDataRequired": true
+        },
+        {
+          "masterLabel": "eventType",
+          "dataType": "Text",
+          "developerName": "eventType",
+          "isDataRequired": true
+        },
+        {
+          "masterLabel": "sessionId",
+          "dataType": "Text",
+          "developerName": "sessionId",
+          "isDataRequired": true
+        }
+      ]
+    },
+    {
+      "developerName": "contactPointEmail",
+      "masterLabel": "Contact Point Email",
+      "category": "Profile",
+      "externalDataTranFields": [
+        {
+          "masterLabel": "eventId",
+          "dataType": "Text",
+          "developerName": "eventId",
+          "isDataRequired": true
+        },
+        {
+          "masterLabel": "category",
+          "dataType": "Text",
+          "developerName": "category",
+          "isDataRequired": true
+        },
+        {
+          "masterLabel": "dateTime",
+          "dataType": "DateTime",
+          "developerName": "dateTime",
+          "isDataRequired": true
+        },
+        {
+          "masterLabel": "deviceId",
+          "dataType": "Text",
+          "developerName": "deviceId",
+          "isDataRequired": true,
+          "primaryIndexOrder": 1
+        },
+        {
+          "masterLabel": "email",
+          "dataType": "Text",
+          "developerName": "email",
+          "isDataRequired": true
+        },
+        {
+          "masterLabel": "eventType",
+          "dataType": "Text",
+          "developerName": "eventType",
+          "isDataRequired": true
+        },
+        {
+          "masterLabel": "interactionName",
+          "dataType": "Text",
+          "developerName": "interactionName",
+          "isDataRequired": true
+        },
+        {
+          "masterLabel": "pageView",
+          "dataType": "Number",
+          "developerName": "pageView",
+          "isDataRequired": false
+        },
+        {
+          "masterLabel": "sessionId",
+          "dataType": "Text",
+          "developerName": "sessionId",
+          "isDataRequired": true
+        },
+        {
+          "masterLabel": "sourceChannel",
+          "dataType": "Text",
+          "developerName": "sourceChannel",
+          "isDataRequired": false
+        },
+        {
+          "masterLabel": "sourceLocale",
+          "dataType": "Text",
+          "developerName": "sourceLocale",
+          "isDataRequired": false
+        },
+        {
+          "masterLabel": "sourcePageType",
+          "dataType": "Text",
+          "developerName": "sourcePageType",
+          "isDataRequired": false
+        },
+        {
+          "masterLabel": "sourceUrl",
+          "dataType": "Text",
+          "developerName": "sourceUrl",
+          "isDataRequired": false
+        },
+        {
+          "masterLabel": "sourceUrlReferrer",
+          "dataType": "Text",
+          "developerName": "sourceUrlReferrer",
+          "isDataRequired": false
+        }
+      ]
+    }
+  ]
+}

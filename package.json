@@ -1,0 +1,91 @@
+{
+  "name": "lumina-data-cloud",
+  "description": "Lumina Solar - Data Cloud Integration",
+  "type": "module",
+  "version": "1.0.0",
+  "main": "app.js",
+  "keywords": [
+    "heroku",
+    "data cloud",
+    "postgres"
+  ],
+  "author": "Heroku DevRel <heroku-dev-advocacy@salesforce.com>",
+  "license": "Apache-2.0",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build": "npm run build:client && npm run build:server",
+    "build:dev": "npm run build:client:dev && npm run build:server:dev",
+    "build:client": "vite build --outDir dist/client --ssrManifest",
+    "build:server": "vite build --outDir dist/server --ssr /index.js",
+    "build:client:dev": "vite build -m dev --outDir dist/client --ssrManifest",
+    "build:server:dev": "vite build -m dev --outDir dist/server --ssr /index.js",
+    "test": "node --test test/**/*.test.js",
+    "start": "node server.js",
+    "dev": "npm run build:dev && node server.js --dev",
+    "setup": "node scripts/setup.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prettier": "prettier --write .",
+    "prepare": "husky",
+    "precommit": "lint-staged"
+  },
+  "dependencies": {
+    "@fastify/formbody": "^7.4.0",
+    "@fastify/react": "^0.6.0",
+    "@fastify/vite": "^6.0.6",
+    "@mantine/carousel": "^7.9.2",
+    "@mantine/core": "^7.9.1",
+    "@mantine/hooks": "^7.9.1",
+    "@tabler/icons-react": "^3.3.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "dotenv": "^16.4.5",
+    "fastify": "^4.27.0",
+    "history": "^5.3.0",
+    "minipass": "^7.1.0",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0",
+    "postcss": "^8.4.38",
+    "postcss-nesting": "^12.1.2",
+    "postcss-preset-env": "^9.5.11",
+    "postcss-preset-mantine": "^1.15.0",
+    "postcss-simple-vars": "^7.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-error-boundary": "^4.0.13",
+    "react-router-dom": "^6.23.0",
+    "react-use": "^17.5.0",
+    "tailwindcss": "^3.4.3",
+    "unihead": "0.0.6",
+    "valtio": "^1.13.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.2.0",
+    "eslint": "^9.2.0",
+    "eslint-config-prettier": "^9.1.0",
+    "globals": "^15.1.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
+    "prettier": "^3.2.5",
+    "vite": "^5.2.11"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,md,json}": [
+      "prettier --write"
+    ]
+  },
+  "engines": {
+    "node": "20.x",
+    "npm": "10.x"
+  },
+  "volta": {
+    "node": "20.13.1",
+    "npm": "10.5.2"
+  },
+  "packageManager": "pnpm@9.7.1+sha512.faf344af2d6ca65c4c5c8c2224ea77a81a5e8859cbc4e06b1511ddce2f0151512431dd19e6aff31f2c6a8f5f2aced9bd2273e1fed7dd4de1868984059d2c4247"
+}

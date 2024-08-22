@@ -34,37 +34,42 @@ export function state() {
 // could be named anything, no special processing involved.
 export const actions = {
   async authenticate(state, credentials) {
-    const response = await this.request(state, '/api/user/authenticate', {
+    const response = await fetch('/user/authenticate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(credentials),
     });
+
     if (!response.ok) {
       throw new Error('Invalid credentials');
     }
-    const { user } = await response.json();
+    const { authorization, user } = await response.json();
     state.user = { ...state.user, ...user };
+    state.authorization = authorization;
   },
   async logout(state) {
     // Reset state
     state.user = null;
+    state.authorization = null;
     state.systems = [];
     state.metricsSummary = null;
     state.products = [];
     state.product = null;
     state.cart = [];
-    await this.request(state, '/api/user/logout');
+    await fetch('/user/logout');
   },
   async getProfile(state) {
-    const response = await this.request(state, '/api/user/profile');
+    const response = await fetch('/user/profile');
     if (response.ok) {
       state.user = await response.json();
     }
   },
   async getSystemsByUser(state) {
-    const response = await this.request(state, '/api/systems');
+    const response = await this.request(state, '/api/systems', {
+      headers: { Authorization: `Bearer ${state.authorization}` },
+    });
     if (response.ok) {
       state.systems = await response.json();
     }
@@ -72,7 +77,10 @@ export const actions = {
   async getMetricsBySystem(state, systemId, date) {
     const response = await this.reques(
       state,
-      `/api/metrics/${systemId}?date=${date}`
+      `/api/metrics/${systemId}?date=${date}`,
+      {
+        headers: { Authorization: `Bearer ${state.authorization}` },
+      }
     );
     if (response.ok) {
       state.metrics = await response.json();
@@ -81,7 +89,10 @@ export const actions = {
   async getMetricsSummaryBySystem(state, systemId, date) {
     const response = await this.request(
       state,
-      `/api/summary/${systemId}?date=${date}`
+      `/api/summary/${systemId}?date=${date}`,
+      {
+        headers: { Authorization: `Bearer ${state.authorization}` },
+      }
     );
     if (response.ok) {
       state.metricsSummary = await response.json();

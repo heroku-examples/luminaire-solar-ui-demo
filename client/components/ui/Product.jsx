@@ -35,7 +35,9 @@ export function Product({ product }) {
       }}
     >
       <Card.Section className={classes.title}>
-        <Text fw={600}>{product.name}</Text>
+        <Text fw={600}>
+          {product.name} {product.productCode}
+        </Text>
       </Card.Section>
       <Center>
         <Image
@@ -54,13 +56,20 @@ export function Product({ product }) {
       <Card.Section className={classes.section}>
         <Group justify="space-between">
           <Text fz="xl" fw={700} mt={3}>
-            <NumberFormatter
-              prefix="$"
-              value={product.price}
-              thousandSeparator
-            />
+            {product.price ? (
+              <NumberFormatter
+                prefix="$"
+                value={product.price}
+                thousandSeparator
+              />
+            ) : (
+              <Text fz="m" fw={400} mt={3}>
+                Call for price
+              </Text>
+            )}
           </Text>
-          {loggedIn && (
+
+          {loggedIn && product.price && (
             <Button
               variant="light"
               mod="data-add-to-cart"

@@ -64,7 +64,7 @@ export const actions = {
     }
   },
   async getSystemsByUser(state) {
-    const response = await fetch('/api/systems');
+    const response = await this.request(state, '/api/systems');
     if (response.ok) {
       state.systems = await response.json();
     }

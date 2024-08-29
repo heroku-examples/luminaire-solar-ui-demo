@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Group, Burger } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { Group } from '@mantine/core';
 import { IconSun } from '@tabler/icons-react';
 import { Login } from '@/components/ui/Login.jsx';
 import { Profile } from '@/components/ui/Profile.jsx';
@@ -18,8 +17,6 @@ const links = [
 
 export function Header() {
   const { state } = useRouteContext();
-  const [opened, { toggle }] = useDisclosure(false);
-
   const loggedIn = state.user && state.user.username != null;
 
   const items = links.map((link) => {
@@ -35,19 +32,19 @@ export function Header() {
   return (
     <header className={classes.header}>
       <div className={classes.inner}>
-        <Group>
-          <Burger opened={opened} onClick={toggle} size="sm" hiddenFrom="sm" />
-          <IconSun color="orange" />
-          {title}
-        </Group>
-
+        <Link to="/demo" className="nav-link">
+          <Group>
+            <IconSun color="orange" />
+            {title}
+          </Group>
+        </Link>
         <Group gap={5} className={classes.links} visibleFrom="sm">
           {items}
         </Group>
 
         <Group className={classes.links} visibleFrom="sm">
           <Cart />
-          {state.user ? <Profile /> : <Login />}
+          {loggedIn ? <Profile /> : <Login />}
         </Group>
       </div>
     </header>

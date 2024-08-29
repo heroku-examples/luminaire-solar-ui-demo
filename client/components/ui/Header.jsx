@@ -5,11 +5,13 @@ import { IconSun } from '@tabler/icons-react';
 import { Login } from '@/components/ui/Login.jsx';
 import { Profile } from '@/components/ui/Profile.jsx';
 import { Cart } from '@/components/ui/Cart.jsx';
+import { title } from '@/theme.js';
 import classes from './Header.module.css';
 import { useRouteContext } from '/:core.jsx';
 
 const links = [
   { link: '/', label: 'Home' },
+  { link: '/about', label: 'About' },
   { link: '/dashboard', label: 'Dashboard' },
   { link: '/products', label: 'Products' },
 ];
@@ -36,7 +38,7 @@ export function Header() {
         <Group>
           <Burger opened={opened} onClick={toggle} size="sm" hiddenFrom="sm" />
           <IconSun color="orange" />
-          Lumina Solar
+          {title}
         </Group>
 
         <Group gap={5} className={classes.links} visibleFrom="sm">

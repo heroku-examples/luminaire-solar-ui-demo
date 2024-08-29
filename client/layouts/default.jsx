@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import { Header } from '@/components/ui/Header.jsx';
+import { Footer } from '@/components/ui/Footer';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Container } from '@mantine/core';
 
@@ -28,6 +29,7 @@ export default function Default({ children }) {
           {children}
         </ErrorBoundary>
       </Container>
+      <Footer />
     </Suspense>
   );
 }

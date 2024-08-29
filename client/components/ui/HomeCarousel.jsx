@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { Carousel } from '@mantine/carousel';
 import { useMediaQuery } from '@mantine/hooks';
 import { Paper, Title, Button, useMantineTheme, rem } from '@mantine/core';
@@ -8,6 +9,7 @@ import industrial from '@/assets/img/industrial.jpg';
 import wind from '@/assets/img/wind.jpg';
 
 export function CarouselCard({ title, image }) {
+  const navigate = useNavigate();
   return (
     <Paper
       shadow="md"
@@ -21,7 +23,13 @@ export function CarouselCard({ title, image }) {
           {title}
         </Title>
       </div>
-      <Button>Learn more</Button>
+      <Button
+        onClick={() => {
+          navigate('/about');
+        }}
+      >
+        Learn more
+      </Button>
     </Paper>
   );
 }

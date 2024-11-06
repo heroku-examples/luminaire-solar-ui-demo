@@ -27,6 +27,7 @@ export function state() {
     products: [],
     product: null,
     cart: [],
+    authorization: null,
   };
 }
 

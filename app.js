@@ -23,12 +23,12 @@ export async function build(opts = {}) {
   });
   fastify.register(FastifyCookie);
   fastify.register(FastifySession, {
-    cookieName: 'SESSIONID',
+    cookieName: 'sessionId',
     secret: crypto.randomBytes(32).toString('hex'),
+    maxAge: 60 * 60 * 1000,
     cookie: {
-      secure: false,
+      secure: 'auto',
     },
-    expires: 60 * 60 * 1000,
   });
   fastify.register(FastifyJwt, {
     secret: process.env.JWT_SECRET || 'secret',

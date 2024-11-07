@@ -27,6 +27,7 @@ export async function build(opts = {}) {
     secret: crypto.randomBytes(32).toString('hex'),
     maxAge: 60 * 60 * 1000,
     cookie: {
+      httpOnly: false,
       secure: 'auto',
     },
   });

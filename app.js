@@ -26,7 +26,8 @@ export async function build(opts = {}) {
     secret: process.env.SESSION_SECRET || 'wesetaluminasolaruisessionsecret',
     maxAge: 60 * 60 * 1000,
     cookie: {
-      httpOnly: false,
+      httpOnly: true,
+      domain: process.env.COOKIE_DOMAIN || 'lumina.ukoreh.com',
       secure: 'auto',
     },
   });

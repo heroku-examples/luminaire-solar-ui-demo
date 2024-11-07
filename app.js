@@ -27,7 +27,6 @@ export async function build(opts = {}) {
     maxAge: 60 * 60 * 1000,
     cookie: {
       httpOnly: true,
-      domain: process.env.COOKIE_DOMAIN || 'lumina.ukoreh.com',
       secure: 'auto',
     },
   });

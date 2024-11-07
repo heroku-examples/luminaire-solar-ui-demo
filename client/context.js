@@ -21,13 +21,13 @@ export default async (ctx) => {
 export function state() {
   return {
     apiUrl: null,
+    authorization: null,
     user: null,
     systems: [],
     metricsSummary: null,
     products: [],
     product: null,
     cart: [],
-    authorization: null,
   };
 }
 
@@ -64,7 +64,9 @@ export const actions = {
   async getProfile(state) {
     const response = await fetch('/user/profile');
     if (response.ok) {
-      state.user = await response.json();
+      const { user, authorization } = await response.json();
+      state.user = user;
+      state.authorization = authorization;
     }
   },
   async getSystemsByUser(state) {

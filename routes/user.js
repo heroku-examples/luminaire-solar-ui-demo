@@ -60,6 +60,7 @@ export default async function (fastify, _opts) {
       });
       if (user && authorization) {
         request.session.user = user;
+        request.session.authorization = authorization;
         reply.send({ user, authorization });
       } else {
         reply.status(401).send({
@@ -127,13 +128,19 @@ export default async function (fastify, _opts) {
         },
         200: {
           type: 'object',
-          description: 'User profile',
-          $ref: 'user#',
+          description: 'User profile and authorization',
+          properties: {
+            user: { $ref: 'user#' },
+            authorization: { type: 'string' },
+          },
         },
       },
     },
     handler: async function (request, reply) {
-      reply.send(request.session.user);
+      reply.send({
+        user: request.session.user,
+        authorization: request.session.authorization,
+      });
     },
   });
 }

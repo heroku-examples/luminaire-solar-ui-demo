@@ -15,6 +15,18 @@ export function EnergyStats({ metricsSummary }) {
     );
   }
 
+  if (
+    !metricsSummary.daily.length ||
+    !metricsSummary.weekly.length ||
+    !metricsSummary.monthly.length
+  ) {
+    return (
+      <Card withBorder mt={10}>
+        No metrics available
+      </Card>
+    );
+  }
+
   const daily = metricsSummary.daily[0];
   const weekly = metricsSummary.weekly[0];
   const monthly = metricsSummary.monthly[0];

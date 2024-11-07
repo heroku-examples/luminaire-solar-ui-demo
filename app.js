@@ -1,6 +1,5 @@
 import 'dotenv/config';
 import path from 'node:path';
-import crypto from 'node:crypto';
 import Fastify from 'fastify';
 import FastifyJwt from '@fastify/jwt';
 import FastifyVite from '@fastify/vite';
@@ -24,7 +23,7 @@ export async function build(opts = {}) {
   fastify.register(FastifyCookie);
   fastify.register(FastifySession, {
     cookieName: 'sessionId',
-    secret: crypto.randomBytes(32).toString('hex'),
+    secret: process.env.SESSION_SECRET || 'wesetaluminasolaruisessionsecret',
     maxAge: 60 * 60 * 1000,
     cookie: {
       httpOnly: false,
@@ -32,7 +31,7 @@ export async function build(opts = {}) {
     },
   });
   fastify.register(FastifyJwt, {
-    secret: process.env.JWT_SECRET || 'secret',
+    secret: process.env.JWT_SECRET || 'supersecret',
   });
   fastify
     .decorate('authenticate', async function ({ username, password }) {

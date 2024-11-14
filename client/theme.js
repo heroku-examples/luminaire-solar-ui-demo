@@ -1,6 +1,6 @@
 import { createTheme } from '@mantine/core';
 
-export const title = 'bloomberg';
+export const title = 'Lumina Solarb';
 export const year = '2024';
 
 export const theme = createTheme({

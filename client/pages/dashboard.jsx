@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useRouteContext } from '/:core.jsx';
 import { title } from '@/theme.js';
-import { EnergyStats } from '@/components/ui/EnergyStats.jsx';
 import { Select } from '@mantine/core';
+import { EnergyStats } from '@/components/ui/EnergyStats.jsx';
+import { Assistant } from '@/components/ui/Assistant.jsx';
 
 export function getMeta(ctx) {
   return {
@@ -54,6 +55,7 @@ export default function Dashboard() {
         }}
       />
       <EnergyStats metricsSummary={snapshot.metricsSummary} />
+      <Assistant />
     </>
   );
 }

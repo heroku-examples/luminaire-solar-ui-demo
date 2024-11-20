@@ -3,7 +3,6 @@ import { SimpleGrid } from '@mantine/core';
 import { useRouteContext } from '/:core.jsx';
 import { title } from '@/theme.js';
 import { Product } from '@/components/ui/Product.jsx';
-import { Cart } from '@/components/ui/Cart.jsx';
 
 export function getMeta() {
   return {

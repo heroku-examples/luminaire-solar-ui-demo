@@ -7,6 +7,7 @@ import {
   Box,
   Paper,
   ScrollArea,
+  Text,
   TextInput,
   Button,
   Group,
@@ -54,9 +55,10 @@ const Message = ({ role, content, isLast }) => {
       background: theme.colors.blue[0],
     },
     agent: {
-      background: '#f6f8fa',
       fontStyle: 'italic',
       color: '#666666',
+      padding: '2px',
+      borderRadius: 0,
     },
     error: {
       background: '#ffebee',
@@ -76,7 +78,9 @@ const Message = ({ role, content, isLast }) => {
     <Box style={style}>
       {role === 'agent' ? (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div style={{ flex: 1 }}>{content}</div>
+          <Text size="xs" style={{ flex: 1 }}>
+            {content}
+          </Text>
           <IconWrapper isLast={isLast} />
         </div>
       ) : role === 'assistant' ? (
@@ -229,6 +233,15 @@ const Chat = () => {
       // Process any remaining data
       buffer += decoder.decode();
       processBuffer();
+    } catch (error) {
+      console.error('Stream error:', error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'error',
+          content: 'Sorry, there was an error processing the response',
+        },
+      ]);
     } finally {
       reader.releaseLock();
     }

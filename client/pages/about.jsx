@@ -42,9 +42,9 @@ function AboutPage() {
           </Text>
 
           <Text size="lg" align="left" my="lg">
-            Join us in creating a brighter, greener future. Discover how Lumina
-            Solar can help you harness the power of the sun and wind to meet
-            your energy needs.
+            Join us in creating a brighter, greener future. Discover how {title}{' '}
+            can help you harness the power of the sun and wind to meet your
+            energy needs.
           </Text>
         </Grid.Col>
       </Grid>

@@ -42,7 +42,7 @@ export function HomeCarousel() {
     { title: 'Residential', image: residential },
     { title: 'Commercial', image: commercial },
     { title: 'Industrial', image: industrial },
-    { title: 'Lumina Wind', image: wind },
+    { title: 'Luminaire Wind', image: wind },
   ].map((slide) => (
     <Carousel.Slide key={slide.title}>
       <CarouselCard {...slide} />

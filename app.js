@@ -23,7 +23,7 @@ export async function build(opts = {}) {
   fastify.register(FastifyCookie);
   fastify.register(FastifySession, {
     cookieName: 'sessionId',
-    secret: process.env.SESSION_SECRET || 'wesetaluminasolaruisessionsecret',
+    secret: process.env.SESSION_SECRET || 'setaluminairesolaruisessionsecret',
     maxAge: 60 * 60 * 1000,
     cookie: {
       httpOnly: true,

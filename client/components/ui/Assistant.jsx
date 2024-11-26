@@ -87,6 +87,19 @@ const Message = ({ role, content, isLast }) => {
         <ReactMarkdown
           rehypePlugins={[rehypeRaw]}
           components={{
+            a: ({ children, href, target }) => (
+              <a
+                style={{
+                  color: theme.colors.violet[4],
+                  textDecoration: 'underline',
+                }}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {children}
+              </a>
+            ),
             ul: ({ children }) => (
               <ul style={{ paddingLeft: '16px', listStyle: 'disc' }}>
                 {children}

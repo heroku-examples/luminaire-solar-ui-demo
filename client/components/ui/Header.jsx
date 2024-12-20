@@ -7,12 +7,32 @@ import { Cart } from '@/components/ui/Cart.jsx';
 import { title } from '@/theme.js';
 import classes from './Header.module.css';
 import { useRouteContext } from '/:core.jsx';
+import ChevronArrow from '../icons/ChevonArrow';
+import SearchIcon from '../icons/SearchIcon';
+import FullLogo from '../icons/Logo';
 
 const links = [
-  { link: '/', label: 'Home' },
+  {
+    link: '/residential-solutions',
+    label: (
+      <div className={classes.linkItem}>
+        <p>Residential Solutions</p>
+        <ChevronArrow />
+      </div>
+    ),
+  },
+  {
+    link: '/commercial-solutions',
+    label: (
+      <div className={classes.linkItem}>
+        <p>Commercial Solutions</p>
+        <ChevronArrow />
+      </div>
+    ),
+  },
   { link: '/about', label: 'About' },
   { link: '/dashboard', label: 'Dashboard' },
-  { link: '/products', label: 'Products' },
+  { link: '/contact', label: 'Contact' },
 ];
 
 export function Header() {
@@ -34,8 +54,7 @@ export function Header() {
       <div className={classes.inner}>
         <Link to="/demo" className="nav-link">
           <Group>
-            <IconSun color="orange" />
-            {title}
+            <FullLogo />
           </Group>
         </Link>
         <Group gap={5} className={classes.links} visibleFrom="sm">
@@ -43,6 +62,7 @@ export function Header() {
         </Group>
 
         <Group className={classes.links} visibleFrom="sm">
+          <SearchIcon />
           <Cart />
           {loggedIn ? <Profile /> : <Login />}
         </Group>

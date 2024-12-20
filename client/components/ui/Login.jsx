@@ -12,6 +12,19 @@ import {
 import { IconAlertCircle } from '@tabler/icons-react';
 import { useRouteContext } from '/:core.jsx';
 
+export function LoginButton({ onClick }) {
+  return (
+    <Button
+      variant="outline"
+      radius={9999}
+      color="black"
+      onClick={() => onClick()}
+    >
+      Login
+    </Button>
+  );
+}
+
 export function Login() {
   const { state, actions } = useRouteContext();
   const [error, setError] = useState(null);
@@ -69,7 +82,8 @@ export function Login() {
           </Group>
         </Stack>
       </Modal>
-      <Button onClick={open}>Login</Button>
+      {/* <Button onClick={open}>Login</Button> */}
+      <LoginButton onClick={open} />
     </>
   );
 }

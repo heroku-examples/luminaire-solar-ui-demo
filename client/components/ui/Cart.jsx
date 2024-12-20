@@ -1,7 +1,5 @@
 import { useMantineTheme } from '@mantine/core';
-import { IconShoppingCart } from '@tabler/icons-react';
 import { useRouteContext } from '/:core.jsx';
-
 import {
   ActionIcon,
   Indicator,
@@ -11,6 +9,7 @@ import {
   NumberFormatter,
 } from '@mantine/core';
 import { IconTrash } from '@tabler/icons-react';
+import CartIcon from '../icons/CartIcon';
 
 function CartList({ cart }) {
   const { state, actions } = useRouteContext();
@@ -74,7 +73,7 @@ export function Cart() {
             disabled={disabled}
             withBorder
           >
-            <IconShoppingCart size={32} color={theme.colors.gray[5]} />
+            <CartIcon />
           </Indicator>
         </Popover.Target>
         <Popover.Dropdown>

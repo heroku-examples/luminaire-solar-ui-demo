@@ -76,8 +76,8 @@ export default function FullLogo() {
           y2="24.4914"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#FA9F47" />
-          <stop offset="1" stop-color="#FFD3A0" />
+          <stop stopColor="#FA9F47" />
+          <stop offset="1" stopColor="#FFD3A0" />
         </linearGradient>
       </defs>
     </svg>

@@ -1,0 +1,84 @@
+.messagingFooterContainer {
+  width: 100%;
+  display: flex;
+  height: rem(100px);
+  font-family: inherit;
+  background: rgb(252, 251, 254);
+  justify-content: center;
+  align-items: center;
+}
+
+.messagingFooterInputContainer {
+  height: rem(40px);
+  width: 100%;
+  margin-left: rem(61px);
+  margin-right: rem(61px);
+  border-radius: 9999px;
+  background: rgba(77, 37, 126, 0.09);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: rem(2px);
+  padding-right: rem(2px);
+}
+
+.messagingFooterContainer textarea {
+  height: rem(36px);
+  flex-grow: 1;
+  align-content: center;
+  font-family: inherit;
+  resize: none;
+  background: transparent;
+  resize: none;
+  margin-left: rem(10px);
+  margin-right: rem(10px);
+}
+
+.sendButton {
+  height: rem(36px);
+  width: rem(36px);
+  border-radius: 9999px;
+  background: rgb(90, 27, 169);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.attachButton {
+  height: rem(36px);
+  width: rem(36px);
+  border-radius: 9999px;
+  background: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.attachButton:hover {
+  opacity: 0.7;
+}
+
+.sendButton:hover:not(:disabled) {
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.sendButton:disabled {
+  opacity: 0.3;
+}
+
+.messagingInputTextarea:disabled,
+.sendButton:disabled {
+  cursor: not-allowed;
+}
+
+.messagingInputTextarea::-webkit-scrollbar {
+  display: none;
+}
+
+.messagingInputTextarea {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}

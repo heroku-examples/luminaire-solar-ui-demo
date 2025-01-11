@@ -3,6 +3,7 @@ import { Header } from '@/components/ui/Header.jsx';
 import { Footer } from '@/components/ui/Footer';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Container } from '@mantine/core';
+import BootstrapMessaging from '@/components/ui/Chat/BootstrapMessaging';
 
 export default function Default({ children }) {
   function fallbackRender({ error, resetErrorBoundary }) {
@@ -30,6 +31,9 @@ export default function Default({ children }) {
         </ErrorBoundary>
       </Container>
       <Footer />
+      <div className="fixed bottom-8 right-8 drop-shadow-xl z-50">
+        <BootstrapMessaging />
+      </div>
     </Suspense>
   );
 }

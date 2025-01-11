@@ -82,7 +82,6 @@ export function Login() {
           </Group>
         </Stack>
       </Modal>
-      {/* <Button onClick={open}>Login</Button> */}
       <LoginButton onClick={open} />
     </>
   );

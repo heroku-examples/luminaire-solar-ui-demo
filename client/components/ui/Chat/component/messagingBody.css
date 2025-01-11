@@ -1,0 +1,25 @@
+.messagingBody {
+  height: 500px;
+  overflow: auto;
+  padding-left: rem(48px);
+  padding-right: rem(48px);
+  padding-bottom: rem(48px);
+  font-family: inherit;
+  background: rgb(252, 251, 254);
+}
+
+.conversationStartTimeText,
+.conversationEndTimeText {
+  color: rgb(98 91 91);
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+  margin-top: rem(26px);
+  margin-bottom: rem(26px);
+}
+
+.conversationEntriesListView {
+  height: auto;
+  margin-top: 0;
+  margin-bottom: 0;
+}

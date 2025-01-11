@@ -43,7 +43,7 @@ export function Header() {
     if (link.label === 'Dashboard' && !loggedIn) return null;
     const className = classes.link + ' nav-link';
     return (
-      <Link key={link.label} to={link.link} className={className}>
+      <Link key={link.link} to={link.link} className={className}>
         {link.label}
       </Link>
     );

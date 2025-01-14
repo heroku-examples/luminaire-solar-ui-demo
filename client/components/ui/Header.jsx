@@ -50,8 +50,8 @@ export function Header() {
   });
 
   return (
-    <header className={classes.header}>
-      <div className={classes.inner}>
+    <header className="z-20 w-full h-16 bg-white fixed top-0">
+      <div className="px-16 py-4 flex justify-between items-center">
         <Link to="/demo" className="nav-link">
           <Group>
             <FullLogo />

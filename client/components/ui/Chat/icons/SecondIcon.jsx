@@ -10,9 +10,9 @@ export default function SendIcon() {
       <path
         d="M14.3724 1.42218L7.03906 8.75551M14.3724 1.42218L9.70573 14.7555L7.03906 8.75551M14.3724 1.42218L1.03906 6.08885L7.03906 8.75551"
         stroke="#FCFBFE"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );

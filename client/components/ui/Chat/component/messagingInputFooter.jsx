@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 
 import './messagingInputFooter.css';
 import CountdownTimer from '../helpers/countdownTimer';
@@ -9,6 +9,7 @@ import { getConversationId } from '../services/dataProvider';
 import PaperclipIcon from '../icons/PaperclipIcon';
 import SendIcon from '../icons/SecondIcon';
 import { P } from 'pino';
+import { MetadataContext } from '../helpers/metadataContext';
 
 export default function MessagingInputFooter(props) {
   // Initialize the Textarea value to empty.
@@ -17,6 +18,8 @@ export default function MessagingInputFooter(props) {
   // Initialize whether end user is actively typing.
   // This holds a reference to a CountdownTimer object.
   let [typingIndicatorTimer, setTypingIndicatorTimer] = useState(undefined);
+
+  const { metadata } = useContext(MetadataContext);
 
   /**
    * Handle 'change' event in Textarea to reactively update the Textarea value.
@@ -122,7 +125,8 @@ export default function MessagingInputFooter(props) {
     // Required parameters.
     const conversationId = getConversationId();
     const messageId = util.generateUUID();
-    const value = textareaContent;
+    // message and metadata stringified
+    const value = JSON.stringify({ message: textareaContent, metadata });
     // Optional parameters.
     let inReplyToMessageId;
     let isNewMessagingSession;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 
 // Import children components to render.
 import MessagingWindow from './component/messagingWindow.jsx';
@@ -24,13 +24,16 @@ import ChatIcon from './icons/ChatIcon.jsx';
 
 import config from './config.js';
 
-export default function BootstrapMessaging() {
+import { MetadataContext } from './helpers/metadataContext.js';
+
+export default function BootstrapMessaging({ children }) {
   let [orgId, setOrgId] = useState('');
   let [deploymentDevName, setDeploymentDevName] = useState('');
   let [messagingURL, setMessagingURL] = useState('');
   let [shouldShowMessagingWindow, setShouldShowMessagingWindow] =
     useState(false);
   let [isExistingConversation, setIsExistingConversation] = useState(false);
+  const [metadata, setMetadata] = useState({});
 
   useEffect(() => {
     const storage = determineStorageType();
@@ -133,21 +136,24 @@ export default function BootstrapMessaging() {
   }, [shouldShowMessagingWindow]);
 
   return (
-    <div>
-      {!shouldShowMessagingWindow && (
-        <div
-          className="messagingFloatingButton"
-          onClick={handleDeploymentDetailsFormSubmit}
-        >
-          <ChatIcon />
-        </div>
-      )}
-      {shouldShowMessagingWindow && (
-        <MessagingWindow
-          isExistingConversation={isExistingConversation}
-          showMessagingWindow={showMessagingWindow}
-        />
-      )}
-    </div>
+    <MetadataContext.Provider value={{ metadata, setMetadata }}>
+      {children}
+      <div className="fixed bottom-8 right-8 drop-shadow-xl z-50">
+        {!shouldShowMessagingWindow && (
+          <div
+            className="messagingFloatingButton"
+            onClick={handleDeploymentDetailsFormSubmit}
+          >
+            <ChatIcon />
+          </div>
+        )}
+        {shouldShowMessagingWindow && (
+          <MessagingWindow
+            isExistingConversation={isExistingConversation}
+            showMessagingWindow={showMessagingWindow}
+          />
+        )}
+      </div>
+    </MetadataContext.Provider>
   );
 }

@@ -27,13 +27,10 @@ export default function Default({ children }) {
             console.log(details);
           }}
         >
-          {children}
+          <BootstrapMessaging>{children}</BootstrapMessaging>
         </ErrorBoundary>
       </Container>
       <Footer />
-      <div className="fixed bottom-8 right-8 drop-shadow-xl z-50">
-        <BootstrapMessaging />
-      </div>
     </Suspense>
   );
 }

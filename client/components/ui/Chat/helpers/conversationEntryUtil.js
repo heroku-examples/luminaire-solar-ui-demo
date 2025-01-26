@@ -182,6 +182,13 @@ export function isTextMessage(conversationEntry) {
  */
 export function getTextMessageContent(conversationEntry) {
   if (isTextMessage(conversationEntry)) {
+    if (isMessageFromEndUser(conversationEntry)) {
+      const jsonConversationEntry = JSON.parse(
+        getStaticContentPayload(conversationEntry).text
+      ); // end user message has metadata
+      const text = jsonConversationEntry.message;
+      return text;
+    }
     return getStaticContentPayload(conversationEntry).text;
   }
   return '';

@@ -1,9 +1,10 @@
 import { useState, useEffect, useContext } from 'react';
 import { useRouteContext } from '/:core.jsx';
 import { title } from '@/theme.js';
-import { EnergyStats } from '@/components/ui/EnergyStats.jsx';
 import { Select } from '@mantine/core';
 import { MetadataContext } from '../components/ui/Chat/helpers/metadataContext';
+import { EnergyStats } from '@/components/ui/EnergyStats.jsx';
+import { Assistant } from '@/components/ui/Assistant.jsx';
 
 export function getMeta(ctx) {
   return {

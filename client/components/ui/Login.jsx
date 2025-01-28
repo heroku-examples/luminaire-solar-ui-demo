@@ -48,7 +48,12 @@ export function Login() {
 
   return (
     <>
-      <Modal opened={opened} onClose={handleOnClose} title="Authentication">
+      <Modal
+        opened={opened}
+        onClose={handleOnClose}
+        title="Authentication"
+        trapFocus={false}
+      >
         <Stack spacing="md">
           {error && (
             <Alert color="red" icon={<IconAlertCircle />}>

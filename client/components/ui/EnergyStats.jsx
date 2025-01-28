@@ -118,7 +118,7 @@ export function EnergyStats({ metricsSummary }) {
                 fw={500}
                 className={classes.diff}
               >
-                <Group>{item.percentage}%</Group>
+                {item.percentage}%
               </Text>
             )}
           </Group>

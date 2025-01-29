@@ -5,6 +5,7 @@ import * as EventSourcePolyfill from '../helpers/eventsource-polyfill.js';
 import MessagingHeader from './messagingHeader.jsx';
 import MessagingBody from './messagingBody.jsx';
 import MessagingInputFooter from './messagingInputFooter.jsx';
+import LoadingIcon from '../icons/LoadingIcon.jsx';
 
 import {
   setJwt,
@@ -1046,7 +1047,14 @@ export default function Conversation(props) {
         <>
           {conversationStatus ===
             CONVERSATION_CONSTANTS.ConversationStatus
-              .NOT_STARTED_CONVERSATION && <p>Loading...</p>}
+              .NOT_STARTED_CONVERSATION && (
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 flex justify-center items-center">
+              <div className="flex flex-row">
+                <LoadingIcon className="mr-3 -ml-1" />
+                Loading...
+              </div>
+            </div>
+          )}
           <MessagingBody
             conversationEntries={conversationEntries}
             conversationStatus={conversationStatus}

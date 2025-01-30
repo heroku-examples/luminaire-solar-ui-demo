@@ -76,7 +76,7 @@ export default function TextMessage({ conversationEntry }) {
    * @returns {string}
    */
   function generateMessageContentClassName() {
-    const className = `textMessageContent ${conversationEntry.isEndUserMessage ? `outgoing` : `incoming`}`;
+    const className = `textMessageContent ${conversationEntry.isEndUserMessage ? `outgoing` : `incoming`} whitespace-pre-wrap`;
     return className;
   }
 
@@ -192,7 +192,7 @@ export default function TextMessage({ conversationEntry }) {
           {/* Message, and more */}
           <div className={generateMessageBubbleClassName()}>
             <p className={generateMessageContentClassName()}>
-              {ConversationEntryUtil.getTextMessageContent(conversationEntry)}
+              {`${ConversationEntryUtil.getTextMessageContent(conversationEntry)}`}
             </p>
           </div>
         </div>

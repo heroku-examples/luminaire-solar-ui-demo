@@ -6,6 +6,8 @@ import { util } from '../helpers/common';
 import VotingIcon from '../icons/VotingIcon';
 
 import config from '../config';
+import { AgentforceAvatar } from '../../../icons/AgentforceAvatar';
+import UserAvatar from '@/assets/img/profile.jpg';
 
 export default function TextMessage({ conversationEntry }) {
   // Initialize acknowledgement status.
@@ -172,6 +174,14 @@ export default function TextMessage({ conversationEntry }) {
     }
   }
 
+  function generateAvatar() {
+    return conversationEntry.isEndUserMessage ? (
+      <img src={UserAvatar} />
+    ) : (
+      <AgentforceAvatar />
+    );
+  }
+
   return (
     <div className={generateTextMessageContainerClassName()}>
       {' '}
@@ -185,7 +195,9 @@ export default function TextMessage({ conversationEntry }) {
       <div className={generateTextMessageRowClassName()}>
         {' '}
         {/* Avatar and message*/}
-        <div className={generateTextMessageAvatarClassName()}></div>{' '}
+        <div className={generateTextMessageAvatarClassName()}>
+          {generateAvatar()}
+        </div>{' '}
         {/* Avatar */}
         <div className={generateMessageBubbleContainerClassName()}>
           {' '}

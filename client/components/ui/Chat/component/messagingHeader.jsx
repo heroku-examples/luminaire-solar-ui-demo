@@ -40,6 +40,7 @@ export default function MessagingHeader(props) {
 
   return (
     <div className="messagingHeader">
+      <p>Luminaire Agent Chat</p>
       <button
         className="messagingHeaderCloseButton"
         title={generateCloseButtonTitle()}

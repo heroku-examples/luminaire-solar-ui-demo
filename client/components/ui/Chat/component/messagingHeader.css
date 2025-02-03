@@ -1,16 +1,22 @@
 .messagingHeader {
-  width: inherit;
-  height: 50px;
-  background-color: rgba(13, 157, 218);
-  border-radius: 15px 15px 0px 0px;
+  position: relative;
+  height: 60px;
+  background-color: #d0d7e5;
+  border-radius: 29px 29px 0px 0px;
   font-family: inherit;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-left: rem(40px);
+  padding-right: rem(20px);
+  font-weight: 600;
 }
 
 .messagingHeaderCloseButton {
-  float: right;
-  margin-right: 20px;
+  position: absolute;
   height: 50px;
-  width: max-content;
+  right: rem(20px);
+  transform: translate(-50%, 0%);
   background: transparent;
   border: none;
   pointer-events: all;

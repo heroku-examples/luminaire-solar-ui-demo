@@ -176,10 +176,10 @@ export default function MessagingInputFooter(props) {
   return (
     <div className="messagingFooterContainer">
       <div className="messagingFooterInputContainer">
-        <AttachButton />
+        {/* <AttachButton /> */}
         <textarea
           className="messagingInputTextarea"
-          placeholder="Type to send a message"
+          placeholder="Type your message here..."
           rows={1}
           wrap={'off'}
           value={textareaContent}
@@ -188,7 +188,7 @@ export default function MessagingInputFooter(props) {
           onClick={handleTextareaClick}
           disabled={shouldDisableTextarea()}
         />
-        <SendButton />
+        <SendButton onClick={() => handleSendButtonClick()} />
       </div>
     </div>
   );
@@ -202,9 +202,9 @@ const AttachButton = () => {
   );
 };
 
-const SendButton = () => {
+const SendButton = ({ onClick }) => {
   return (
-    <div className="sendButton">
+    <div className="sendButton" onClick={onClick}>
       <SendIcon />
     </div>
   );

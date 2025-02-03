@@ -3,23 +3,26 @@
   display: flex;
   height: rem(100px);
   font-family: inherit;
-  background: rgb(252, 251, 254);
+  background: #f7f8fb;
   justify-content: center;
   align-items: center;
+  border-radius: 0px 0px 29px 29px;
 }
 
 .messagingFooterInputContainer {
   height: rem(40px);
   width: 100%;
-  margin-left: rem(61px);
-  margin-right: rem(61px);
+  margin-left: rem(48px);
+  margin-right: rem(48px);
   border-radius: 9999px;
-  background: rgba(77, 37, 126, 0.09);
+  background: white;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding-left: rem(2px);
   padding-right: rem(2px);
+  border-width: 1px;
+  border-color: #d0d7e5;
 }
 
 .messagingFooterContainer textarea {

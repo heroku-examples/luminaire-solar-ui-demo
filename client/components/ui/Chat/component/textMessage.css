@@ -30,19 +30,21 @@
   min-width: 50px;
   max-width: 350px;
   margin: 1px auto;
-  padding: 8px 14px;
+  padding: 8px 16px;
 }
 
 .textMessageBubble[class~='incoming'] {
   float: left;
   border-radius: 20px 20px 20px 0px;
-  background: rgba(77, 37, 126, 0.09);
+  background: #f7f8fb;
+  border-width: 1px;
+  border-color: #d0d7e5;
 }
 
 .textMessageBubble[class~='outgoing'] {
   float: right;
   border-radius: 20px 20px 0px 20px;
-  background-color: rgba(90, 27, 169);
+  background-color: #7525e3;
 }
 
 .textMessageContent {
@@ -56,13 +58,13 @@
 }
 
 .textMessageContent[class~='outgoing'] {
-  color: rgb(255, 255, 255);
+  color: white;
 }
 
 .textMessageAgentName {
   padding-left: rem(54px);
   font-size: rem(13px);
-  color: rgba(32, 20, 46, 0.62);
+  color: #d0d7e5;
 }
 
 .textMessageRow {
@@ -84,7 +86,12 @@
   height: rem(32px);
   width: rem(32px);
   border-radius: 9999px;
-  background: rgb(32, 27, 40);
+  background: #f7f8fb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-width: 1px;
+  border-color: #d0d7e5;
 }
 
 .textMessageVotingContainer {

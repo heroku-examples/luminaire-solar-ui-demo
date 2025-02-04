@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import './messagingBody.css';
 import { util } from '../helpers/common';
 import { CONVERSATION_CONSTANTS } from '../helpers/constants';
@@ -68,6 +68,11 @@ export default function MessagingBody({
     return conversationEndTimeText;
   }
 
+  const bottomOfChat = useRef();
+  useEffect(() => {
+    bottomOfChat.current.scrollIntoView({ behavior: 'smooth' });
+  }, [conversationEntries]);
+
   return (
     <div className="messagingBody">
       {conversationEntries.length > 0 && (
@@ -77,6 +82,7 @@ export default function MessagingBody({
       )}
       <ul className="conversationEntriesListView">
         {conversationEntriesListView}
+        <div className={'float-left clear-both'} ref={bottomOfChat}></div>
       </ul>
       {showTypingIndicator && (
         <TypingIndicator typingParticipants={typingParticipants} />

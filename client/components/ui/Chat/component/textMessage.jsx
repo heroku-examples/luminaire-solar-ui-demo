@@ -213,7 +213,7 @@ export default function TextMessage({ conversationEntry }) {
         <div className={generateTextMessageVotingContainerClassName()}>
           {' '}
           {/* Up/downvote */}
-          <div
+          {/* <div
             className={generateTextMessageVotingIconClassName()}
             onClick={() => handleVoteCast(1)}
           >
@@ -230,7 +230,7 @@ export default function TextMessage({ conversationEntry }) {
               upvote={false}
               active={votingState === -1 ? true : false}
             />
-          </div>
+          </div> */}
         </div>
       )}
       {/* <p className={generateMessageSenderContentClassName()}>{generateMessageAcknowledgementContentText()}{generateMessageSenderContentText()}</p> */}

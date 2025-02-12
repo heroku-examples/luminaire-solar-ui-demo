@@ -5,6 +5,7 @@ import { Select } from '@mantine/core';
 import { MetadataContext } from '../components/ui/Chat/helpers/metadataContext';
 import { EnergyStats } from '@/components/ui/EnergyStats.jsx';
 import { Assistant } from '@/components/ui/Assistant.jsx';
+import { EnergyForecast } from '../components/ui/EnergyForecast';
 
 export function getMeta(ctx) {
   return {
@@ -53,6 +54,14 @@ export default function Dashboard() {
     fetchMetrics();
   }, [system]);
 
+  useEffect(() => {
+    async function fetchForecast() {
+      if (!system) return;
+      await actions.getForecastBySystem(state, system);
+    }
+    fetchForecast();
+  }, [system]);
+
   return (
     <>
       <Select
@@ -65,6 +74,7 @@ export default function Dashboard() {
           handleSetSystem(value);
         }}
       />
+      <EnergyForecast forecast={snapshot.forecast} className="mt-4" />
       <EnergyStats metricsSummary={snapshot.metricsSummary} />
     </>
   );

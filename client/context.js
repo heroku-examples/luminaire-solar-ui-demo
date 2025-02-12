@@ -56,6 +56,7 @@ export const actions = {
     state.authorization = null;
     state.systems = [];
     state.metricsSummary = null;
+    state.forecast = null;
     state.products = [];
     state.product = null;
     state.cart = [];
@@ -139,6 +140,14 @@ export const actions = {
       }
       return newCart;
     }, []);
+  },
+  async getForecastBySystem(state, systemId) {
+    const response = await this.request(state, `/api/forecast/${systemId}`, {
+      headers: { Authorization: `Bearer ${state.authorization}` },
+    });
+    if (response.ok) {
+      state.forecast = await response.json();
+    }
   },
   async request(state, path = '/', options = {}) {
     const apiUrl = state.apiUrl;

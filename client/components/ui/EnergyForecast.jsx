@@ -21,18 +21,18 @@ import { AgentforceAvatar } from '../icons/AgentforceAvatar.jsx';
   Agentforce agent analysis of system performance with respect to the 7-day
   efficiency forecast.
 */
-export function EnergyForecast({ forecast, className }) {
+export function EnergyForecast({ systemId, forecast, className }) {
   return (
     <div className={className}>
       <div className="grid grid-flow-col grid-cols-2 gap-4">
-        <AgentforceAnalysis forecast={forecast} />
+        <AgentforceAnalysis forecast={forecast} systemId={systemId} />
         <EfficiencyForecast forecast={forecast} />
       </div>
     </div>
   );
 }
 
-function AgentforceAnalysis({ forecast, className }) {
+function AgentforceAnalysis({ forecast, className, systemId }) {
   if (!forecast) return <div></div>;
 
   const { metadata } = useContext(MetadataContext);
@@ -125,13 +125,17 @@ function AgentforceAnalysis({ forecast, className }) {
     setJwt(token);
     storeOrganizationId(config.organizationId);
 
-    await createEventSource(
-      config.url.concat(`/eventrouter/v1/sse?_ts=${Date.now()}`),
-      {
-        [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_MESSAGE]:
-          handleParseAgentMessage,
-      }
-    );
+    try {
+      await createEventSource(
+        config.url.concat(`/eventrouter/v1/sse?_ts=${Date.now()}`),
+        {
+          [CONVERSATION_CONSTANTS.EventTypes.CONVERSATION_MESSAGE]:
+            handleParseAgentMessage,
+        }
+      );
+    } catch (e) {
+      console.log('Event Source Creation Error: ', e);
+    }
   }
 
   async function handleInitialQuery() {
@@ -163,7 +167,7 @@ function AgentforceAnalysis({ forecast, className }) {
     );
   }
 
-  // handle ending conversation and setting analysis state
+  // handle ending conversation
   function handleEndConversation() {
     // end conversation
     fetch(
@@ -181,19 +185,6 @@ function AgentforceAnalysis({ forecast, className }) {
         }),
       }
     );
-    // set analysis
-    const text =
-      agentResponses[agentResponses.length - 1]?.content?.staticContent?.text;
-    try {
-      const parsedText = JSON.parse(text);
-      setAgentAnalysis(parsedText);
-    } catch (e) {
-      setAgentAnalysis({
-        efficiency: '',
-        analysis:
-          'There was an error with Agentforce, please refresh the page.',
-      });
-    }
   }
 
   function generateAnalysisColor(efficiency, opacity) {
@@ -218,7 +209,7 @@ function AgentforceAnalysis({ forecast, className }) {
     } catch (e) {
       console.log(e);
     }
-  }, [forecast]);
+  }, [systemId]);
 
   useEffect(() => {
     if (agentJoined) {
@@ -227,9 +218,14 @@ function AgentforceAnalysis({ forecast, className }) {
   }, [agentJoined]);
 
   useEffect(() => {
-    // close the conversation after receiving the response (first message after initial greeting)
-    if (agentResponses.length >= 2) {
-      handleEndConversation();
+    // set analysis
+    const text =
+      agentResponses[agentResponses.length - 1]?.content?.staticContent?.text;
+    try {
+      const parsedText = JSON.parse(text);
+      setAgentAnalysis(parsedText);
+    } catch (e) {
+      console.log(e);
     }
   }, [agentResponses]);
 

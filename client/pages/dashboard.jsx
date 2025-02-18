@@ -61,7 +61,6 @@ export default function Dashboard() {
     }
     fetchForecast();
   }, [system]);
-
   return (
     <>
       <Select
@@ -74,7 +73,11 @@ export default function Dashboard() {
           handleSetSystem(value);
         }}
       />
-      <EnergyForecast forecast={snapshot.forecast} className="mt-4" />
+      <EnergyForecast
+        forecast={snapshot.forecast}
+        systemId={system}
+        className="mt-4"
+      />
       <EnergyStats metricsSummary={snapshot.metricsSummary} />
     </>
   );

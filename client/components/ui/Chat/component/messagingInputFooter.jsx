@@ -125,8 +125,11 @@ export default function MessagingInputFooter(props) {
     // Required parameters.
     const conversationId = getConversationId();
     const messageId = util.generateUUID();
-    // message and metadata stringified
-    const value = JSON.stringify({ message: textareaContent, metadata });
+    // message and metadata stringified; set env to webChat to inform Agentforce of environment
+    const value = JSON.stringify({
+      message: textareaContent,
+      metadata: { ...metadata, env: 'webChat' },
+    });
     // Optional parameters.
     let inReplyToMessageId;
     let isNewMessagingSession;

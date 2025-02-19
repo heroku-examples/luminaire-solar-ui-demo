@@ -40,7 +40,7 @@ function AgentforceAnalysis({ forecast, className, systemId }) {
   // construct message for Agentforce; follow the metadata convention for systemId awareness
   const message = JSON.stringify({
     message: `Can you get my system's energy efficiency forecast?`,
-    metadata,
+    metadata: { ...metadata, env: 'internal' },
   });
 
   const {
@@ -274,8 +274,8 @@ function EfficiencyForecast({ forecast, className }) {
       <p className="uppercase text-xs text-[#596981] font-bold">
         7 day solar production forecast
       </p>
-      <div className="grid grid-flow-col pt-4 place-content-start overflow-x-auto">
-        {forecast.map((day) => {
+      <div className="grid grid-flow-col grid-cols-[auto-fill] pt-4 overflow-x-auto">
+        {forecast.map((day, index) => {
           const date = new Date(day.date);
           const dayOfWeekNumber = date.getDay();
 
@@ -297,7 +297,7 @@ function EfficiencyForecast({ forecast, className }) {
               key={`forecast-${day.date}`}
               className="flex justify-center border-r border-[#e5e7eb] px-5 last:border-none"
             >
-              <div style={{ width: `${barHeight}rem` }}>
+              <div className="w-2/5" style={{ minWidth: `${barHeight}rem` }}>
                 <div
                   className={`bg-[#F7F8FB] relative rounded-md`}
                   style={{ height: `${barHeight}rem` }}

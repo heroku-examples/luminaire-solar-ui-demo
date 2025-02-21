@@ -137,7 +137,12 @@ const Message = ({ role, content, isLast }) => {
 
 const Chat = () => {
   const { state, actions } = useRouteContext();
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([
+    {
+      role: 'assistant',
+      content: "Hello, I'm Luminaire Agent, how can I help you today?",
+    },
+  ]);
   const [currentMessage, setCurrentMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef(null);
@@ -175,7 +180,11 @@ const Chat = () => {
     if (!currentMessage.trim()) return;
 
     const userMessage = { role: 'user', content: currentMessage };
-    setMessages((prev) => [...prev, userMessage]);
+    const agentMessage = {
+      role: 'agent',
+      content: 'Luminaire Agent is thinking...',
+    };
+    setMessages((prev) => [...prev, userMessage, agentMessage]);
     setCurrentMessage('');
     setIsLoading(true);
 
@@ -210,29 +219,7 @@ const Chat = () => {
     const reader = stream.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
-    const messageQueue = [];
-
-    const processBuffer = () => {
-      const lines = buffer.split('\n');
-      buffer = lines.pop() || ''; // Save incomplete line
-
-      lines.forEach((line) => {
-        if (!line.trim()) return;
-
-        try {
-          const message = JSON.parse(line);
-          messageQueue.push(message);
-        } catch (e) {
-          console.error('Failed to parse:', line, e);
-        }
-      });
-
-      // Batch update messages
-      if (messageQueue.length > 0) {
-        setMessages((prev) => [...prev, ...messageQueue]);
-        messageQueue.length = 0;
-      }
-    };
+    let isFirstAssistantMessage = true;
 
     try {
       while (true) {
@@ -240,12 +227,91 @@ const Chat = () => {
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
-        processBuffer();
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || ''; // Save incomplete line
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+
+          try {
+            const message = JSON.parse(line);
+
+            setMessages((prevMessages) => {
+              const updatedMessages = [...prevMessages];
+
+              // If it's an agent message, add it as a new message
+              if (message.role === 'agent') {
+                return [...updatedMessages, message];
+              }
+
+              // Handle assistant message
+              if (isFirstAssistantMessage) {
+                isFirstAssistantMessage = false;
+                return [
+                  ...updatedMessages,
+                  { role: 'assistant', content: message.content || '' },
+                ];
+              }
+
+              // Append content to the last assistant message
+              const lastMessage = updatedMessages[updatedMessages.length - 1];
+              if (lastMessage && lastMessage.role === 'assistant') {
+                lastMessage.content += message.content || '';
+              }
+
+              return updatedMessages;
+            });
+          } catch (e) {
+            // If JSON parsing fails, treat it as a partial assistant message
+            setMessages((prevMessages) => {
+              const updatedMessages = [...prevMessages];
+              const lastMessage = updatedMessages[updatedMessages.length - 1];
+
+              if (lastMessage && lastMessage.role === 'assistant') {
+                lastMessage.content += line;
+              } else if (isFirstAssistantMessage) {
+                isFirstAssistantMessage = false;
+                updatedMessages.push({ role: 'assistant', content: line });
+              }
+
+              return updatedMessages;
+            });
+          }
+        }
       }
 
-      // Process any remaining data
-      buffer += decoder.decode();
-      processBuffer();
+      // Process any remaining data in buffer
+      if (buffer) {
+        try {
+          const message = JSON.parse(buffer);
+          setMessages((prevMessages) => {
+            const updatedMessages = [...prevMessages];
+
+            if (message.role === 'agent') {
+              return [...updatedMessages, message];
+            }
+
+            const lastMessage = updatedMessages[updatedMessages.length - 1];
+            if (lastMessage && lastMessage.role === 'assistant') {
+              lastMessage.content += message.content || '';
+            }
+
+            return updatedMessages;
+          });
+        } catch (e) {
+          // Handle remaining partial content
+          setMessages((prevMessages) => {
+            const updatedMessages = [...prevMessages];
+            const lastMessage = updatedMessages[updatedMessages.length - 1];
+
+            if (lastMessage && lastMessage.role === 'assistant') {
+              lastMessage.content += buffer;
+            }
+
+            return updatedMessages;
+          });
+        }
+      }
     } catch (error) {
       console.error('Stream error:', error);
       setMessages((prev) => [
@@ -259,6 +325,7 @@ const Chat = () => {
       reader.releaseLock();
     }
   };
+
   return (
     <Paper shadow="xl" p="md" style={{ flex: 1, height: '100%' }}>
       <Stack style={{ height: '100%' }}>

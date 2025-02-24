@@ -12,27 +12,10 @@ import SearchIcon from '../icons/SearchIcon';
 import FullLogo from '../icons/Logo';
 
 const links = [
-  {
-    link: '/residential-solutions',
-    label: (
-      <div className={classes.linkItem}>
-        <p>Residential Solutions</p>
-        <ChevronArrow />
-      </div>
-    ),
-  },
-  {
-    link: '/commercial-solutions',
-    label: (
-      <div className={classes.linkItem}>
-        <p>Commercial Solutions</p>
-        <ChevronArrow />
-      </div>
-    ),
-  },
+  { link: '/', label: 'Home' },
   { link: '/about', label: 'About' },
   { link: '/dashboard', label: 'Dashboard' },
-  { link: '/contact', label: 'Contact' },
+  { link: '/products', label: 'Products' },
 ];
 
 export function Header() {

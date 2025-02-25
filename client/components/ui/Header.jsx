@@ -1,12 +1,11 @@
 import { Link } from 'react-router-dom';
 import { Group } from '@mantine/core';
-import { IconSun } from '@tabler/icons-react';
 import { Login } from '@/components/ui/Login.jsx';
 import { Profile } from '@/components/ui/Profile.jsx';
 import { Cart } from '@/components/ui/Cart.jsx';
-import { title } from '@/theme.js';
 import classes from './Header.module.css';
 import { useRouteContext } from '/:core.jsx';
+import FullLogo from '@/components/icons/Logo.jsx';
 
 const links = [
   { link: '/', label: 'Home' },
@@ -34,8 +33,7 @@ export function Header() {
       <div className={classes.inner}>
         <Link to="/demo" className="nav-link">
           <Group>
-            <IconSun color="orange" />
-            {title}
+            <FullLogo />
           </Group>
         </Link>
         <Group gap={5} className={classes.links} visibleFrom="sm">

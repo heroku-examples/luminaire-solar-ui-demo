@@ -1,10 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Group } from '@mantine/core';
-import { IconSun } from '@tabler/icons-react';
 import { Login } from '@/components/ui/Login.jsx';
 import { Profile } from '@/components/ui/Profile.jsx';
 import { Cart } from '@/components/ui/Cart.jsx';
-import { title } from '@/theme.js';
 import classes from './Header.module.css';
 import { useRouteContext } from '/:core.jsx';
 import ChevronArrow from '../icons/ChevonArrow';
@@ -13,26 +10,16 @@ import FullLogo from '../icons/Logo';
 
 const links = [
   {
-    link: '/residential-solutions',
+    link: '/products',
     label: (
       <div className={classes.linkItem}>
-        <p>Residential Solutions</p>
-        <ChevronArrow />
-      </div>
-    ),
-  },
-  {
-    link: '/commercial-solutions',
-    label: (
-      <div className={classes.linkItem}>
-        <p>Commercial Solutions</p>
+        <p>Products</p>
         <ChevronArrow />
       </div>
     ),
   },
   { link: '/about', label: 'About' },
-  { link: '/dashboard', label: 'Dashboard' },
-  { link: '/contact', label: 'Contact' },
+  { link: '/dashboard', label: 'My Dashboard' },
 ];
 
 export function Header() {
@@ -43,7 +30,12 @@ export function Header() {
     if (link.label === 'Dashboard' && !loggedIn) return null;
     const className = classes.link + ' nav-link';
     return (
-      <Link key={link.link} to={link.link} className={className}>
+      <Link
+        key={link.link}
+        to={link.link}
+        className={`${className} text-dark-grey font-medium`}
+        style={{ padding: 0 }}
+      >
         {link.label}
       </Link>
     );
@@ -51,21 +43,18 @@ export function Header() {
 
   return (
     <header className="z-20 w-full h-16 bg-white fixed top-0">
-      <div className="px-16 py-4 flex justify-between items-center">
-        <Link to="/demo" className="nav-link">
-          <Group>
+      <div className="px-16 py-4 flex justify-between">
+        <div className="flex flex-row">
+          <Link to="/demo" className="nav-link" style={{ padding: 0 }}>
             <FullLogo />
-          </Group>
-        </Link>
-        <Group gap={5} className={classes.links} visibleFrom="sm">
-          {items}
-        </Group>
+          </Link>
+          <div className="flex flex-row items-center ml-10 gap-8">{items}</div>
+        </div>
 
-        <Group className={classes.links} visibleFrom="sm">
-          <SearchIcon />
+        <div className="flex flex-row items-center gap-x-6">
           <Cart />
           {loggedIn ? <Profile /> : <Login />}
-        </Group>
+        </div>
       </div>
     </header>
   );

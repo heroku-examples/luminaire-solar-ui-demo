@@ -17,7 +17,7 @@ export default {
       },
       colors: {
         'lightest-grey': '#f7f8fb',
-        'light-grey': '#d0e7d5',
+        'light-grey': '#d0d7e5',
         'dark-grey': '#596981',
         'near-black': '#4f5359',
         'heroku-orange': '#fa9f47',

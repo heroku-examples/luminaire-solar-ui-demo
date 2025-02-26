@@ -59,7 +59,7 @@ const Hero = () => {
 const CardSection = () => {
   const Card = ({ data }) => {
     return (
-      <div className="col-span-1 flex flex-col justify-between items-center gap-y-6">
+      <div className="col-span-1 flex flex-col justify-between items-center gap-y-6 py-6">
         <div>{data.icon}</div>
         <div className="flex flex-col gap-y-6">
           <p className="text-center text-h4 font-semibold">{data.title}</p>

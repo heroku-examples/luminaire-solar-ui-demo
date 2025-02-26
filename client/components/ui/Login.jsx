@@ -14,14 +14,12 @@ import { useRouteContext } from '/:core.jsx';
 
 export function LoginButton({ onClick }) {
   return (
-    <Button
-      variant="outline"
-      radius={9999}
-      color="black"
+    <div
+      className="text-white bg-purple-40 px-6 py-1.5 rounded-full cursor-pointer"
       onClick={() => onClick()}
     >
       Login
-    </Button>
+    </div>
   );
 }
 

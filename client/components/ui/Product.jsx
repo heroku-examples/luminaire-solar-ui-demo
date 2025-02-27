@@ -9,6 +9,7 @@ import {
 } from '@mantine/core';
 import { useRouteContext } from '/:core.jsx';
 import classes from '@/components/ui/Product.module.css';
+import { Link } from 'react-router-dom';
 
 export function Product({ product }) {
   const { state, actions } = useRouteContext();
@@ -20,66 +21,40 @@ export function Product({ product }) {
   };
 
   return (
-    <Card
-      withBorder
-      shadow="lg"
-      radius="md"
-      className={classes.card}
-      styles={{
-        root: { justifyContent: 'space-between' },
-      }}
-      mod={{
-        product: true,
-        productid: product.id,
-        productname: product.name,
-      }}
-    >
-      <Card.Section className={classes.title}>
-        <Text fw={600}>
-          {product.name} {product.productCode}
-        </Text>
-      </Card.Section>
-      <Center>
-        <Image
-          preload="auto"
-          src={product.imageUrl}
-          alt={product.name}
-          w={300}
-          className={classes.imageSection}
-        />
-      </Center>
-      <Group>
-        <Text fz="sm" c="dimmed">
-          {product.description}
-        </Text>
-      </Group>
-      <Card.Section className={classes.section}>
-        <Group justify="space-between">
-          <Text fz="xl" fw={700} mt={3}>
-            {product.price ? (
-              <NumberFormatter
-                prefix="$"
-                value={product.price}
-                thousandSeparator
-              />
-            ) : (
-              <Text fz="m" fw={400} mt={3}>
-                Call for price
-              </Text>
-            )}
-          </Text>
-
-          {loggedIn && product.price && (
-            <Button
-              variant="light"
-              mod="data-add-to-cart"
-              onClick={addToCart(product)}
-            >
-              Add to cart
-            </Button>
-          )}
-        </Group>
-      </Card.Section>
-    </Card>
+    <div className="w-80 bg-white p-10 flex flex-col border-light-grey border-[1px] rounded-xl shadow-md shadow-black/10">
+      <div className="flex flex-col">
+        <p className="text-h4 font-semibold text-nowrap overflow-x-clip text-ellipsis">
+          {product.name}
+        </p>
+        <p className="pt-3 text-lg text-dark-grey">
+          {product.price
+            ? new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                maximumSignificantDigits: 1,
+              }).format(product.price)
+            : 'Call for price'}
+        </p>
+        <img src={product.imageUrl} className="w-40 mx-auto pt-2" />
+      </div>
+      <hr className="-mx-10 mt-6" />
+      <div className="flex flex-col pt-6">
+        <p className="line-clamp-3 text-dark-grey">{product.description}</p>
+        <div className="flex pt-14 items-center">
+          <Link to={`/products/${product.id}`}>
+            <p className="text-purple-40 font-semibold underline underline-offset-4 cursor-pointer">
+              Learn more
+            </p>
+          </Link>
+          <button
+            className="ml-7 text-white bg-purple-40 rounded-full text-semibold py-2.5 px-5 cursor-pointer disabled:cursor-not-allowed disabled:opacity-20"
+            onClick={addToCart(product)}
+            disabled={!product.price}
+          >
+            Add to cart
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

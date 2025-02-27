@@ -42,8 +42,8 @@ export function Header() {
   });
 
   return (
-    <header className="z-20 w-full h-16 bg-white fixed top-0">
-      <div className="px-16 py-4 flex justify-between">
+    <header className="z-20 w-full h-16 bg-white fixed top-0 border-b-[1px] border-light-grey">
+      <div className="px-12 py-4 flex justify-between">
         <div className="flex flex-row">
           <Link to="/demo" className="nav-link" style={{ padding: 0 }}>
             <FullLogo />

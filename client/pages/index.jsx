@@ -32,7 +32,7 @@ const Hero = () => {
   };
   return (
     <div className="w-full relative h-[100vh] flex justify-center items-center">
-      <div className="-z-10 absolute top-0 left-0 -mx-4 pt-16 h-[100vh] overflow-hidden">
+      <div className="absolute top-0 left-0 -mx-12 h-[100vh] overflow-hidden">
         <img
           src={'../../assets/img/home.jpg'}
           className="object-cover w-[100vw]"

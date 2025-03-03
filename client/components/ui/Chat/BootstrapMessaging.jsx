@@ -128,10 +128,6 @@ export default function BootstrapMessaging() {
     setShouldShowMessagingWindow(Boolean(shouldShow));
   }
 
-  useEffect(() => {
-    console.log(shouldShowMessagingWindow);
-  }, [shouldShowMessagingWindow]);
-
   return (
     <div>
       {!shouldShowMessagingWindow && (

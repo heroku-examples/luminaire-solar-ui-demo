@@ -7,24 +7,27 @@ import { useRouteContext } from '/:core.jsx';
 import ChevronArrow from '../icons/ChevonArrow';
 import SearchIcon from '../icons/SearchIcon';
 import FullLogo from '../icons/Logo';
-
-const links = [
-  {
-    link: '/products',
-    label: (
-      <div className={classes.linkItem}>
-        <p>Products</p>
-        <ChevronArrow />
-      </div>
-    ),
-  },
-  { link: '/about', label: 'About' },
-  { link: '/dashboard', label: 'My Dashboard' },
-];
+import { useLocation } from 'react-router-dom';
 
 export function Header() {
   const { state } = useRouteContext();
+  const { pathname } = useLocation();
+
   const loggedIn = state.user && state.user.username != null;
+
+  const links = [
+    {
+      link: '/products',
+      label: (
+        <div className={classes.linkItem}>
+          <p>Products</p>
+          <ChevronArrow />
+        </div>
+      ),
+    },
+    { link: '/about', label: 'About' },
+    { link: '/dashboard', label: 'My Dashboard' },
+  ];
 
   const items = links.map((link) => {
     if (link.label === 'Dashboard' && !loggedIn) return null;
@@ -36,7 +39,11 @@ export function Header() {
         className={`${className} text-dark-grey font-medium`}
         style={{ padding: 0 }}
       >
-        {link.label}
+        <div
+          className={`pb-1 ${pathname === link.link ? 'border-b-2 border-purple-40' : ''}`}
+        >
+          {link.label}
+        </div>
       </Link>
     );
   });
@@ -45,7 +52,7 @@ export function Header() {
     <header className="z-20 w-full h-16 bg-white fixed top-0 border-b-[1px] border-light-grey">
       <div className="px-12 py-4 flex justify-between">
         <div className="flex flex-row">
-          <Link to="/demo" className="nav-link" style={{ padding: 0 }}>
+          <Link to="/" className="nav-link" style={{ padding: 0 }}>
             <FullLogo />
           </Link>
           <div className="flex flex-row items-center ml-10 gap-8">{items}</div>

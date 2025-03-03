@@ -1,7 +1,7 @@
 export default function CloseIcon({ className }) {
   return (
     <svg
-      class={className}
+      className={className}
       stroke="currentColor"
       fill="currentColor"
       strokeWidth="0"

@@ -110,6 +110,16 @@ export default function Dashboard() {
     fetchSystems();
   }, [state]);
 
+  useEffect(() => {
+    async function fetchSystemDetails() {
+      if (!system) return;
+      await actions.getSystemDetailsBySystem(state, system);
+      await actions.getSystemWeatherBySystem(state, system);
+      await actions.getActivityHistoryBySystem(state, system);
+    }
+    fetchSystemDetails();
+  }, [system]);
+
   // Get metrics by system
   useEffect(() => {
     async function fetchMetrics() {
@@ -123,24 +133,9 @@ export default function Dashboard() {
     fetchMetrics();
   }, [system]);
 
-  useEffect(() => {
-    const data = fetchActivity();
-    setActivityData(data);
-  }, []);
-
   return (
     <div className="pb-28">
       <h1 className="text-h3 font-semibold py-6">Solar Panel Activity</h1>
-      {/* <Select
-        data={snapshot.systems.map((s) => ({
-          value: s.id,
-          label: `🏡 ${s.address}, ${s.city}, ${s.state}, ${s.zip}, ${s.country}`,
-        }))}
-        placeholder="Select a system installation"
-        onChange={(value, _option) => {
-          handleSetSystem(value);
-        }}
-      /> */}
       <div className="flex items-center w-full">
         <p className="capitalize mr-4 text-h5 font-semibold text-dark-grey">
           System Location
@@ -185,36 +180,47 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {activityData && (
-        <div className="grid grid-flow-row grid-cols-4 gap-x-6 gap-y-3 mt-3">
-          <MetricCard
-            title="Today's Output"
-            value={activityData.output.today.value}
-            unit={activityData.output.today.unit}
-            tooltip="Total output of your system."
-          />
-          <MetricCard
-            title="Today's Usage"
-            value={activityData.usage.today.value}
-            unit={activityData.usage.today.unit}
-            tooltip="Total usage of your system."
-          />
-          <MetricCard
-            title="Battery Storage"
-            value={activityData.batteryStorage.value}
-            unit={activityData.batteryStorage.unit}
-            tooltip="Percentage of total capacity."
-          />
-          <WeatherCard
-            value={activityData.weather.value}
-            unit={activityData.weather.unit}
-            description={activityData.weather.description}
-            tooltip="Based on your general location."
-          />
-          <ActivityHistoryCard activityHistory={activityData.activityHistory} />
-          <SystemComponentsCard />
-        </div>
-      )}
+      <div className="grid grid-flow-row grid-cols-4 gap-x-6 gap-y-3 mt-3">
+        <MetricCard
+          title="Today's Output"
+          value={snapshot?.metricsSummary?.daily[0]?.total_energy_produced}
+          unit={'kWh'}
+          tooltip="Total output of your system."
+        />
+        <MetricCard
+          title="Today's Usage"
+          value={
+            snapshot.metricsSummary
+              ? Math.min(
+                  (
+                    (snapshot?.metricsSummary?.daily[0]?.total_energy_consumed /
+                      snapshot?.metricsSummary?.daily[0]
+                        ?.total_energy_produced) *
+                    100
+                  ).toFixed(2),
+                  100
+                )
+              : null
+          }
+          unit={'%'}
+          tooltip="Total usage of your system."
+          inverseProgress={true}
+        />
+        <MetricCard
+          title="Battery Storage"
+          value={snapshot?.system?.battery_storage}
+          unit={'%'}
+          tooltip="Percentage of total capacity."
+        />
+        <WeatherCard
+          weather={snapshot?.system?.weather}
+          tooltip="Based on your general location."
+        />
+        <ActivityHistoryCard
+          activityHistory={snapshot?.system?.activityHistory}
+        />
+        <SystemComponentsCard components={snapshot?.system?.components} />
+      </div>
     </div>
   );
 }
@@ -231,17 +237,18 @@ const TooltipComponent = ({ children }) => {
   );
 };
 
-const MetricCard = ({ title, value, unit, tooltip }) => {
+const MetricCard = ({ title, value, unit, tooltip, inverseProgress }) => {
+  if (!value) return <></>;
   /* progress indicator color determined by percentage breakpoints */
+  let bp = inverseProgress ? 100 - value : value; // inverse colours
   let progressColor = '#D64141';
-  if (value > 66) {
+  if (bp > 66) {
     progressColor = '#03B665';
-  } else if (value > 33) {
+  } else if (bp > 33) {
     progressColor = '#FA9F47';
   }
 
-  const fillWidth = (value / 100) * 11; // width of filled bar in rems
-
+  const fillWidth = Math.min((value / 100) * 11, 11); // width of filled bar in rems; 11 rem max width
   return (
     <div className="col-span-1 min-w-[318px]">
       <div className="w-full h-full p-6 bg-white border-solid border-2 border-gray-200 rounded-xl shadow-md">
@@ -269,7 +276,9 @@ const MetricCard = ({ title, value, unit, tooltip }) => {
   );
 };
 
-const WeatherCard = ({ value, unit, description, tooltip }) => {
+const WeatherCard = ({ weather, tooltip }) => {
+  console.log('weather: ', weather);
+  if (!weather) return <></>;
   return (
     <div className="col-span-1">
       <div className="w-full h-full p-6 bg-white border-solid border-2 border-gray-200 rounded-xl shadow-md">
@@ -278,15 +287,16 @@ const WeatherCard = ({ value, unit, description, tooltip }) => {
           <TooltipComponent>{tooltip}</TooltipComponent>
         </div>
         <p className="text-4xl mt-4 font-semibold">
-          {value} &deg;{unit}
+          {weather.temperature} &deg;F
         </p>
-        <p className="text-sm mt-2">{description}</p>
+        <p className="text-sm mt-2">{weather.description}</p>
       </div>
     </div>
   );
 };
 
 const ActivityHistoryCard = ({ activityHistory }) => {
+  if (!activityHistory) return <></>;
   return (
     <div className="col-span-2">
       <div className="w-full min-h-[400px] px-6 pt-6 bg-white border-solid border-2 border-gray-200 rounded-xl shadow-md">
@@ -294,46 +304,64 @@ const ActivityHistoryCard = ({ activityHistory }) => {
           30 Day Performance History
         </h2>
         <div className="-mx-6">
-          <ResponsiveContainer width="100%" height={400} className="mt-6">
-            <LineChart
-              width={500}
-              height={400}
-              data={activityHistory.data}
-              margin={{
-                top: 5,
-                right: 30,
-                left: 20,
-                bottom: 5,
-              }}
-            >
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Line
-                type="linear"
-                dataKey="pv"
-                stroke="#8884d8"
-                strokeWidth={4}
-              />
-              <Line
-                type="linear"
-                dataKey="uv"
-                stroke="#82ca9d"
-                strokeWidth={4}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          {activityHistory && (
+            <ResponsiveContainer width="100%" height={400} className="mt-6">
+              <LineChart
+                width={500}
+                height={400}
+                data={activityHistory.pastMonth}
+                margin={{
+                  top: 5,
+                  right: 30,
+                  left: 20,
+                  bottom: 5,
+                }}
+              >
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Line
+                  type="linear"
+                  dataKey="total_energy_produced"
+                  stroke="#8884d8"
+                  strokeWidth={4}
+                />
+                <Line
+                  type="linear"
+                  dataKey="total_energy_consumed"
+                  stroke="#82ca9d"
+                  strokeWidth={4}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-const SystemComponentsCard = () => {
+const SystemComponentsCard = ({ components }) => {
+  if (!components) return <></>;
   return (
     <div className="col-span-1">
       <div className="w-full h-full p-6 bg-white border-solid border-2 border-gray-200 rounded-xl shadow-md">
-        <h2 className="text-lg font-semibold">System Components</h2>
+        <h2 className="text-h5 font-semibold text-dark-grey">
+          System Components
+        </h2>
+        <div>
+          {components?.map((c) => {
+            return (
+              <div className="flex items-center gap-2 mt-4">
+                <div
+                  className="h-3 w-3 rounded-full"
+                  style={{ backgroundColor: c.active ? '#03B665' : '#D64141' }}
+                ></div>
+                <p className="text-md text-dark-grey">{c.name}</p>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

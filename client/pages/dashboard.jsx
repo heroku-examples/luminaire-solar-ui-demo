@@ -1,16 +1,8 @@
-import { useState, useEffect, forwardRef, PureComponent } from 'react';
+import { useState, useEffect } from 'react';
 
 import { useRouteContext } from '/:core.jsx';
 import { title } from '@/theme.js';
-import { EnergyStats } from '@/components/ui/EnergyStats.jsx';
-import {
-  Select,
-  Grid,
-  Container,
-  Flex,
-  Tooltip,
-  Progress,
-} from '@mantine/core';
+
 import {
   LineChart,
   Line,
@@ -238,7 +230,7 @@ const TooltipComponent = ({ children }) => {
 };
 
 const MetricCard = ({ title, value, unit, tooltip, inverseProgress }) => {
-  if (!value) return <></>;
+  if (value === null || value === undefined) return <></>;
   /* progress indicator color determined by percentage breakpoints */
   let bp = inverseProgress ? 100 - value : value; // inverse colours
   let progressColor = '#D64141';
@@ -260,7 +252,6 @@ const MetricCard = ({ title, value, unit, tooltip, inverseProgress }) => {
           {value} {unit}
         </p>
         {unit === '%' && (
-          // <Progress value={value} color={progressColor} className="mt-4" />
           <div className="bg-light-grey w-44 h-2 rounded-full mt-4">
             <div
               className="h-2 rounded-full"
@@ -289,7 +280,7 @@ const WeatherCard = ({ weather, tooltip }) => {
         <p className="text-4xl mt-4 font-semibold">
           {weather.temperature} &deg;F
         </p>
-        <p className="text-sm mt-2">{weather.description}</p>
+        <p className="text-sm mt-2 capitalize">{weather.description}</p>
       </div>
     </div>
   );
@@ -319,7 +310,6 @@ const ActivityHistoryCard = ({ activityHistory }) => {
               >
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip />
                 <Line
                   type="linear"
                   dataKey="total_energy_produced"

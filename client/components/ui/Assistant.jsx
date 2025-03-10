@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { IconCheck, IconRobot } from '@tabler/icons-react';
 import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm';
 import { useRouteContext } from '/:core.jsx';
 import {
   Box,
@@ -85,6 +86,7 @@ const Message = ({ role, content, isLast }) => {
         </div>
       ) : role === 'assistant' ? (
         <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
           rehypePlugins={[rehypeRaw]}
           components={{
             a: ({ children, href, target }) => (

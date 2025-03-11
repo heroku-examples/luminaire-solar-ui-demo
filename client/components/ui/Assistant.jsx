@@ -75,12 +75,18 @@ const Message = ({ role, content, isLast }) => {
     ...(role === 'error' ? messageStyles.error : {}),
   };
 
+  // For assistant messages, ensure proper newlines for markdown
+  const processedContent =
+    role === 'assistant'
+      ? content.replace(/\\n/g, '\n').replace(/\n\n+/g, '\n\n')
+      : content;
+
   return (
     <Box style={style}>
       {role === 'agent' ? (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Text size="xs" style={{ flex: 1 }}>
-            {content}
+            {processedContent}
           </Text>
           <IconWrapper isLast={isLast} />
         </div>
@@ -145,10 +151,10 @@ const Message = ({ role, content, isLast }) => {
             ),
           }}
         >
-          {content}
+          {processedContent}
         </ReactMarkdown>
       ) : (
-        <div>{content}</div>
+        <div>{processedContent}</div>
       )}
     </Box>
   );
@@ -246,14 +252,15 @@ const Chat = () => {
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || ''; // Save incomplete line
+        // Split by newline but preserve them in the content
+        const chunks = buffer.split(/(?<=\n)/);
+        buffer = chunks.pop() || ''; // Save incomplete chunk
 
-        for (const line of lines) {
-          if (!line) continue;
+        for (const chunk of chunks) {
+          if (!chunk.trim()) continue;
 
           try {
-            const message = JSON.parse(line);
+            const message = JSON.parse(chunk);
 
             setMessages((prevMessages) => {
               const updatedMessages = [...prevMessages];
@@ -266,7 +273,6 @@ const Chat = () => {
               // Handle assistant message
               if (isFirstAssistantMessage) {
                 isFirstAssistantMessage = false;
-                message.content += '\n';
                 return [
                   ...updatedMessages,
                   { role: 'assistant', content: message.content || '' },
@@ -277,7 +283,6 @@ const Chat = () => {
               const lastMessage = updatedMessages[updatedMessages.length - 1];
               if (lastMessage && lastMessage.role === 'assistant') {
                 lastMessage.content += message.content || '';
-                lastMessage.content += '\n';
               }
 
               return updatedMessages;
@@ -289,14 +294,10 @@ const Chat = () => {
               const lastMessage = updatedMessages[updatedMessages.length - 1];
 
               if (lastMessage && lastMessage.role === 'assistant') {
-                lastMessage.content += line;
-                lastMessage.content += '\n';
+                lastMessage.content += chunk;
               } else if (isFirstAssistantMessage) {
                 isFirstAssistantMessage = false;
-                updatedMessages.push({
-                  role: 'assistant',
-                  content: line + '\n',
-                });
+                updatedMessages.push({ role: 'assistant', content: chunk });
               }
               return updatedMessages;
             });
@@ -318,7 +319,6 @@ const Chat = () => {
             const lastMessage = updatedMessages[updatedMessages.length - 1];
             if (lastMessage && lastMessage.role === 'assistant') {
               lastMessage.content += message.content || '';
-              lastMessage.content += '\n';
             }
 
             return updatedMessages;
@@ -331,7 +331,6 @@ const Chat = () => {
 
             if (lastMessage && lastMessage.role === 'assistant') {
               lastMessage.content += buffer;
-              lastMessage.content += '\n';
             }
 
             return updatedMessages;

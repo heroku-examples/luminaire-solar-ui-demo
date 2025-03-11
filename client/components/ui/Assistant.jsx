@@ -170,6 +170,7 @@ const Chat = () => {
   ]);
   const [currentMessage, setCurrentMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [sessionId, setSessionId] = useState(null);
   const scrollAreaRef = useRef(null);
   const viewportRef = useRef(null);
   const inputRef = useRef(null);
@@ -214,11 +215,12 @@ const Chat = () => {
     setIsLoading(true);
 
     try {
-      const response = await actions.request(state, '/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: currentMessage }),
-      });
+      const requestBody = {
+        question: currentMessage,
+        ...(sessionId && { sessionId }),
+      };
+
+      const response = await actions.chatCompletion(state, requestBody);
 
       if (!response.ok) {
         throw new Error(`Request failed: ${response.status}`);
@@ -261,6 +263,10 @@ const Chat = () => {
 
           try {
             const message = JSON.parse(chunk);
+
+            if (message.sessionId && !sessionId) {
+              setSessionId(message.sessionId);
+            }
 
             setMessages((prevMessages) => {
               const updatedMessages = [...prevMessages];
@@ -309,6 +315,11 @@ const Chat = () => {
       if (buffer) {
         try {
           const message = JSON.parse(buffer);
+
+          if (message.sessionId && !sessionId) {
+            setSessionId(message.sessionId);
+          }
+
           setMessages((prevMessages) => {
             const updatedMessages = [...prevMessages];
 

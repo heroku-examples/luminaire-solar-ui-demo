@@ -140,6 +140,17 @@ export const actions = {
       return newCart;
     }, []);
   },
+  async chatCompletion(state, body) {
+    const response = await this.request(state, '/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${state.authorization}`,
+      },
+      body: JSON.stringify(body),
+    });
+    return response;
+  },
   async request(state, path = '/', options = {}) {
     const apiUrl = state.apiUrl;
     const response = await fetch(apiUrl + path, options);

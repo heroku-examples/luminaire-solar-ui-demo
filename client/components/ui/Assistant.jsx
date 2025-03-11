@@ -103,9 +103,26 @@ const Message = ({ role, content, isLast }) => {
               </a>
             ),
             ul: ({ children }) => (
-              <ul style={{ paddingLeft: '16px', listStyle: 'disc' }}>
+              <ul
+                style={{
+                  paddingLeft: '2rem',
+                  listStyle: 'disc',
+                  marginBottom: '1rem',
+                }}
+              >
                 {children}
               </ul>
+            ),
+            ol: ({ children }) => (
+              <ol
+                style={{
+                  paddingLeft: '2rem',
+                  listStyle: 'decimal',
+                  marginBottom: '1rem',
+                }}
+              >
+                {children}
+              </ol>
             ),
             pre: ({ children }) => (
               <pre
@@ -233,7 +250,7 @@ const Chat = () => {
         buffer = lines.pop() || ''; // Save incomplete line
 
         for (const line of lines) {
-          if (!line.trim()) continue;
+          if (!line) continue;
 
           try {
             const message = JSON.parse(line);
@@ -249,6 +266,7 @@ const Chat = () => {
               // Handle assistant message
               if (isFirstAssistantMessage) {
                 isFirstAssistantMessage = false;
+                message.content += '\n';
                 return [
                   ...updatedMessages,
                   { role: 'assistant', content: message.content || '' },
@@ -259,6 +277,7 @@ const Chat = () => {
               const lastMessage = updatedMessages[updatedMessages.length - 1];
               if (lastMessage && lastMessage.role === 'assistant') {
                 lastMessage.content += message.content || '';
+                lastMessage.content += '\n';
               }
 
               return updatedMessages;
@@ -271,11 +290,14 @@ const Chat = () => {
 
               if (lastMessage && lastMessage.role === 'assistant') {
                 lastMessage.content += line;
+                lastMessage.content += '\n';
               } else if (isFirstAssistantMessage) {
                 isFirstAssistantMessage = false;
-                updatedMessages.push({ role: 'assistant', content: line });
+                updatedMessages.push({
+                  role: 'assistant',
+                  content: line + '\n',
+                });
               }
-
               return updatedMessages;
             });
           }
@@ -296,6 +318,7 @@ const Chat = () => {
             const lastMessage = updatedMessages[updatedMessages.length - 1];
             if (lastMessage && lastMessage.role === 'assistant') {
               lastMessage.content += message.content || '';
+              lastMessage.content += '\n';
             }
 
             return updatedMessages;
@@ -308,6 +331,7 @@ const Chat = () => {
 
             if (lastMessage && lastMessage.role === 'assistant') {
               lastMessage.content += buffer;
+              lastMessage.content += '\n';
             }
 
             return updatedMessages;

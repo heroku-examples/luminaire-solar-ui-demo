@@ -242,7 +242,7 @@ const MetricCard = ({ title, value, unit, tooltip, inverseProgress }) => {
 
   const fillWidth = Math.min((value / 100) * 11, 11); // width of filled bar in rems; 11 rem max width
   return (
-    <div className="col-span-1 min-w-[318px]">
+    <div className="col-span-1 ">
       <div className="w-full h-full p-6 bg-white border-solid border-2 border-gray-200 rounded-xl shadow-md">
         <div className="flex justify-between">
           <h2 className="text-h5 text-dark-grey font-semibold">{title}</h2>

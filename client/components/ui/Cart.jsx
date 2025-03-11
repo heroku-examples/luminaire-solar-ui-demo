@@ -48,7 +48,7 @@ export function Cart() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="relative flex">
+    <div className="flex">
       <div className="relative flex">
         <button onClick={() => setOpen((prev) => !prev)}>
           <CartIcon />
@@ -58,11 +58,23 @@ export function Cart() {
         </button>
       </div>
 
-      {open && (
-        <div className="absolute left-0 -translate-x-[75%] translate-y-1/2 bg-lightest-grey p-5 border-dark-gray border-2 text-nowrap w-[33vw]">
+      {open && <CartModal snapshot={snapshot} setOpen={setOpen} />}
+    </div>
+  );
+}
+
+export function CartModal({ snapshot, setOpen }) {
+  return (
+    <div>
+      <div
+        className="absolute left-0 top-0 w-[100vw] h-[100vh] bg-transparent"
+        onClick={() => setOpen((prev) => !prev)}
+      />
+      <div className="relative">
+        <div className="absolute left-0 top-0 -translate-x-[90%] translate-y-8  bg-lightest-grey p-5 border-dark-gray border-2 text-nowrap w-[33vw] rounded-md">
           <CartList cart={snapshot.cart} />
         </div>
-      )}
+      </div>
     </div>
   );
 }

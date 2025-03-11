@@ -11,7 +11,7 @@ import { useRouteContext } from '/:core.jsx';
 import classes from '@/components/ui/Product.module.css';
 import { Link } from 'react-router-dom';
 
-export function Product({ product }) {
+export function Product({ product, className }) {
   const { state, actions } = useRouteContext();
 
   const loggedIn = state.user && state.user.username != null;
@@ -21,7 +21,9 @@ export function Product({ product }) {
   };
 
   return (
-    <div className="w-80 bg-white p-10 flex flex-col border-light-grey border-[1px] rounded-xl shadow-md shadow-black/10">
+    <div
+      className={`w-80 bg-white p-10 flex flex-col border-light-grey border-[1px] rounded-xl shadow-md shadow-black/10 ${className}`}
+    >
       <div className="flex flex-col">
         <p className="text-h4 font-semibold text-nowrap overflow-x-clip text-ellipsis">
           {product.name}

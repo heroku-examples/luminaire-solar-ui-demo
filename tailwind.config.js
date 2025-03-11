@@ -53,6 +53,9 @@ export default {
         },
       },
     },
+    screens: {
+      desktop: '1024px',
+    },
   },
   plugins: [],
 };

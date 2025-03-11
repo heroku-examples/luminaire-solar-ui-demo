@@ -43,17 +43,21 @@ const Message = ({ role, content, isLast }) => {
   const theme = useMantineTheme();
   const messageStyles = {
     base: {
-      padding: '12px',
+      padding: '12px 16px',
       maxWidth: '80%',
-      borderRadius: '8px',
+      borderRadius: '16px',
+      marginBottom: '16px',
     },
     user: {
       marginLeft: 'auto',
-      textAlign: 'right',
-      background: theme.colors.violet[1],
+      background: '#7E3AF2',
+      color: 'white',
+      borderTopRightRadius: '4px',
     },
     assistant: {
-      background: theme.colors.blue[0],
+      background: '#F0F2F5',
+      color: '#333',
+      borderTopLeftRadius: '4px',
     },
     agent: {
       fontStyle: 'italic',

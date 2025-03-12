@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRouteContext } from '/:core.jsx';
+import profile from '@/assets/img/profile.png';
+
 export function Profile() {
   const [open, setOpen] = useState(false);
   return (
     <div>
       <div className="cursor-pointer " onClick={() => setOpen((prev) => !prev)}>
-        <img src="../../assets/img/profile.png" className="w-8 h-8" />
+        <img src={profile} className="w-8 h-8" />
       </div>
       {open && <ProfileModal setOpen={setOpen} />}
     </div>

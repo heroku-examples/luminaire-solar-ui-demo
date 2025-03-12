@@ -4,6 +4,7 @@ import { title } from '@/theme.js';
 import LightbulbIcon from '../components/icons/LightbulbIcon';
 import WrenchIcon from '../components/icons/WrenchIcon';
 import PigIcon from '../components/icons/PigIcon';
+import home from '@/assets/img/home.jpg';
 
 export function getMeta() {
   return {
@@ -33,10 +34,7 @@ const Hero = () => {
   return (
     <div className="w-full relative h-[100vh] flex justify-center items-center">
       <div className="absolute top-0 left-0 -mx-12 h-[100vh] overflow-hidden">
-        <img
-          src={'../../assets/img/home.jpg'}
-          className="object-cover w-[100vw]"
-        />
+        <img src={home} className="object-cover w-[100vw]" />
       </div>
       <div className="z-10 w-2/3 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white">
         <h1 className="text-center text-h1 font-bold">

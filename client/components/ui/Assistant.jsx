@@ -22,6 +22,182 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 
+const useChatStream = ({ onError } = {}) => {
+  const [messages, setMessages] = useState([
+    {
+      role: 'assistant',
+      content: "Hello, I'm Luminaire Agent, how can I help you today?",
+    },
+  ]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [sessionId, setSessionId] = useState(null);
+
+  const sendMessage = async (message, actions, state) => {
+    if (!message.trim()) return;
+
+    const userMessage = { role: 'user', content: message };
+    const agentMessage = {
+      role: 'agent',
+      content: 'Luminaire Agent is processing your request...',
+    };
+    setMessages((prev) => [...prev, userMessage, agentMessage]);
+    setIsLoading(true);
+
+    try {
+      const requestBody = {
+        question: message,
+        ...(sessionId && { sessionId }),
+      };
+
+      const response = await actions.chatCompletion(state, requestBody);
+
+      if (!response.ok) {
+        throw new Error(
+          response.status === 401
+            ? 'Unauthorized'
+            : `Request failed: ${response.status}`
+        );
+      }
+
+      await processStream(response.body);
+    } catch (error) {
+      console.error('Chat error:', error);
+      setMessages((prev) => {
+        const filtered = prev.filter((msg) => msg.role !== 'agent');
+        return [
+          ...filtered,
+          {
+            role: 'error',
+            content:
+              error.message === 'Unauthorized'
+                ? 'Session expired. Please refresh the page.'
+                : 'Sorry, there was an error processing your message',
+          },
+        ];
+      });
+      onError?.(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const processStream = async (stream) => {
+    const reader = stream.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let agentBuffer = '';
+    let isFirstAssistantMessage = true;
+
+    const handleAgentMessage = (message) => {
+      if (message.sessionId && !sessionId) {
+        setSessionId(message.sessionId);
+      }
+      flushSync(() => {
+        setMessages((prevMessages) => [...prevMessages, message]);
+      });
+    };
+
+    const handleAssistantMessage = (content) => {
+      setMessages((prevMessages) => {
+        const updatedMessages = [...prevMessages];
+        if (isFirstAssistantMessage) {
+          isFirstAssistantMessage = false;
+          return [...updatedMessages, { role: 'assistant', content }];
+        }
+        const lastMessage = updatedMessages[updatedMessages.length - 1];
+        if (lastMessage?.role === 'assistant') {
+          lastMessage.content += content;
+        }
+        return updatedMessages;
+      });
+    };
+
+    const processAgentBuffer = () => {
+      try {
+        const message = JSON.parse(agentBuffer);
+        if (message.role === 'agent') {
+          handleAgentMessage(message);
+        } else {
+          buffer += agentBuffer;
+        }
+        agentBuffer = '';
+      } catch (e) {
+        if (agentBuffer.length > 1000) {
+          buffer += agentBuffer;
+          agentBuffer = '';
+        }
+      }
+    };
+
+    const processChunk = (chunk) => {
+      if (!chunk.trim()) return;
+
+      try {
+        const message = JSON.parse(chunk);
+        if (message.sessionId && !sessionId) {
+          setSessionId(message.sessionId);
+        }
+        if (message.role === 'assistant') {
+          handleAssistantMessage(message.content || '');
+        }
+      } catch (e) {
+        handleAssistantMessage(chunk);
+      }
+    };
+
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        const decodedChunk = decoder.decode(value, { stream: true });
+
+        for (const char of decodedChunk) {
+          if (char === '{') {
+            agentBuffer = char;
+          } else if (agentBuffer) {
+            agentBuffer += char;
+            if (char === '}') {
+              processAgentBuffer();
+            }
+          } else {
+            buffer += char;
+          }
+        }
+
+        const chunks = buffer.split(/(?<=\n)/);
+        buffer = chunks.pop() || '';
+        chunks.forEach(processChunk);
+      }
+    } catch (error) {
+      console.error('Stream error:', error);
+      const errorMessage =
+        error.message === 'Unauthorized'
+          ? 'Session expired. Please refresh the page.'
+          : 'Connection interrupted. Please try again.';
+
+      setMessages((prev) => [
+        ...prev,
+        { role: 'error', content: errorMessage },
+      ]);
+    } finally {
+      try {
+        await reader.cancel();
+        reader.releaseLock();
+      } catch (e) {
+        console.error('Error cleaning up reader:', e);
+      }
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    messages,
+    isLoading,
+    sendMessage,
+  };
+};
+
 const IconWrapper = ({ isLast }) => {
   return (
     <div
@@ -168,18 +344,14 @@ const Message = ({ role, content, isLast }) => {
 
 const Chat = () => {
   const { state, actions } = useRouteContext();
-  const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      content: "Hello, I'm Luminaire Agent, how can I help you today?",
-    },
-  ]);
   const [currentMessage, setCurrentMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [sessionId, setSessionId] = useState(null);
   const scrollAreaRef = useRef(null);
   const viewportRef = useRef(null);
   const inputRef = useRef(null);
+
+  const { messages, isLoading, sendMessage } = useChatStream({
+    onError: () => focus(),
+  });
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
@@ -209,172 +381,9 @@ const Chat = () => {
   }, []);
 
   const handleSend = async () => {
-    if (!currentMessage.trim()) return;
-
-    const userMessage = { role: 'user', content: currentMessage };
-    const agentMessage = {
-      role: 'agent',
-      content: 'Luminaire Agent is processing your request...',
-    };
-    setMessages((prev) => [...prev, userMessage, agentMessage]);
+    await sendMessage(currentMessage, actions, state);
     setCurrentMessage('');
-    setIsLoading(true);
-
-    try {
-      const requestBody = {
-        question: currentMessage,
-        ...(sessionId && { sessionId }),
-      };
-
-      const response = await actions.chatCompletion(state, requestBody);
-
-      if (!response.ok) {
-        throw new Error(
-          response.status === 401
-            ? 'Unauthorized'
-            : `Request failed: ${response.status}`
-        );
-      }
-
-      await processStream(response.body);
-    } catch (error) {
-      console.error('Chat error:', error);
-      setMessages((prev) => {
-        // Remove the last "processing" message if it exists
-        const filtered = prev.filter((msg) => msg.role !== 'agent');
-        return [
-          ...filtered,
-          {
-            role: 'error',
-            content:
-              error.message === 'Unauthorized'
-                ? 'Session expired. Please refresh the page.'
-                : 'Sorry, there was an error processing your message',
-          },
-        ];
-      });
-    } finally {
-      setIsLoading(false);
-      focus();
-    }
-  };
-
-  const processStream = async (stream) => {
-    const reader = stream.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    let agentBuffer = '';
-    let isFirstAssistantMessage = true;
-
-    const handleAgentMessage = (message) => {
-      if (message.sessionId && !sessionId) {
-        setSessionId(message.sessionId);
-      }
-      flushSync(() => {
-        setMessages((prevMessages) => [...prevMessages, message]);
-      });
-      scrollToBottom();
-    };
-
-    const handleAssistantMessage = (content) => {
-      setMessages((prevMessages) => {
-        const updatedMessages = [...prevMessages];
-        if (isFirstAssistantMessage) {
-          isFirstAssistantMessage = false;
-          return [...updatedMessages, { role: 'assistant', content }];
-        }
-        const lastMessage = updatedMessages[updatedMessages.length - 1];
-        if (lastMessage?.role === 'assistant') {
-          lastMessage.content += content;
-        }
-        return updatedMessages;
-      });
-      scrollToBottom();
-    };
-
-    const processAgentBuffer = () => {
-      try {
-        const message = JSON.parse(agentBuffer);
-        if (message.role === 'agent') {
-          handleAgentMessage(message);
-        } else {
-          buffer += agentBuffer;
-        }
-        agentBuffer = '';
-      } catch (e) {
-        // If it's not valid JSON yet, keep accumulating
-        if (agentBuffer.length > 1000) {
-          // Safety check - if buffer gets too large, process as regular chunk
-          buffer += agentBuffer;
-          agentBuffer = '';
-        }
-      }
-    };
-
-    const processChunk = (chunk) => {
-      if (!chunk.trim()) return;
-
-      try {
-        const message = JSON.parse(chunk);
-        if (message.sessionId && !sessionId) {
-          setSessionId(message.sessionId);
-        }
-        if (message.role === 'assistant') {
-          handleAssistantMessage(message.content || '');
-        }
-      } catch (e) {
-        // Handle non-JSON chunks for assistant messages
-        handleAssistantMessage(chunk);
-      }
-    };
-
-    try {
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-
-        const decodedChunk = decoder.decode(value, { stream: true });
-
-        // Process each character for immediate agent message display
-        for (const char of decodedChunk) {
-          if (char === '{') {
-            agentBuffer = char;
-          } else if (agentBuffer) {
-            agentBuffer += char;
-            if (char === '}') {
-              processAgentBuffer();
-            }
-          } else {
-            buffer += char;
-          }
-        }
-
-        // Process complete chunks for assistant messages
-        const chunks = buffer.split(/(?<=\n)/);
-        buffer = chunks.pop() || '';
-        chunks.forEach(processChunk);
-      }
-    } catch (error) {
-      console.error('Stream error:', error);
-      const errorMessage =
-        error.message === 'Unauthorized'
-          ? 'Session expired. Please refresh the page.'
-          : 'Connection interrupted. Please try again.';
-
-      setMessages((prev) => [
-        ...prev,
-        { role: 'error', content: errorMessage },
-      ]);
-      scrollToBottom();
-    } finally {
-      try {
-        await reader.cancel();
-        reader.releaseLock();
-      } catch (e) {
-        console.error('Error cleaning up reader:', e);
-      }
-      setIsLoading(false);
-    }
+    focus();
   };
 
   return (

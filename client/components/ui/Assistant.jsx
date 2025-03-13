@@ -4,6 +4,7 @@ import { IconCheck, IconRobot } from '@tabler/icons-react';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import { useRouteContext } from '/:core.jsx';
+import { flushSync } from 'react-dom';
 import {
   Box,
   Paper,
@@ -262,46 +263,52 @@ const Chat = () => {
     const reader = stream.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
+    let agentBuffer = '';
     let isFirstAssistantMessage = true;
 
     try {
       while (true) {
         const { value, done } = await reader.read();
-        if (done) {
-          if (buffer) {
-            try {
-              const message = JSON.parse(buffer);
-              if (message.sessionId && !sessionId) {
-                setSessionId(message.sessionId);
-              }
-              setMessages((prevMessages) => {
-                const updatedMessages = [...prevMessages];
-                if (message.role === 'agent') {
-                  return [...updatedMessages, message];
-                }
-                const lastMessage = updatedMessages[updatedMessages.length - 1];
-                if (lastMessage && lastMessage.role === 'assistant') {
-                  lastMessage.content += message.content || '';
-                }
-                return updatedMessages;
-              });
-            } catch (e) {
-              setMessages((prevMessages) => {
-                const updatedMessages = [...prevMessages];
-                const lastMessage = updatedMessages[updatedMessages.length - 1];
-                if (lastMessage && lastMessage.role === 'assistant') {
-                  lastMessage.content += buffer;
-                }
-                return updatedMessages;
-              });
-            }
-          }
-          break;
-        }
+        if (done) break;
 
         const decodedChunk = decoder.decode(value, { stream: true });
-        buffer += decodedChunk;
 
+        // Process each character for immediate agent message display
+        for (const char of decodedChunk) {
+          if (char === '{') {
+            agentBuffer = char;
+          } else if (agentBuffer) {
+            agentBuffer += char;
+            if (char === '}') {
+              try {
+                const message = JSON.parse(agentBuffer);
+                if (message.role === 'agent') {
+                  if (message.sessionId && !sessionId) {
+                    setSessionId(message.sessionId);
+                  }
+                  flushSync(() => {
+                    setMessages((prevMessages) => [...prevMessages, message]);
+                  });
+                  scrollToBottom();
+                } else {
+                  buffer += agentBuffer;
+                }
+                agentBuffer = '';
+              } catch (e) {
+                // If it's not valid JSON yet, keep accumulating
+                if (agentBuffer.length > 1000) {
+                  // Safety check - if buffer gets too large, process as regular chunk
+                  buffer += agentBuffer;
+                  agentBuffer = '';
+                }
+              }
+            }
+          } else {
+            buffer += char;
+          }
+        }
+
+        // Process complete chunks for assistant messages
         const chunks = buffer.split(/(?<=\n)/);
         buffer = chunks.pop() || '';
 
@@ -315,35 +322,30 @@ const Chat = () => {
               setSessionId(message.sessionId);
             }
 
-            if (message.role === 'agent') {
-              setMessages((prevMessages) => [...prevMessages, message]);
-              continue;
+            if (message.role === 'assistant') {
+              setMessages((prevMessages) => {
+                const updatedMessages = [...prevMessages];
+                const content = message.content || '';
+
+                if (isFirstAssistantMessage) {
+                  isFirstAssistantMessage = false;
+                  return [...updatedMessages, { role: 'assistant', content }];
+                }
+
+                const lastMessage = updatedMessages[updatedMessages.length - 1];
+                if (lastMessage && lastMessage.role === 'assistant') {
+                  lastMessage.content += content;
+                }
+                return updatedMessages;
+              });
+              scrollToBottom();
             }
-
-            setMessages((prevMessages) => {
-              const updatedMessages = [...prevMessages];
-              const content = message.content || '';
-
-              if (isFirstAssistantMessage) {
-                isFirstAssistantMessage = false;
-                // Add new assistant message without removing agent message
-                return [...updatedMessages, { role: 'assistant', content }];
-              }
-
-              // Append to existing assistant message
-              const lastMessage = updatedMessages[updatedMessages.length - 1];
-              if (lastMessage && lastMessage.role === 'assistant') {
-                lastMessage.content += content;
-              }
-              return updatedMessages;
-            });
           } catch (e) {
+            // Handle non-JSON chunks for assistant messages
             setMessages((prevMessages) => {
               const updatedMessages = [...prevMessages];
-
               if (isFirstAssistantMessage) {
                 isFirstAssistantMessage = false;
-                // Add new assistant message without removing agent message
                 return [
                   ...updatedMessages,
                   { role: 'assistant', content: chunk },
@@ -356,6 +358,7 @@ const Chat = () => {
               }
               return updatedMessages;
             });
+            scrollToBottom();
           }
         }
       }
@@ -370,6 +373,7 @@ const Chat = () => {
         ...prev,
         { role: 'error', content: errorMessage },
       ]);
+      scrollToBottom();
     } finally {
       try {
         await reader.cancel();

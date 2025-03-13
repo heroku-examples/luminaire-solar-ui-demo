@@ -62,7 +62,8 @@ const Message = ({ role, content, isLast }) => {
     agent: {
       fontStyle: 'italic',
       color: '#666666',
-      padding: '2px',
+      padding: 0,
+      marginBottom: 0,
       borderRadius: 0,
     },
     error: {
@@ -212,7 +213,7 @@ const Chat = () => {
     const userMessage = { role: 'user', content: currentMessage };
     const agentMessage = {
       role: 'agent',
-      content: 'Luminaire Agent is thinking...',
+      content: 'Luminaire Agent is processing your request...',
     };
     setMessages((prev) => [...prev, userMessage, agentMessage]);
     setCurrentMessage('');
@@ -227,19 +228,30 @@ const Chat = () => {
       const response = await actions.chatCompletion(state, requestBody);
 
       if (!response.ok) {
-        throw new Error(`Request failed: ${response.status}`);
+        throw new Error(
+          response.status === 401
+            ? 'Unauthorized'
+            : `Request failed: ${response.status}`
+        );
       }
 
       await processStream(response.body);
     } catch (error) {
       console.error('Chat error:', error);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'error',
-          content: 'Sorry, there was an error processing your message',
-        },
-      ]);
+      setMessages((prev) => {
+        // Remove the last "processing" message if it exists
+        const filtered = prev.filter((msg) => msg.role !== 'agent');
+        return [
+          ...filtered,
+          {
+            role: 'error',
+            content:
+              error.message === 'Unauthorized'
+                ? 'Session expired. Please refresh the page.'
+                : 'Sorry, there was an error processing your message',
+          },
+        ];
+      });
     } finally {
       setIsLoading(false);
       focus();
@@ -255,12 +267,43 @@ const Chat = () => {
     try {
       while (true) {
         const { value, done } = await reader.read();
-        if (done) break;
+        if (done) {
+          if (buffer) {
+            try {
+              const message = JSON.parse(buffer);
+              if (message.sessionId && !sessionId) {
+                setSessionId(message.sessionId);
+              }
+              setMessages((prevMessages) => {
+                const updatedMessages = [...prevMessages];
+                if (message.role === 'agent') {
+                  return [...updatedMessages, message];
+                }
+                const lastMessage = updatedMessages[updatedMessages.length - 1];
+                if (lastMessage && lastMessage.role === 'assistant') {
+                  lastMessage.content += message.content || '';
+                }
+                return updatedMessages;
+              });
+            } catch (e) {
+              setMessages((prevMessages) => {
+                const updatedMessages = [...prevMessages];
+                const lastMessage = updatedMessages[updatedMessages.length - 1];
+                if (lastMessage && lastMessage.role === 'assistant') {
+                  lastMessage.content += buffer;
+                }
+                return updatedMessages;
+              });
+            }
+          }
+          break;
+        }
 
-        buffer += decoder.decode(value, { stream: true });
-        // Split by newline but preserve them in the content
+        const decodedChunk = decoder.decode(value, { stream: true });
+        buffer += decodedChunk;
+
         const chunks = buffer.split(/(?<=\n)/);
-        buffer = chunks.pop() || ''; // Save incomplete chunk
+        buffer = chunks.pop() || '';
 
         for (const chunk of chunks) {
           if (!chunk.trim()) continue;
@@ -272,97 +315,69 @@ const Chat = () => {
               setSessionId(message.sessionId);
             }
 
+            if (message.role === 'agent') {
+              setMessages((prevMessages) => [...prevMessages, message]);
+              continue;
+            }
+
             setMessages((prevMessages) => {
               const updatedMessages = [...prevMessages];
+              const content = message.content || '';
 
-              // If it's an agent message, add it as a new message
-              if (message.role === 'agent') {
-                return [...updatedMessages, message];
-              }
-
-              // Handle assistant message
               if (isFirstAssistantMessage) {
                 isFirstAssistantMessage = false;
-                return [
-                  ...updatedMessages,
-                  { role: 'assistant', content: message.content || '' },
-                ];
+                // Add new assistant message without removing agent message
+                return [...updatedMessages, { role: 'assistant', content }];
               }
 
-              // Append content to the last assistant message
+              // Append to existing assistant message
               const lastMessage = updatedMessages[updatedMessages.length - 1];
               if (lastMessage && lastMessage.role === 'assistant') {
-                lastMessage.content += message.content || '';
+                lastMessage.content += content;
               }
-
               return updatedMessages;
             });
           } catch (e) {
-            // If JSON parsing fails, treat it as a partial assistant message
             setMessages((prevMessages) => {
               const updatedMessages = [...prevMessages];
-              const lastMessage = updatedMessages[updatedMessages.length - 1];
 
+              if (isFirstAssistantMessage) {
+                isFirstAssistantMessage = false;
+                // Add new assistant message without removing agent message
+                return [
+                  ...updatedMessages,
+                  { role: 'assistant', content: chunk },
+                ];
+              }
+
+              const lastMessage = updatedMessages[updatedMessages.length - 1];
               if (lastMessage && lastMessage.role === 'assistant') {
                 lastMessage.content += chunk;
-              } else if (isFirstAssistantMessage) {
-                isFirstAssistantMessage = false;
-                updatedMessages.push({ role: 'assistant', content: chunk });
               }
               return updatedMessages;
             });
           }
-        }
-      }
-
-      // Process any remaining data in buffer
-      if (buffer) {
-        try {
-          const message = JSON.parse(buffer);
-
-          if (message.sessionId && !sessionId) {
-            setSessionId(message.sessionId);
-          }
-
-          setMessages((prevMessages) => {
-            const updatedMessages = [...prevMessages];
-
-            if (message.role === 'agent') {
-              return [...updatedMessages, message];
-            }
-
-            const lastMessage = updatedMessages[updatedMessages.length - 1];
-            if (lastMessage && lastMessage.role === 'assistant') {
-              lastMessage.content += message.content || '';
-            }
-
-            return updatedMessages;
-          });
-        } catch (e) {
-          // Handle remaining partial content
-          setMessages((prevMessages) => {
-            const updatedMessages = [...prevMessages];
-            const lastMessage = updatedMessages[updatedMessages.length - 1];
-
-            if (lastMessage && lastMessage.role === 'assistant') {
-              lastMessage.content += buffer;
-            }
-
-            return updatedMessages;
-          });
         }
       }
     } catch (error) {
       console.error('Stream error:', error);
+      const errorMessage =
+        error.message === 'Unauthorized'
+          ? 'Session expired. Please refresh the page.'
+          : 'Connection interrupted. Please try again.';
+
       setMessages((prev) => [
         ...prev,
-        {
-          role: 'error',
-          content: 'Sorry, there was an error processing the response',
-        },
+        { role: 'error', content: errorMessage },
       ]);
     } finally {
-      reader.releaseLock();
+      try {
+        await reader.cancel();
+        reader.releaseLock();
+      } catch (e) {
+        console.error('Error cleaning up reader:', e);
+      }
+      setIsLoading(false);
     }
   };
 
@@ -382,7 +397,7 @@ const Chat = () => {
                 key={i}
                 role={msg.role}
                 content={msg.content}
-                isLast={i === messages.length - 1}
+                isLast={isLoading && i === messages.length - 1}
               />
             ))}
           </Stack>

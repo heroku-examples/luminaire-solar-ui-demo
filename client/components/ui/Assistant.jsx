@@ -266,6 +266,68 @@ const Chat = () => {
     let agentBuffer = '';
     let isFirstAssistantMessage = true;
 
+    const handleAgentMessage = (message) => {
+      if (message.sessionId && !sessionId) {
+        setSessionId(message.sessionId);
+      }
+      flushSync(() => {
+        setMessages((prevMessages) => [...prevMessages, message]);
+      });
+      scrollToBottom();
+    };
+
+    const handleAssistantMessage = (content) => {
+      setMessages((prevMessages) => {
+        const updatedMessages = [...prevMessages];
+        if (isFirstAssistantMessage) {
+          isFirstAssistantMessage = false;
+          return [...updatedMessages, { role: 'assistant', content }];
+        }
+        const lastMessage = updatedMessages[updatedMessages.length - 1];
+        if (lastMessage?.role === 'assistant') {
+          lastMessage.content += content;
+        }
+        return updatedMessages;
+      });
+      scrollToBottom();
+    };
+
+    const processAgentBuffer = () => {
+      try {
+        const message = JSON.parse(agentBuffer);
+        if (message.role === 'agent') {
+          handleAgentMessage(message);
+        } else {
+          buffer += agentBuffer;
+        }
+        agentBuffer = '';
+      } catch (e) {
+        // If it's not valid JSON yet, keep accumulating
+        if (agentBuffer.length > 1000) {
+          // Safety check - if buffer gets too large, process as regular chunk
+          buffer += agentBuffer;
+          agentBuffer = '';
+        }
+      }
+    };
+
+    const processChunk = (chunk) => {
+      if (!chunk.trim()) return;
+
+      try {
+        const message = JSON.parse(chunk);
+        if (message.sessionId && !sessionId) {
+          setSessionId(message.sessionId);
+        }
+        if (message.role === 'assistant') {
+          handleAssistantMessage(message.content || '');
+        }
+      } catch (e) {
+        // Handle non-JSON chunks for assistant messages
+        handleAssistantMessage(chunk);
+      }
+    };
+
     try {
       while (true) {
         const { value, done } = await reader.read();
@@ -280,28 +342,7 @@ const Chat = () => {
           } else if (agentBuffer) {
             agentBuffer += char;
             if (char === '}') {
-              try {
-                const message = JSON.parse(agentBuffer);
-                if (message.role === 'agent') {
-                  if (message.sessionId && !sessionId) {
-                    setSessionId(message.sessionId);
-                  }
-                  flushSync(() => {
-                    setMessages((prevMessages) => [...prevMessages, message]);
-                  });
-                  scrollToBottom();
-                } else {
-                  buffer += agentBuffer;
-                }
-                agentBuffer = '';
-              } catch (e) {
-                // If it's not valid JSON yet, keep accumulating
-                if (agentBuffer.length > 1000) {
-                  // Safety check - if buffer gets too large, process as regular chunk
-                  buffer += agentBuffer;
-                  agentBuffer = '';
-                }
-              }
+              processAgentBuffer();
             }
           } else {
             buffer += char;
@@ -311,56 +352,7 @@ const Chat = () => {
         // Process complete chunks for assistant messages
         const chunks = buffer.split(/(?<=\n)/);
         buffer = chunks.pop() || '';
-
-        for (const chunk of chunks) {
-          if (!chunk.trim()) continue;
-
-          try {
-            const message = JSON.parse(chunk);
-
-            if (message.sessionId && !sessionId) {
-              setSessionId(message.sessionId);
-            }
-
-            if (message.role === 'assistant') {
-              setMessages((prevMessages) => {
-                const updatedMessages = [...prevMessages];
-                const content = message.content || '';
-
-                if (isFirstAssistantMessage) {
-                  isFirstAssistantMessage = false;
-                  return [...updatedMessages, { role: 'assistant', content }];
-                }
-
-                const lastMessage = updatedMessages[updatedMessages.length - 1];
-                if (lastMessage && lastMessage.role === 'assistant') {
-                  lastMessage.content += content;
-                }
-                return updatedMessages;
-              });
-              scrollToBottom();
-            }
-          } catch (e) {
-            // Handle non-JSON chunks for assistant messages
-            setMessages((prevMessages) => {
-              const updatedMessages = [...prevMessages];
-              if (isFirstAssistantMessage) {
-                isFirstAssistantMessage = false;
-                return [
-                  ...updatedMessages,
-                  { role: 'assistant', content: chunk },
-                ];
-              }
-
-              const lastMessage = updatedMessages[updatedMessages.length - 1];
-              if (lastMessage && lastMessage.role === 'assistant') {
-                lastMessage.content += chunk;
-              }
-              return updatedMessages;
-            });
-            scrollToBottom();
-          }
-        }
+        chunks.forEach(processChunk);
       }
     } catch (error) {
       console.error('Stream error:', error);

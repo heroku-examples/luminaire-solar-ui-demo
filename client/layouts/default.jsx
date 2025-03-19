@@ -2,9 +2,11 @@ import { Suspense } from 'react';
 import { Header } from '@/components/ui/Header.jsx';
 import { Footer } from '@/components/ui/Footer';
 import { ErrorBoundary } from 'react-error-boundary';
-import BootstrapMessaging from '@/components/ui/Chat/BootstrapMessaging';
+import { getChatbotComponent } from '@/components/ui/Chat/helpers/chatbotSwitch';
 
 export default function Default({ children }) {
+  const ChatbotComponent = getChatbotComponent();
+
   function fallbackRender({ error, resetErrorBoundary }) {
     return (
       <div role="alert">
@@ -30,9 +32,11 @@ export default function Default({ children }) {
         </ErrorBoundary>
       </div>
       <Footer />
-      <div className="fixed bottom-8 right-8 drop-shadow-xl z-50">
-        <BootstrapMessaging />
-      </div>
+      {ChatbotComponent && (
+        <div className="fixed bottom-8 right-8 drop-shadow-xl z-50">
+          <ChatbotComponent />
+        </div>
+      )}
     </Suspense>
   );
 }

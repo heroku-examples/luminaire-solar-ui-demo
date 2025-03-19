@@ -3,17 +3,11 @@ import { useState, useEffect } from 'react';
 import { useRouteContext } from '/:core.jsx';
 import { title } from '@/theme.js';
 
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 
 import TooltipIcon from '../components/icons/TooltipIcon';
+import { EnergyStats } from '@/components/ui/EnergyStats.jsx';
+import { EnergyForecast } from '../components/ui/EnergyForecast';
 
 export function getMeta(ctx) {
   return {
@@ -29,6 +23,14 @@ export default function Dashboard() {
   const handleSetSystem = (value) => {
     setSystem(value);
   };
+
+  useEffect(() => {
+    async function fetchForecast() {
+      if (!system) return;
+      await actions.getForecastBySystem(state, system);
+    }
+    fetchForecast();
+  }, [system]);
 
   // if (!state.user) {
   //   throw new Error('Unauthorized');
@@ -171,7 +173,11 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
+      <EnergyForecast
+        forecast={snapshot.forecast}
+        systemId={system}
+        className="mt-4"
+      />
       <div className="grid grid-flow-row grid-cols-4 gap-x-6 gap-y-3 mt-3">
         <MetricCard
           title="Today's Output"
@@ -212,6 +218,7 @@ export default function Dashboard() {
           activityHistory={snapshot?.system?.activityHistory}
         />
         <SystemComponentsCard components={snapshot?.system?.components} />
+        {/* <EnergyStats metricsSummary={snapshot.metricsSummary} /> */}
       </div>
     </div>
   );
@@ -268,7 +275,6 @@ const MetricCard = ({ title, value, unit, tooltip, inverseProgress }) => {
 };
 
 const WeatherCard = ({ weather, tooltip }) => {
-  console.log('weather: ', weather);
   if (!weather) return <></>;
   return (
     <div className="col-span-1">
@@ -340,9 +346,12 @@ const SystemComponentsCard = ({ components }) => {
           System Components
         </h2>
         <div>
-          {components?.map((c) => {
+          {components?.map((c, idx) => {
             return (
-              <div className="flex items-center gap-2 mt-4">
+              <div
+                className="flex items-center gap-2 mt-4"
+                key={`component-${idx}`}
+              >
                 <div
                   className="h-3 w-3 rounded-full"
                   style={{ backgroundColor: c.active ? '#03B665' : '#D64141' }}

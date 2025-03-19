@@ -201,3 +201,12 @@ export const DEPLOYMENT_CONFIGURATION_CONSTANTS = {
 export const CLIENT_CONSTANTS = {
   TYPING_INDICATOR_DISPLAY_TIMEOUT: 5000,
 };
+
+/**
+ * Chatbot type constants.
+ * @type {Object}
+ */
+export const CHATBOT_TYPES = {
+  HEROKU: 'heroku-ai',
+  SALESFORCE: 'salesforce-ai',
+};

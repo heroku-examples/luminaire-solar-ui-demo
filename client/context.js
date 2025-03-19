@@ -57,6 +57,7 @@ export const actions = {
     state.systems = [];
     state.system = {};
     state.metricsSummary = null;
+    state.forecast = null;
     state.products = [];
     state.product = null;
     state.cart = [];
@@ -172,6 +173,25 @@ export const actions = {
       }
       return newCart;
     }, []);
+  },
+  async getForecastBySystem(state, systemId) {
+    const response = await this.request(state, `/api/forecast/${systemId}`, {
+      headers: { Authorization: `Bearer ${state.authorization}` },
+    });
+    if (response.ok) {
+      state.forecast = await response.json();
+    }
+  },
+  async chatCompletion(state, body) {
+    const response = await this.request(state, '/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${state.authorization}`,
+      },
+      body: JSON.stringify(body),
+    });
+    return response;
   },
   async request(state, path = '/', options = {}) {
     const apiUrl = state.apiUrl;

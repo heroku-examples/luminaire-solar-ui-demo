@@ -40,7 +40,7 @@ export function Header() {
         style={{ padding: 0 }}
       >
         <div
-          className={`pb-1 text-dark-grey font-bold ${pathname === link.link ? 'border-b-2 border-purple-40' : ''}`}
+          className={`text-dark-grey font-bold ${pathname === link.link ? 'border-b-2 border-purple-40' : ''}`}
         >
           {link.label}
         </div>

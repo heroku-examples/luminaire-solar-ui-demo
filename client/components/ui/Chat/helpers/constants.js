@@ -203,10 +203,10 @@ export const CLIENT_CONSTANTS = {
 };
 
 /**
- * Chatbot type constants.
+ * AI type constants.
  * @type {Object}
  */
-export const CHATBOT_TYPES = {
+export const AI_TYPES = {
   HEROKU: 'heroku-ai',
   SALESFORCE: 'salesforce-ai',
 };

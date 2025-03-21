@@ -18,7 +18,12 @@ export function getMeta(ctx) {
 export default function Dashboard() {
   const { snapshot, state, actions } = useRouteContext();
   const [system, setSystem] = useState(null);
+  const [performanceTimeFrame, setPerformanceTimeFrame] = useState('daily');
   const [activityData, setActivityData] = useState(null);
+
+  const handlePerformanceTimeFrameChange = (option) => {
+    setPerformanceTimeFrame(option);
+  };
 
   const handleSetSystem = (value) => {
     setSystem(value);
@@ -35,65 +40,6 @@ export default function Dashboard() {
   // if (!state.user) {
   //   throw new Error('Unauthorized');
   // }
-
-  /**
-   * Fetches all statistics for the root page of the dashboard
-   */
-  const fetchActivity = () => {
-    // mock fetch; TODO real fetch
-    const res = {
-      output: {
-        today: {
-          value: 1200,
-          unit: 'kWh',
-        },
-      },
-      usage: {
-        today: {
-          value: 95,
-          unit: '%',
-        },
-      },
-      batteryStorage: {
-        value: 48,
-        unit: '%',
-      },
-      weather: {
-        value: 89,
-        unit: 'F',
-        description: 'Clear Skies',
-      },
-      activityHistory: {
-        data: [
-          {
-            name: 'Sept',
-            uv: 2780,
-            pv: 3908,
-            amt: 2000,
-          },
-          {
-            name: 'Oct',
-            uv: 1890,
-            pv: 4800,
-            amt: 2181,
-          },
-          {
-            name: 'Nov',
-            uv: 2390,
-            pv: 3800,
-            amt: 2500,
-          },
-          {
-            name: 'Dec',
-            uv: 3490,
-            pv: 4300,
-            amt: 2100,
-          },
-        ],
-      },
-    };
-    return res;
-  };
 
   // Get systems by user
   useEffect(() => {
@@ -123,6 +69,7 @@ export default function Dashboard() {
         system,
         new Date().toISOString().split('T')[0]
       );
+      setPerformanceTimeFrame('daily');
     }
     fetchMetrics();
   }, [system]);
@@ -173,53 +120,46 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-      <EnergyForecast
-        forecast={snapshot.forecast}
-        systemId={system}
-        className="mt-4"
-      />
-      <div className="grid grid-flow-row grid-cols-4 gap-x-6 gap-y-3 mt-3">
-        <MetricCard
-          title="Today's Output"
-          value={snapshot?.metricsSummary?.daily[0]?.total_energy_produced}
-          unit={'kWh'}
-          tooltip="Total output of your system."
-        />
-        <MetricCard
-          title="Today's Usage"
-          value={
-            snapshot.metricsSummary
-              ? Math.min(
-                  (
-                    (snapshot?.metricsSummary?.daily[0]?.total_energy_consumed /
-                      snapshot?.metricsSummary?.daily[0]
-                        ?.total_energy_produced) *
-                    100
-                  ).toFixed(2),
-                  100
-                )
-              : null
-          }
-          unit={'%'}
-          tooltip="Total usage of your system."
-          inverseProgress={true}
-        />
-        <MetricCard
-          title="Battery Storage"
-          value={snapshot?.system?.battery_storage}
-          unit={'%'}
-          tooltip="Percentage of total capacity."
-        />
-        <WeatherCard
-          weather={snapshot?.system?.weather}
-          tooltip="Based on your general location."
-        />
-        <ActivityHistoryCard
-          activityHistory={snapshot?.system?.activityHistory}
-        />
-        <SystemComponentsCard components={snapshot?.system?.components} />
-        {/* <EnergyStats metricsSummary={snapshot.metricsSummary} /> */}
-      </div>
+      {system && (
+        <>
+          <h2 className="text-dark-grey font-bold text-md mt-8">
+            7 Day Performance Forecast
+          </h2>
+          <EnergyForecast
+            forecast={snapshot.forecast}
+            systemId={system}
+            className="mt-4"
+          />
+          <h2 className="text-dark-grey text-md font-bold mt-8">
+            Current System Information
+          </h2>
+          <div className="grid grid-flow-row grid-cols-4 gap-x-6 gap-y-3 mt-3">
+            <LargeMetricsCard
+              title={'Performance'}
+              metrics={snapshot?.metricsSummary}
+              timeFrame={performanceTimeFrame}
+              handleTimeFrameChange={handlePerformanceTimeFrameChange}
+            />
+            <MetricCard
+              title="Battery Storage"
+              value={snapshot?.system?.battery_storage}
+              unit={'%'}
+              tooltip="Percentage of total capacity."
+            />
+            <ActivityHistoryCard
+              activityHistory={snapshot?.system?.activityHistory}
+            />
+            <SystemComponentsCard
+              components={snapshot?.system?.components}
+              tooltip="List of installed components"
+            />
+            <WeatherCard
+              weather={snapshot?.system?.weather}
+              tooltip="Based on your general location."
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -274,17 +214,103 @@ const MetricCard = ({ title, value, unit, tooltip, inverseProgress }) => {
   );
 };
 
+const LargeMetricsCard = ({
+  title,
+  metrics,
+  timeFrame,
+  handleTimeFrameChange,
+  selectOptions,
+}) => {
+  //default if no options provided
+  const defaultOptions = [
+    { value: 'daily', label: 'Today' },
+    { value: 'weekly', label: 'Last 7 Days' },
+    { value: 'monthly', label: 'Last 30 Days' },
+  ];
+
+  const effectiveOptions = selectOptions || defaultOptions;
+
+  if (!metrics) return <></>;
+  return (
+    <div className="col-span-3">
+      <div className="w-full h-full p-6 flex gap-3 justify-between bg-white border-solid border-2 border-gray-200 rounded-xl shadow-md">
+        <div className="flex flex-col justify-start gap-5 relative">
+          <p className="font-bold text-dark-grey text-h5">{title}</p>
+          <select
+            value={timeFrame}
+            onChange={(e) => handleTimeFrameChange(e.target.value)}
+            className="rounded-md border border-light-grey p-1 appearance-none"
+          >
+            {effectiveOptions.map((option, idx) => (
+              <option className="" key={`option-${idx}`} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <div className="absolute top-12 right-1">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="black"
+              viewBox="0 0 24 24"
+              strokeWidth="1.2"
+              stroke="black"
+              className="h-5 w-5 absolute top-0 right-0 translate-y-1/4 text-slate-700 pointer-events-none"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"
+              />
+            </svg>
+          </div>
+        </div>
+        <div className="w-[205px] flex flex-col justify-start gap-5">
+          <p className="text-dark-grey">Total Energy Output</p>
+          <p className="text-3xl font-semibold whitespace-nowrap">
+            {metrics?.[timeFrame]?.total_energy_produced.toLocaleString(
+              'en-US'
+            )}{' '}
+            kWh
+          </p>
+        </div>
+        <div className="w-[205px] flex flex-col justify-start gap-5">
+          <p className="text-dark-grey">Total Energy Usage</p>
+          <p className="text-3xl font-semibold whitespace-nowrap">
+            {metrics?.[timeFrame]?.total_energy_consumed.toLocaleString(
+              'en-US'
+            )}{' '}
+            kWh
+          </p>
+        </div>
+        <div className="w-[205px] flex flex-col justify-start gap-5">
+          <p className="text-dark-grey">Total Energy Savings</p>
+          <p className="text-3xl font-semibold whitespace-nowrap">
+            {(
+              metrics?.[timeFrame]?.total_energy_produced -
+              metrics?.[timeFrame]?.total_energy_consumed
+            ).toLocaleString('en-US', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}{' '}
+            kWh
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const WeatherCard = ({ weather, tooltip }) => {
   if (!weather) return <></>;
   return (
     <div className="col-span-1">
-      <div className="w-full h-full p-6 bg-white border-solid border-2 border-gray-200 rounded-xl shadow-md">
+      <div className="w-full h-[156px] p-6 bg-white border-solid border-2 border-gray-200 rounded-xl shadow-md">
         <div className="flex justify-between">
           <h2 className="text-lg font-semibold">Local Weather</h2>
           <TooltipComponent>{tooltip}</TooltipComponent>
         </div>
         <p className="text-4xl mt-4 font-semibold">
-          {weather.temperature} &deg;F
+          {weather.temperature}&deg; <span className="text-dark-grey">F</span>
         </p>
         <p className="text-sm mt-2 capitalize">{weather.description}</p>
       </div>
@@ -337,14 +363,17 @@ const ActivityHistoryCard = ({ activityHistory }) => {
   );
 };
 
-const SystemComponentsCard = ({ components }) => {
+const SystemComponentsCard = ({ components, tooltip }) => {
   if (!components) return <></>;
   return (
     <div className="col-span-1">
       <div className="w-full h-full p-6 bg-white border-solid border-2 border-gray-200 rounded-xl shadow-md">
-        <h2 className="text-h5 font-semibold text-dark-grey">
-          System Components
-        </h2>
+        <div className="flex justify-between items-center">
+          <h2 className="text-h5 font-semibold text-dark-grey">
+            System Components
+          </h2>
+          <TooltipComponent>{tooltip}</TooltipComponent>
+        </div>
         <div>
           {components?.map((c, idx) => {
             return (

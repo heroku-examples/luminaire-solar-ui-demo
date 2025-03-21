@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import FullLogo from '../icons/Logo';
+import { HerokuIcon } from '../icons/HerokuIcon';
 
 export function Footer() {
   const customerServiceLinks = [
@@ -21,45 +22,15 @@ export function Footer() {
   ];
   return (
     <footer>
-      <div className="p-12 pb-36 bg-light-grey flex justify-between">
-        <div>
+      <div className="p-12 bg-light-grey flex justify-end">
+        {/* <div>
           <Link to="/" className="nav-link" style={{ padding: 0 }}>
             <FullLogo />
           </Link>
-        </div>
-        <div className="flex flex-row gap-12">
-          <div className="flex flex-col gap-y-2">
-            <p className="min-w-48 text-sm">Customer Service</p>
-            {customerServiceLinks.map((link) => {
-              return (
-                <div key={`footer${link.link}`}>
-                  <Link
-                    to={link.link}
-                    className={`text-dark-grey font-medium text-sm`}
-                    style={{ padding: 0 }}
-                  >
-                    {link.label}
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
-          <div className="flex flex-col gap-y-2">
-            <p className="min-w-48 text-sm">About Us</p>
-            {aboutUsLinks.map((link) => {
-              return (
-                <div key={`footer${link.link}`}>
-                  <Link
-                    to={link.link}
-                    className={`text-dark-grey font-medium text-sm`}
-                    style={{ padding: 0 }}
-                  >
-                    {link.label}
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
+        </div> */}
+        <div className="flex flex-row items-center">
+          <p className="text-darkest-grey italic mr-4">Powered by</p>
+          <HerokuIcon />
         </div>
       </div>
       {/* <Container mt="lg">

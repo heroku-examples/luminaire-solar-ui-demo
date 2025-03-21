@@ -38,6 +38,7 @@
 
 .linkItem {
   display: flex;
+  align-items: center;
   flex-direction: row;
-  gap: rem(2px);
+  gap: rem(4px);
 }

@@ -40,7 +40,7 @@ export function Header() {
         style={{ padding: 0 }}
       >
         <div
-          className={`pb-1 ${pathname === link.link ? 'border-b-2 border-purple-40' : ''}`}
+          className={`pb-1 text-dark-grey font-bold ${pathname === link.link ? 'border-b-2 border-purple-40' : ''}`}
         >
           {link.label}
         </div>
@@ -50,7 +50,7 @@ export function Header() {
 
   return (
     <header className="z-20 w-full h-16 bg-white fixed top-0 border-b-[1px] border-light-grey">
-      <div className="px-12 py-4 flex justify-between">
+      <div className="px-12 py-4 flex justify-between items-center">
         <div className="flex flex-row">
           <Link to="/" className="nav-link" style={{ padding: 0 }}>
             <FullLogo />

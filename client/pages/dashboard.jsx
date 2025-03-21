@@ -236,25 +236,25 @@ const LargeMetricsCard = ({
       <div className="w-full h-full p-6 flex gap-3 justify-between bg-white border-solid border-2 border-gray-200 rounded-xl shadow-md">
         <div className="flex flex-col justify-start gap-5 relative">
           <p className="font-bold text-dark-grey text-h5">{title}</p>
-          <select
-            value={timeFrame}
-            onChange={(e) => handleTimeFrameChange(e.target.value)}
-            className="rounded-md border border-light-grey p-1 appearance-none"
-          >
-            {effectiveOptions.map((option, idx) => (
-              <option className="" key={`option-${idx}`} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <div className="absolute top-12 right-1">
+          <div className="flex items-center rounded-md border border-light-grey cursor-pointer">
+            <select
+              value={timeFrame}
+              onChange={(e) => handleTimeFrameChange(e.target.value)}
+              className="bg-transparent p-1 appearance-none focus:outline-none"
+            >
+              {effectiveOptions.map((option, idx) => (
+                <option className="" key={`option-${idx}`} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="black"
               viewBox="0 0 24 24"
               strokeWidth="1.2"
               stroke="black"
-              className="h-5 w-5 absolute top-0 right-0 translate-y-1/4 text-slate-700 pointer-events-none"
+              className="h-5 w-5 text-slate-700 pointer-events-none"
             >
               <path
                 strokeLinecap="round"

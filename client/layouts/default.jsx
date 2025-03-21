@@ -18,25 +18,27 @@ export default function Default({ children }) {
   }
 
   return (
-    <Suspense>
-      <Header />
-      <div className="px-12 bg-lightest-grey">
-        <ErrorBoundary
-          fallbackRender={fallbackRender}
-          onReset={(details) => {
-            // log the error to the server
-            console.log(details);
-          }}
-        >
-          <div className="mt-16">{children}</div>
-        </ErrorBoundary>
-      </div>
-      <Footer />
-      {ChatbotComponent && (
-        <div className="fixed bottom-8 right-8 drop-shadow-xl z-50">
-          <ChatbotComponent />
+    <div className="h-full flex flex-col">
+      <Suspense>
+        <Header />
+        <div className="px-12 bg-lightest-grey flex-1">
+          <ErrorBoundary
+            fallbackRender={fallbackRender}
+            onReset={(details) => {
+              // log the error to the server
+              console.log(details);
+            }}
+          >
+            <div className="mt-16">{children}</div>
+          </ErrorBoundary>
         </div>
-      )}
-    </Suspense>
+        <Footer />
+        {ChatbotComponent && (
+          <div className="fixed bottom-8 right-8 drop-shadow-xl z-50">
+            <ChatbotComponent />
+          </div>
+        )}
+      </Suspense>
+    </div>
   );
 }

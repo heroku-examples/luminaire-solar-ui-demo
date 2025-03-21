@@ -27,7 +27,9 @@ export function EnergyForecast({ systemId, forecast, className }) {
   return (
     <div className={className}>
       <div className="grid grid-flow-col grid-cols-2 gap-4">
-        <AnalysisComponent forecast={forecast} systemId={systemId} />
+        {AnalysisComponent && (
+          <AnalysisComponent forecast={forecast} systemId={systemId} />
+        )}
         <EfficiencyForecast forecast={forecast} />
       </div>
     </div>
@@ -328,7 +330,7 @@ function AnalysisDisplay({ analysis }) {
   }
 
   return (
-    <div className="col-span-1 border rounded-lg border-[#e5e7eb] p-4">
+    <div className="col-span-1 border rounded-lg border-[#e5e7eb] bg-white p-4">
       <div className="w-full flex justify-between">
         <p className="uppercase text-xs text-[#596981] font-bold">
           7 day predicted energy savings
@@ -352,7 +354,9 @@ function AnalysisDisplay({ analysis }) {
           <AgentforceAvatar
             color={generateAnalysisColor(agentAnalysis.efficiency, 1)}
           />
-          <p className="text-2xl font-bold pl-2">{agentAnalysis.efficiency}</p>
+          <p className="flex-shrink-0 text-2xl font-bold pl-2">
+            {agentAnalysis.efficiency}
+          </p>
           <p className="pl-8 text-sm text-[#4F5359]">
             {agentAnalysis.analysis}
           </p>
@@ -366,7 +370,7 @@ function EfficiencyForecast({ forecast }) {
   if (!forecast) return;
   const dayOfWeek = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
   return (
-    <div className="col-span-1 border rounded-lg border-[#e5e7eb] p-4">
+    <div className="col-span-1 border rounded-lg bg-white border-[#e5e7eb] p-4">
       <p className="uppercase text-xs text-[#596981] font-bold">
         7 day solar production forecast
       </p>

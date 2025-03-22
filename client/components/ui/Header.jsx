@@ -18,19 +18,14 @@ export function Header() {
   const links = [
     {
       link: '/products',
-      label: (
-        <div className={classes.linkItem}>
-          <p>Products</p>
-          <ChevronArrow />
-        </div>
-      ),
+      label: 'Products',
     },
     { link: '/about', label: 'About' },
     { link: '/dashboard', label: 'My Dashboard' },
   ];
 
   const items = links.map((link) => {
-    if (link.label === 'Dashboard' && !loggedIn) return null;
+    if (link.label === 'My Dashboard' && !loggedIn) return null;
     const className = classes.link + ' nav-link';
     return (
       <Link

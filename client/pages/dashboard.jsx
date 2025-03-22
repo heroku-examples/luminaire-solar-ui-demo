@@ -3,7 +3,14 @@ import { useState, useEffect } from 'react';
 import { useRouteContext } from '/:core.jsx';
 import { title } from '@/theme.js';
 
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  CartesianGrid,
+} from 'recharts';
 
 import TooltipIcon from '../components/icons/TooltipIcon';
 import { EnergyStats } from '@/components/ui/EnergyStats.jsx';
@@ -240,7 +247,7 @@ const LargeMetricsCard = ({
             <select
               value={timeFrame}
               onChange={(e) => handleTimeFrameChange(e.target.value)}
-              className="bg-transparent p-1 appearance-none focus:outline-none"
+              className="h-9 bg-transparent p-1 appearance-none focus:outline-none"
             >
               {effectiveOptions.map((option, idx) => (
                 <option className="" key={`option-${idx}`} value={option.value}>
@@ -264,7 +271,7 @@ const LargeMetricsCard = ({
             </svg>
           </div>
         </div>
-        <div className="w-[205px] flex flex-col justify-start gap-5">
+        <div className="w-52 flex flex-col justify-start gap-5">
           <p className="text-dark-grey">Total Energy Output</p>
           <p className="text-3xl font-semibold whitespace-nowrap">
             {metrics?.[timeFrame]?.total_energy_produced.toLocaleString(
@@ -273,7 +280,7 @@ const LargeMetricsCard = ({
             kWh
           </p>
         </div>
-        <div className="w-[205px] flex flex-col justify-start gap-5">
+        <div className="w-52 flex flex-col justify-start gap-5">
           <p className="text-dark-grey">Total Energy Usage</p>
           <p className="text-3xl font-semibold whitespace-nowrap">
             {metrics?.[timeFrame]?.total_energy_consumed.toLocaleString(
@@ -282,7 +289,7 @@ const LargeMetricsCard = ({
             kWh
           </p>
         </div>
-        <div className="w-[205px] flex flex-col justify-start gap-5">
+        <div className="w-52 flex flex-col justify-start gap-5">
           <p className="text-dark-grey">Total Energy Savings</p>
           <p className="text-3xl font-semibold whitespace-nowrap">
             {(
@@ -304,7 +311,7 @@ const WeatherCard = ({ weather, tooltip }) => {
   if (!weather) return <></>;
   return (
     <div className="col-span-1">
-      <div className="w-full h-[156px] p-6 bg-white border-solid border-2 border-gray-200 rounded-xl shadow-md">
+      <div className="w-full h-40 p-6 bg-white border-solid border-2 border-gray-200 rounded-xl shadow-md">
         <div className="flex justify-between">
           <h2 className="text-lg font-semibold">Local Weather</h2>
           <TooltipComponent>{tooltip}</TooltipComponent>
@@ -323,9 +330,21 @@ const ActivityHistoryCard = ({ activityHistory }) => {
   return (
     <div className="col-span-2">
       <div className="w-full min-h-[400px] px-6 pt-6 bg-white border-solid border-2 border-gray-200 rounded-xl shadow-md">
-        <h2 className="text-h5 font-semibold capitalize text-dark-grey">
-          30 Day Performance History
-        </h2>
+        <div className="flex justify-between">
+          <h2 className="text-h5 font-semibold capitalize text-dark-grey">
+            30 Day Performance History
+          </h2>
+          <div className="flex gap-3 items-center">
+            <div className="flex gap-1 items-center">
+              <span className="text-[#82ca9d] text-lg font-bold mb-1">o</span>
+              <p>Output</p>
+            </div>
+            <div className="flex gap-1 items-center">
+              <span className="text-[#8884d8] text-lg font-bold mb-1">o</span>
+              <p>Usage</p>
+            </div>
+          </div>
+        </div>
         <div className="-mx-6">
           {activityHistory && (
             <ResponsiveContainer width="100%" height={400} className="mt-6">
@@ -340,18 +359,19 @@ const ActivityHistoryCard = ({ activityHistory }) => {
                   bottom: 5,
                 }}
               >
+                <CartesianGrid vertical={false} />
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Line
                   type="linear"
                   dataKey="total_energy_produced"
-                  stroke="#8884d8"
+                  stroke="#82ca9d"
                   strokeWidth={4}
                 />
                 <Line
                   type="linear"
                   dataKey="total_energy_consumed"
-                  stroke="#82ca9d"
+                  stroke="#8884d8"
                   strokeWidth={4}
                 />
               </LineChart>

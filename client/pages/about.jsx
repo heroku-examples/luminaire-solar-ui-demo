@@ -1,19 +1,18 @@
 import { title } from '@/theme.js';
 import { Container, Text, Title, Grid, Image, Group } from '@mantine/core';
-import { IconSun } from '@tabler/icons-react';
 import residential from '@/assets/img/residential.jpg';
+import Logo from '../components/icons/Logo';
 
 function AboutPage() {
   return (
     <Container>
       <Grid>
         <Grid.Col span={12}>
-          <Title order={1} align="center">
+          <h1 className="p-2 pt-6">
             <Group justify="center">
-              <IconSun color="orange" size={34} />
-              {title}
+              <Logo size={{ width: '350', height: '70' }} />
             </Group>
-          </Title>
+          </h1>
         </Grid.Col>
 
         <Grid.Col span={12} md={6}>

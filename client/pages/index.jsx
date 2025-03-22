@@ -62,9 +62,6 @@ const CardSection = () => {
         <div className="flex flex-col gap-y-6">
           <p className="text-center text-h4 font-semibold">{data.title}</p>
           <p className="text-center text-lg">{data.body}</p>
-          <button className="rounded-full border-2 border-purple-40 py-1.5 px-6 mx-auto text-xs font-semibold text-purple-40">
-            Learn More
-          </button>
         </div>
       </div>
     );

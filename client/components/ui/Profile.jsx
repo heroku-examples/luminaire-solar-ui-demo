@@ -24,7 +24,7 @@ function ProfileModal({ setOpen }) {
         className="absolute top-0 left-0 w-[100vw] h-[100vh] bg-transparent"
         onClick={() => setOpen((prev) => !prev)}
       />
-      <div className="absolute -translate-x-1/2 flex flex-col bg-lightest-grey rounded-md p-8 gap-4">
+      <div className="absolute -translate-x-1/2 flex flex-col bg-lightest-grey drop-shadow-md rounded-md p-8 gap-4">
         <p className="text-nowrap">
           {state.user.name} {state.user.last_name}
         </p>

@@ -6,7 +6,7 @@ import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import { useRouteContext } from '/:core.jsx';
 import { Box, Text, Stack, Loader, useMantineTheme } from '@mantine/core';
-import SendIcon from './icons/SecondIcon.jsx';
+import SendIcon from './icons/SendIcon.jsx';
 import CloseIcon from './icons/CloseIcon.jsx';
 import { flushSync } from 'react-dom';
 

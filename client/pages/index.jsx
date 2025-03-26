@@ -88,8 +88,8 @@ const CardSection = () => {
   ];
   return (
     <div className="w-full grid grid-flow-col p-16">
-      {cardsData.map((data) => {
-        return <Card data={data} />;
+      {cardsData.map((data, idx) => {
+        return <Card data={data} key={`card-${idx}`} />;
       })}
     </div>
   );

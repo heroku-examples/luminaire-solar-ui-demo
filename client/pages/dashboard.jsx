@@ -26,7 +26,6 @@ export default function Dashboard() {
   const { snapshot, state, actions } = useRouteContext();
   const [system, setSystem] = useState(null);
   const [performanceTimeFrame, setPerformanceTimeFrame] = useState('daily');
-  const [activityData, setActivityData] = useState(null);
 
   const handlePerformanceTimeFrameChange = (option) => {
     setPerformanceTimeFrame(option);
@@ -76,7 +75,6 @@ export default function Dashboard() {
         system,
         new Date().toISOString().split('T')[0]
       );
-      setPerformanceTimeFrame('daily');
     }
     fetchMetrics();
   }, [system]);

@@ -47,7 +47,7 @@ export function Header() {
     <header className="z-20 w-full h-16 bg-white fixed top-0 border-b-[1px] border-light-grey">
       <div className="px-12 py-4 flex justify-between items-center">
         <div className="flex flex-row">
-          <Link to="/" className="nav-link" style={{ padding: 0 }}>
+          <Link to="/demo" className="nav-link" style={{ padding: 0 }}>
             <FullLogo />
           </Link>
           <div className="flex flex-row items-center ml-10 gap-8">{items}</div>

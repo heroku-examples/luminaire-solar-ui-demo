@@ -1,9 +1,7 @@
 import { useEffect } from 'react';
-import { SimpleGrid } from '@mantine/core';
 import { useRouteContext } from '/:core.jsx';
 import { title } from '@/theme.js';
 import { Product } from '@/components/ui/Product.jsx';
-import { Cart } from '@/components/ui/Cart.jsx';
 
 export function getMeta() {
   return {
@@ -30,10 +28,13 @@ export default function Products() {
   }
 
   return (
-    <SimpleGrid cols={4}>
-      {snapshot.products.map((product) => (
-        <Product key={product.id} product={product} />
-      ))}
-    </SimpleGrid>
+    <div className="pb-12">
+      <h1 className="text-h3 font-semibold py-7">Residential Products</h1>
+      <div className="flex flex-row gap-x-5 gap-y-12 flex-wrap ">
+        {snapshot.products.map((product) => (
+          <Product key={product.id} product={product} />
+        ))}
+      </div>
+    </div>
   );
 }

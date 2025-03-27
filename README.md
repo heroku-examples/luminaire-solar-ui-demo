@@ -26,6 +26,9 @@ Install dependencies by running:
 
 Install dependencies by running:
 
+> ![NOTE]
+> If you don't have `pnpm` install it by running `corepack install -g pnpm`
+
 ```sh
 pnpm install
 ```
@@ -41,6 +44,13 @@ Run the project locally with:
 ```sh
 pnpm run dev
 ```
+
+## Environment Variables
+
+Before running the project, you need to set up the environment variables.
+
+> [!NOTE]
+> For a complete list of required environment variables, please refer to the [sample .env file](.env.sample) included in the repository.
 
 ## Manual Deployment
 

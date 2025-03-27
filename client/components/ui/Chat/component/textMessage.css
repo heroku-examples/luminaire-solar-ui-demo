@@ -1,0 +1,98 @@
+.textMessageContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: rem(6px);
+  margin-top: rem(10px);
+  margin-bottom: rem(10px);
+}
+
+.textMessageSenderContent {
+  color: rgb(153, 153, 153);
+  margin: 0px;
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.textMessageSenderContent[class~='incoming'] {
+  text-align: left;
+}
+
+.textMessageSenderContent[class~='outgoing'] {
+  text-align: right;
+}
+
+.textMessageBubbleContainer {
+  overflow: auto;
+}
+
+.textMessageBubble {
+  min-width: 50px;
+  max-width: 350px;
+  margin: 1px auto;
+  padding: 8px 14px;
+}
+
+.textMessageBubble[class~='incoming'] {
+  float: left;
+  border-radius: 20px 20px 20px 0px;
+  background: rgba(77, 37, 126, 0.09);
+}
+
+.textMessageBubble[class~='outgoing'] {
+  float: right;
+  border-radius: 20px 20px 0px 20px;
+  background-color: rgba(90, 27, 169);
+}
+
+.textMessageContent {
+  margin: 0px;
+  font-size: 16px;
+  font-weight: 300;
+}
+
+.textMessageContent[class~='incoming'] {
+  color: rgb(32, 27, 40);
+}
+
+.textMessageContent[class~='outgoing'] {
+  color: rgb(255, 255, 255);
+}
+
+.textMessageAgentName {
+  padding-left: rem(54px);
+  font-size: rem(13px);
+  color: rgba(32, 20, 46, 0.62);
+}
+
+.textMessageRow {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  gap: rem(16px);
+}
+
+.textMessageRow[class~='incoming'] {
+  flex-direction: row;
+}
+
+.textMessageRow[class~='outgoing'] {
+  flex-direction: row-reverse;
+}
+
+.textMessageAvatar {
+  height: rem(32px);
+  width: rem(32px);
+  border-radius: 9999px;
+  background: rgb(32, 27, 40);
+}
+
+.textMessageVotingContainer {
+  display: flex;
+  padding-left: rem(48px);
+  gap: rem(16px);
+}
+
+.textMessageVotingIcon {
+  cursor: pointer;
+}

@@ -1,8 +1,8 @@
-export default function FullLogo() {
+export default function FullLogo({ size }) {
   return (
     <svg
-      width="210"
-      height="32"
+      width={size?.width ?? '210'}
+      height={size?.height ?? '32'}
       viewBox="0 0 210 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

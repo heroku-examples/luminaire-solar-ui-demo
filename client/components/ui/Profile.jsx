@@ -1,37 +1,44 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Popover, Text, Stack } from '@mantine/core';
 import { useRouteContext } from '/:core.jsx';
+import profile from '@/assets/img/profile.png';
 
 export function Profile() {
-  const { state, actions } = useRouteContext();
-  const [opened, setOpened] = useState(false);
-  const navigate = useNavigate();
-
+  const [open, setOpen] = useState(false);
   return (
-    <Popover opened={opened} onChange={setOpened}>
-      <Popover.Target>
-        <Button onClick={() => setOpened((o) => !o)}>
-          {state.user.username}
-        </Button>
-      </Popover.Target>
-      <Popover.Dropdown>
-        <Stack>
-          <Text>
-            {state.user.name} {state.user.last_name}
-          </Text>
-          <Text>{state.user.email}</Text>
-          <Button
-            onClick={async () => {
-              navigate('/');
-              await new Promise((resolve) => setTimeout(resolve, 1000));
-              actions.logout(state);
-            }}
-          >
-            Logout
-          </Button>
-        </Stack>
-      </Popover.Dropdown>
-    </Popover>
+    <div>
+      <div className="cursor-pointer " onClick={() => setOpen((prev) => !prev)}>
+        <img src={profile} className="w-8 h-8" />
+      </div>
+      {open && <ProfileModal setOpen={setOpen} />}
+    </div>
+  );
+}
+
+function ProfileModal({ setOpen }) {
+  const { state, actions } = useRouteContext();
+  const navigate = useNavigate();
+  return (
+    <div>
+      <div
+        className="absolute top-0 left-0 w-[100vw] h-[100vh] bg-transparent"
+        onClick={() => setOpen((prev) => !prev)}
+      />
+      <div className="absolute -translate-x-1/2 flex flex-col bg-lightest-grey drop-shadow-md rounded-md p-8 gap-4">
+        <p className="text-nowrap">
+          {state.user.name} {state.user.last_name}
+        </p>
+        <button
+          className="text-white bg-purple-40 px-6 py-1.5 rounded-full cursor-pointer"
+          onClick={async () => {
+            navigate('/');
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            actions.logout(state);
+          }}
+        >
+          Logout
+        </button>
+      </div>
+    </div>
   );
 }

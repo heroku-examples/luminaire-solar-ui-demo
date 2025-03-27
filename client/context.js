@@ -55,7 +55,9 @@ export const actions = {
     state.user = null;
     state.authorization = null;
     state.systems = [];
+    state.system = {};
     state.metricsSummary = null;
+    state.forecast = null;
     state.products = [];
     state.product = null;
     state.cart = [];
@@ -77,8 +79,40 @@ export const actions = {
       state.systems = await response.json();
     }
   },
+  async getSystemDetailsBySystem(state, systemId) {
+    const response = await this.request(state, `/api/system/${systemId}`, {
+      headers: { Authorization: `Bearer ${state.authorization}` },
+    });
+    if (response.ok) {
+      state.system = await response.json();
+    }
+  },
+  async getSystemWeatherBySystem(state, systemId) {
+    const response = await this.request(
+      state,
+      `/api/system/${systemId}/weather`,
+      {
+        headers: { Authorization: `Bearer ${state.authorization}` },
+      }
+    );
+    if (response.ok) {
+      state.system.weather = await response.json();
+    }
+  },
+  async getActivityHistoryBySystem(state, systemId) {
+    const response = await this.request(
+      state,
+      `/api/system/${systemId}/activityHistory`,
+      {
+        headers: { Authorization: `Bearer ${state.authorization}` },
+      }
+    );
+    if (response.ok) {
+      state.system.activityHistory = await response.json();
+    }
+  },
   async getMetricsBySystem(state, systemId, date) {
-    const response = await this.reques(
+    const response = await this.request(
       state,
       `/api/metrics/${systemId}?date=${date}`,
       {
@@ -139,6 +173,25 @@ export const actions = {
       }
       return newCart;
     }, []);
+  },
+  async getForecastBySystem(state, systemId) {
+    const response = await this.request(state, `/api/forecast/${systemId}`, {
+      headers: { Authorization: `Bearer ${state.authorization}` },
+    });
+    if (response.ok) {
+      state.forecast = await response.json();
+    }
+  },
+  async chatCompletion(state, body) {
+    const response = await this.request(state, '/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${state.authorization}`,
+      },
+      body: JSON.stringify(body),
+    });
+    return response;
   },
   async request(state, path = '/', options = {}) {
     const apiUrl = state.apiUrl;

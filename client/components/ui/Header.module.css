@@ -1,6 +1,5 @@
 .header {
-  height: rem(56px);
-  margin-bottom: rem(20px);
+  margin-bottom: rem(32px);
   background-color: var(--mantine-color-body);
   border-bottom: rem(1px) solid
     light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
@@ -9,8 +8,12 @@
 }
 
 .inner {
-  height: rem(56px);
+  padding-left: rem(48px);
+  padding-right: rem(48px);
+  padding-top: rem(16px);
+  padding-bottom: rem(16px);
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
 }
@@ -31,4 +34,11 @@
       var(--mantine-color-dark-6)
     );
   }
+}
+
+.linkItem {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  gap: rem(4px);
 }

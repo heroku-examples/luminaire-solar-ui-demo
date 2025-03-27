@@ -45,6 +45,13 @@ Run the project locally with:
 pnpm run dev
 ```
 
+## Environment Variables
+
+Before running the project, you need to set up the environment variables.
+
+> [!NOTE]
+> For a complete list of required environment variables, please refer to the [sample .env file](.env.sample) included in the repository.
+
 ## Manual Deployment
 
 To manually deploy to Heroku you can run:

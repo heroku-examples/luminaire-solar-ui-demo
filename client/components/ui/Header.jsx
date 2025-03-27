@@ -17,6 +17,10 @@ export function Header() {
 
   const links = [
     {
+      link: '/',
+      label: 'Home',
+    },
+    {
       link: '/products',
       label: 'Products',
     },

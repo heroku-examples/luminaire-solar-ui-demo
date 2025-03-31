@@ -26,7 +26,7 @@ Install dependencies by running:
 
 Install dependencies by running:
 
-> ![NOTE]
+> [!NOTE]
 > If you don't have `pnpm` install it by running `corepack install -g pnpm`
 
 ```sh

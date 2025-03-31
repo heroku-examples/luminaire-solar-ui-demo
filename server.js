@@ -7,4 +7,4 @@ const server = await build({
   logger: getLogger(),
 });
 
-await server.listen({ port, host: '::1' });
+await server.listen({ port, host: '::' });

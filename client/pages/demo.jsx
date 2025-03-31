@@ -1,5 +1,5 @@
 import { Image } from '@mantine/core';
-import architecture from '@/assets/img/kubecon-architecture.png';
+import architecture from '@/assets/img/kubecon-architecture.gif';
 
 export default function Demo() {
   return (

@@ -20,7 +20,7 @@ const useChatStream = ({ onError } = {}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState(null);
 
-  const sendMessage = async (message, actions, state) => {
+  const sendMessage = async (message, actions, state, systemId) => {
     if (!message.trim()) return;
 
     const userMessage = { role: 'user', content: message };
@@ -35,6 +35,7 @@ const useChatStream = ({ onError } = {}) => {
       const requestBody = {
         question: message,
         ...(sessionId && { sessionId }),
+        ...(systemId && { systemId }),
       };
 
       const response = await actions.chatCompletion(state, requestBody);
@@ -331,7 +332,7 @@ const Message = ({ role, content, isLast }) => {
   );
 };
 
-const Chat = () => {
+const Chat = ({ systemId }) => {
   const { state, actions } = useRouteContext();
   const [currentMessage, setCurrentMessage] = useState('');
   const viewportRef = useRef(null);
@@ -365,7 +366,7 @@ const Chat = () => {
   }, []);
 
   const handleSend = async () => {
-    await sendMessage(currentMessage, actions, state);
+    await sendMessage(currentMessage, actions, state, systemId);
     setCurrentMessage('');
     focus();
   };
@@ -409,7 +410,7 @@ const Chat = () => {
   );
 };
 
-export function Assistant() {
+export function Assistant({ systemId }) {
   const [open, setOpen] = useState(false);
 
   const handleChatToggle = () => {
@@ -427,7 +428,7 @@ export function Assistant() {
             <CloseIcon />
           </div>
         </div>
-        <Chat />
+        <Chat systemId={systemId} />
       </div>
       <div
         className="w-fit ml-auto mt-8 cursor-pointer hover:opacity-95"

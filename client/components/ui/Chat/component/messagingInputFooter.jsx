@@ -8,7 +8,6 @@ import { getConversationId } from '../services/dataProvider';
 
 import PaperclipIcon from '../icons/PaperclipIcon';
 import SendIcon from '../icons/SecondIcon';
-import { P } from 'pino';
 
 export default function MessagingInputFooter(props) {
   // Initialize the Textarea value to empty.

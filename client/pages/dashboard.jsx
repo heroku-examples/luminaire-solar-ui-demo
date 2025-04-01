@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getChatbotComponent } from '@/components/ui/Chat/helpers/chatbotSwitch';
 
 import { useRouteContext } from '/:core.jsx';
 import { title } from '@/theme.js';
@@ -13,7 +14,6 @@ import {
 } from 'recharts';
 
 import TooltipIcon from '../components/icons/TooltipIcon';
-import { EnergyStats } from '@/components/ui/EnergyStats.jsx';
 import { EnergyForecast } from '../components/ui/EnergyForecast';
 
 export function getMeta(ctx) {
@@ -26,6 +26,7 @@ export default function Dashboard() {
   const { snapshot, state, actions } = useRouteContext();
   const [system, setSystem] = useState(null);
   const [performanceTimeFrame, setPerformanceTimeFrame] = useState('daily');
+  const ChatbotComponent = getChatbotComponent();
 
   const handlePerformanceTimeFrameChange = (option) => {
     setPerformanceTimeFrame(option);
@@ -163,6 +164,11 @@ export default function Dashboard() {
               tooltip="Based on your general location."
             />
           </div>
+          {ChatbotComponent && (
+            <div className="fixed bottom-8 right-8 drop-shadow-xl z-50">
+              <ChatbotComponent systemId={system} />
+            </div>
+          )}
         </>
       )}
     </div>

@@ -5,7 +5,7 @@ import Logo from '../icons/Logo.jsx';
 export function LoginButton({ onClick }) {
   return (
     <div
-      className="text-white bg-purple-40 px-6 py-1.5 rounded-full cursor-pointer"
+      className="text-white bg-primary-color px-6 py-1.5 rounded-full cursor-pointer"
       onClick={() => onClick((prev) => !prev)}
     >
       Login
@@ -67,7 +67,7 @@ export function Login() {
               </div>
               <div className="w-full flex justify-end">
                 <button
-                  className="text-white bg-purple-40 px-6 py-1.5 rounded-full cursor-pointer mt-4"
+                  className="text-white bg-primary-color px-6 py-1.5 rounded-full cursor-pointer mt-4"
                   onClick={handleAuthenticate}
                 >
                   Login

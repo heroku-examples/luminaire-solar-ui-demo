@@ -1,3 +1,6 @@
+import { theme } from './client/theme';
+import { getMantineColorValue } from './client/util/theme-utils';
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./client/index.html', './client/**/*.{jsx,tsx}'],
@@ -24,6 +27,7 @@ export default {
         'heroku-orange': '#fa9f47',
         'luminaire-green': '#03b665',
         'heroku-red': '#d64141',
+        'primary-color': getMantineColorValue(theme.primaryColor),
         'cloud-blue': {
           95: '#eaf5fe',
           90: '#cfe9fe',

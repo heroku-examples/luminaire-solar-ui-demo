@@ -29,7 +29,7 @@ function ProfileModal({ setOpen }) {
           {state.user.name} {state.user.last_name}
         </p>
         <button
-          className="text-white bg-purple-40 px-6 py-1.5 rounded-full cursor-pointer"
+          className="text-white bg-primary-color px-6 py-1.5 rounded-full cursor-pointer"
           onClick={async () => {
             navigate('/');
             await new Promise((resolve) => setTimeout(resolve, 1000));

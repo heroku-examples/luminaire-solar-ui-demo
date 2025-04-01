@@ -57,7 +57,7 @@ export default function Product() {
               : 'Call for price'}
           </p>
           <button
-            className="text-white bg-purple-40 rounded-full text-semibold py-2.5 px-5 cursor-pointer max-w-min text-nowrap disabled:cursor-not-allowed disabled:opacity-20"
+            className="text-white bg-primary-color rounded-full text-semibold py-2.5 px-5 cursor-pointer max-w-min text-nowrap disabled:cursor-not-allowed disabled:opacity-20"
             onClick={addToCart(snapshot.product)}
             disabled={!snapshot.product.price}
           >

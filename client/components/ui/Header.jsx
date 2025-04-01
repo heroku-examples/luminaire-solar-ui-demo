@@ -4,10 +4,9 @@ import { Profile } from '@/components/ui/Profile.jsx';
 import { Cart } from '@/components/ui/Cart.jsx';
 import classes from './Header.module.css';
 import { useRouteContext } from '/:core.jsx';
-import ChevronArrow from '../icons/ChevonArrow';
-import SearchIcon from '../icons/SearchIcon';
-import FullLogo from '../icons/Logo';
 import { useLocation } from 'react-router-dom';
+import SunIcon from '../icons/SunIcon';
+import { title } from '../../theme';
 
 export function Header() {
   const { state } = useRouteContext();
@@ -39,7 +38,7 @@ export function Header() {
         style={{ padding: 0 }}
       >
         <div
-          className={`text-dark-grey font-bold ${pathname === link.link ? 'border-b-2 border-purple-40' : ''}`}
+          className={`text-dark-grey font-bold ${pathname === link.link ? `border-b-2 border-primary-color` : ''}`}
         >
           {link.label}
         </div>
@@ -51,8 +50,13 @@ export function Header() {
     <header className="z-20 w-full h-16 bg-white fixed top-0 border-b-[1px] border-light-grey">
       <div className="px-12 py-4 flex justify-between items-center">
         <div className="flex flex-row">
-          <Link to="/demo" className="nav-link" style={{ padding: 0 }}>
-            <FullLogo />
+          <Link
+            to="/demo"
+            className="flex gap-1 items-center text-[#001A28] font-bold text-2xl"
+            style={{ padding: 0 }}
+          >
+            <SunIcon />
+            {title}
           </Link>
           <div className="flex flex-row items-center ml-10 gap-8">{items}</div>
         </div>

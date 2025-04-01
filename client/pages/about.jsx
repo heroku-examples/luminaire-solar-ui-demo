@@ -1,7 +1,7 @@
 import { title } from '@/theme.js';
-import { Container, Text, Title, Grid, Image, Group } from '@mantine/core';
+import { Container, Text, Grid, Image } from '@mantine/core';
 import residential from '@/assets/img/residential.jpg';
-import Logo from '../components/icons/Logo';
+import SunIcon from '../components/icons/SunIcon';
 
 function AboutPage() {
   return (
@@ -9,9 +9,10 @@ function AboutPage() {
       <Grid>
         <Grid.Col span={12}>
           <h1 className="p-2 pt-6">
-            <Group justify="center">
-              <Logo size={{ width: '350', height: '70' }} />
-            </Group>
+            <div className="flex gap-1 items-center justify-center text-[#001A28] font-bold text-3xl">
+              <SunIcon />
+              {title}
+            </div>
           </h1>
         </Grid.Col>
 

@@ -45,7 +45,7 @@ const Hero = () => {
           Comprehensive Solar Energy solutions for all your needs.
         </p>
         <div className="flex justify-center mt-12">
-          <NavButton url="/products" className="bg-purple-40 font-semibold">
+          <NavButton url="/products" className="bg-primary-color font-semibold">
             Shop Products
           </NavButton>
         </div>

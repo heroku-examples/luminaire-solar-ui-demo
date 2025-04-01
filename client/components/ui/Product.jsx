@@ -44,12 +44,12 @@ export function Product({ product, className }) {
         <p className="line-clamp-3 text-dark-grey">{product.description}</p>
         <div className="flex pt-14 items-center">
           <Link to={`/products/${product.id}`}>
-            <p className="text-purple-40 font-semibold underline underline-offset-4 cursor-pointer">
+            <p className="text-primary-color font-semibold underline underline-offset-4 cursor-pointer">
               Learn more
             </p>
           </Link>
           <button
-            className="ml-7 text-white bg-purple-40 rounded-full text-semibold py-2.5 px-5 cursor-pointer disabled:cursor-not-allowed disabled:opacity-20"
+            className="ml-7 text-white bg-primary-color rounded-full text-semibold py-2.5 px-5 cursor-pointer disabled:cursor-not-allowed disabled:opacity-20"
             onClick={addToCart(product)}
             disabled={!product.price}
           >

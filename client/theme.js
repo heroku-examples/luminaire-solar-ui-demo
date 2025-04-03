@@ -1,6 +1,6 @@
 import { createTheme } from '@mantine/core';
 
-export const title = 'Luminaire Solar';
+export const title = 'Luminaire Solar heroku';
 export const year = '2024';
 
 export const theme = createTheme({

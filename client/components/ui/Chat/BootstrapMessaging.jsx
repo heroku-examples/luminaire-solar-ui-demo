@@ -36,7 +36,7 @@ export default function BootstrapMessaging() {
     const storage = determineStorageType();
     if (!storage) {
       console.error(
-        `Cannot initialize the app. Web storage is required for the app to function.`
+        'Cannot initialize the app. Web storage is required for the app to function.'
       );
       return;
     }
@@ -47,28 +47,36 @@ export default function BootstrapMessaging() {
 
     if (messaging_webstorage_key) {
       const webStoragePayload = storage.getItem(messaging_webstorage_key);
-      const orgId = getItemInPayloadByKey(
+
+      // Batch state updates together
+      const newOrgId = getItemInPayloadByKey(
         webStoragePayload,
         STORAGE_KEYS.ORGANIZATION_ID
       );
-      const deploymentDevName = getItemInPayloadByKey(
+      const newDeploymentDevName = getItemInPayloadByKey(
         webStoragePayload,
         STORAGE_KEYS.DEPLOYMENT_DEVELOPER_NAME
       );
-      const messagingUrl = getItemInPayloadByKey(
+      const newMessagingURL = getItemInPayloadByKey(
         webStoragePayload,
         STORAGE_KEYS.MESSAGING_URL
       );
 
-      // Re-Initialize state variables from the values in the web storage. This also re-populates app's deployment parameters input form fields with the previously entered data, in case of a messaging session continuation (e.g. page reload).
-      setOrgId(orgId);
-      setDeploymentDevName(deploymentDevName);
-      setMessagingURL(messagingUrl);
+      // Update all related states at once
+      setOrgId(newOrgId);
+      setDeploymentDevName(newDeploymentDevName);
+      setMessagingURL(newMessagingURL);
 
-      // Initialize messaging client.
-      initializeMessagingClient(orgId, deploymentDevName, messagingUrl);
+      // Initialize after state updates using the new values directly
+      initializeMessagingClient(
+        newOrgId,
+        newDeploymentDevName,
+        newMessagingURL
+      );
 
       const messagingJwt = getItemInWebStorageByKey(STORAGE_KEYS.JWT);
+
+      // Batch these state updates together
       if (messagingJwt) {
         // Existing conversation.
         setIsExistingConversation(true);
@@ -82,26 +90,23 @@ export default function BootstrapMessaging() {
       setIsExistingConversation(false);
     }
 
+    // Cleanup function
     return () => {
       showMessagingWindow(false);
     };
-  }, []);
+  }, []); // Keep empty if this should only run on mount
 
   /**
    * Initialize the messaging client by
    * 1. internally initializing the Embedded Service deployment paramaters in-memory.
    * 2. initializing Salesforce Organization Id in the browser web storage.
    */
-  function initializeMessagingClient(
-    ord_id,
-    deployment_dev_name,
-    messaging_url
-  ) {
+  function initializeMessagingClient(orgId, deploymentDevName, messagingURL) {
     // Initialize helpers.
-    initializeWebStorage(ord_id || orgId);
-    storeOrganizationId(ord_id || orgId);
-    storeDeploymentDeveloperName(deployment_dev_name || deploymentDevName);
-    storeSalesforceMessagingUrl(messaging_url || messagingURL);
+    initializeWebStorage(orgId);
+    storeOrganizationId(orgId);
+    storeDeploymentDeveloperName(deploymentDevName);
+    storeSalesforceMessagingUrl(messagingURL);
   }
 
   /**

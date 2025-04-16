@@ -173,11 +173,18 @@ export function AgentforceAnalysis({ forecast, systemId }) {
             }),
           }
         );
-        token = (await getAuthenticatedAccessTokenRes.json()).accessToken;
+        if (!getAuthenticatedAccessTokenRes.ok) {
+          const errorData = await getAuthenticatedAccessTokenRes.json();
+          throw new Error(errorData.message);
+        }
+        const data = await getAuthenticatedAccessTokenRes.json();
+        token = data.accessToken;
         setAuthenticatedAccessToken(token);
       }
     } catch (e) {
-      throw new Error('Failed to fetch an Authenticated access token.');
+      throw new Error(
+        'Failed to fetch an Authenticated access token.' + e.message
+      );
     }
 
     const conversationId = util.generateUUID();

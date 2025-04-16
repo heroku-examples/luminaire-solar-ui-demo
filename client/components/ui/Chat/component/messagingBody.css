@@ -1,17 +1,18 @@
 .messagingBody {
-  height: 500px;
+  height: 600px;
   overflow: auto;
-  padding-left: rem(48px);
-  padding-right: rem(48px);
-  padding-bottom: rem(48px);
+  padding-left: rem(24px);
+  padding-right: rem(24px);
+  padding-bottom: rem(24px);
   font-family: inherit;
   background: rgb(252, 251, 254);
 }
 
 .conversationStartTimeText,
-.conversationEndTimeText {
+.conversationEndTimeText,
+.loadingText {
   color: rgb(98 91 91);
-  font-size: 12px;
+  font-size: 0.8rem;
   font-weight: bold;
   text-align: center;
   margin-top: rem(26px);

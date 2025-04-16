@@ -11,8 +11,8 @@
 .messagingFooterInputContainer {
   height: rem(40px);
   width: 100%;
-  margin-left: rem(61px);
-  margin-right: rem(61px);
+  margin-left: rem(24px);
+  margin-right: rem(24px);
   border-radius: 9999px;
   background: rgba(77, 37, 126, 0.09);
   display: flex;

@@ -10,7 +10,7 @@
 .textMessageSenderContent {
   color: rgb(153, 153, 153);
   margin: 0px;
-  font-size: 10px;
+  font-size: 1rem;
   font-weight: 400;
 }
 
@@ -28,7 +28,7 @@
 
 .textMessageBubble {
   min-width: 50px;
-  max-width: 350px;
+  max-width: 460px;
   margin: 1px auto;
   padding: 8px 14px;
 }
@@ -47,7 +47,7 @@
 
 .textMessageContent {
   margin: 0px;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 300;
 }
 

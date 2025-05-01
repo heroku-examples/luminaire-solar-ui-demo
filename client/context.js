@@ -7,9 +7,10 @@ import { SalesforceDataCloud } from './integration/salesforce-datacloud.js';
 export default async (ctx) => {
   if (ctx.server) {
     // Do server stuff here
-    ctx.state.apiUrl = process.env.API_URL || 'http://0.0.0.0:3001';
+    ctx.state.apiUrl = process.env.API_URL || 'http://localhost:3000';
   } else {
-    // Start the Salesforce Data Cloud integration on the client
+    // Set API URL on client side and start Salesforce Data Cloud integration
+    ctx.state.apiUrl = 'http://localhost:3000';
     await ctx.actions.getProfile(ctx.state);
     await SalesforceDataCloud.init({ user: ctx.state.user });
   }
@@ -126,7 +127,7 @@ export const actions = {
   async getMetricsSummaryBySystem(state, systemId, date) {
     const response = await this.request(
       state,
-      `/api/summary/${systemId}?date=${date}`,
+      `/salesforce/summary/${systemId}?date=${date}`,
       {
         headers: { Authorization: `Bearer ${state.authorization}` },
       }
@@ -136,13 +137,16 @@ export const actions = {
     }
   },
   async getProducts(state) {
-    const response = await this.request(state, '/api/products');
+    const response = await this.request(state, '/salesforce/products');
     if (response.ok) {
       state.products = await response.json();
     }
   },
   async getProductById(state, productId) {
-    const response = await this.request(state, `/api/products/${productId}`);
+    const response = await this.request(
+      state,
+      `/salesforce/products/${productId}`
+    );
     if (response.ok) {
       state.product = await response.json();
     }
@@ -175,9 +179,13 @@ export const actions = {
     }, []);
   },
   async getForecastBySystem(state, systemId) {
-    const response = await this.request(state, `/api/forecast/${systemId}`, {
-      headers: { Authorization: `Bearer ${state.authorization}` },
-    });
+    const response = await this.request(
+      state,
+      `/salesforce/forecast/${systemId}`,
+      {
+        headers: { Authorization: `Bearer ${state.authorization}` },
+      }
+    );
     if (response.ok) {
       state.forecast = await response.json();
     }

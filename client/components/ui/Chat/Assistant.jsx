@@ -87,6 +87,21 @@ const useChatStream = ({ onError } = {}) => {
 
     const handleAssistantMessage = (content) => {
       setMessages((prevMessages) => {
+        if (!content.startsWith('\n') || !content.endsWith('\n')) {
+          // Add newline if content ends with sentence punctuation, is a markdown heading,
+          // code block, list item or sublist item (asterisk, number, or em-dash)
+          if (
+            /[.!:?]$/.test(content.trim()) ||
+            /^(#{1,6}) /.test(content.trim()) ||
+            /^\`{3}.*\`{3}$/.test(content.trim()) ||
+            /^(\s*[\*\-]|\s*\d+\.|\s*\-{3,})/.test(content.trim())
+          ) {
+            content += '\n';
+          } else {
+            content += ' ';
+          }
+        }
+
         const updatedMessages = [...prevMessages];
         if (isFirstAssistantMessage) {
           isFirstAssistantMessage = false;
@@ -252,6 +267,9 @@ const Message = ({ role, content, isLast }) => {
       ? content.replace(/\\n/g, '\n').replace(/\n\n+/g, '\n\n')
       : content;
 
+  console.log(content);
+  console.log(processedContent);
+
   return (
     <Box style={style}>
       {role === 'agent' ? (
@@ -388,7 +406,7 @@ const Chat = () => {
         <div className="bg-lightest-grey rounded-b-3xl px-6 pt-4 pb-8">
           <div className="flex gap-4 bg-white border border-dark-grey rounded-3xl py-[2px] pl-2 pr-[2px]">
             <input
-              className="bg-transparent focus:outline-none overflow-hidden overflow-ellipsis w-[440px]"
+              className="bg-transparent focus:outline-none overflow-hidden overflow-ellipsis w-[840px]"
               placeholder="Type your message here..."
               value={currentMessage}
               ref={inputRef}
@@ -419,7 +437,7 @@ export function Assistant() {
   return (
     <>
       <div
-        className={`flex flex-col w-[550px] h-[600px] z-[999999] bg-white shadow-xl border border-light-grey rounded-3xl ${open ? '' : 'hidden'}`}
+        className={`flex flex-col w-[900px] h-[800px] z-[999999] bg-white shadow-xl border border-light-grey rounded-3xl ${open ? '' : 'hidden'}`}
       >
         <div className="flex justify-between items-center bg-light-grey py-4 px-6 rounded-t-3xl">
           <p className="font-semibold text-sm">Luminaire Agent Chat</p>

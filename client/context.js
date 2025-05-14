@@ -127,7 +127,7 @@ export const actions = {
   async getMetricsSummaryBySystem(state, systemId, date) {
     const response = await this.request(
       state,
-      `/salesforce/summary/${systemId}?date=${date}`,
+      `/api/salesforce/summary/${systemId}?date=${date}`,
       {
         headers: { Authorization: `Bearer ${state.authorization}` },
       }
@@ -137,7 +137,7 @@ export const actions = {
     }
   },
   async getProducts(state) {
-    const response = await this.request(state, '/salesforce/products');
+    const response = await this.request(state, '/api/salesforce/products');
     if (response.ok) {
       state.products = await response.json();
     }
@@ -145,7 +145,7 @@ export const actions = {
   async getProductById(state, productId) {
     const response = await this.request(
       state,
-      `/salesforce/products/${productId}`
+      `/api/salesforce/products/${productId}`
     );
     if (response.ok) {
       state.product = await response.json();
@@ -181,7 +181,7 @@ export const actions = {
   async getForecastBySystem(state, systemId) {
     const response = await this.request(
       state,
-      `/salesforce/forecast/${systemId}`,
+      `/api/salesforce/forecast/${systemId}`,
       {
         headers: { Authorization: `Bearer ${state.authorization}` },
       }

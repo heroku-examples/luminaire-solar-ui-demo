@@ -9,6 +9,11 @@ import { Box, Text, Stack, Loader, useMantineTheme } from '@mantine/core';
 import SendIcon from './icons/SendIcon.jsx';
 import CloseIcon from './icons/CloseIcon.jsx';
 import { flushSync } from 'react-dom';
+import { AI_TYPES } from './helpers/constants.js';
+import {
+  sendMessage as sendAgentforceMessage,
+  closeSession as closeAgentforceSession,
+} from './SalesforceAgentConnector.js';
 
 const useChatStream = ({ onError } = {}) => {
   const [messages, setMessages] = useState([
@@ -19,6 +24,11 @@ const useChatStream = ({ onError } = {}) => {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState(null);
+
+  // Determine if we're using Salesforce Agentforce API or Heroku API
+  const uiType = import.meta.env.VITE_UI_TYPE || 'heroku-ui';
+  const useSalesforceApi = uiType === 'salesforce-ui';
+  console.log('UI Type:', uiType, 'Use Salesforce API:', useSalesforceApi);
 
   const sendMessage = async (message, actions, state) => {
     if (!message.trim()) return;
@@ -32,22 +42,13 @@ const useChatStream = ({ onError } = {}) => {
     setIsLoading(true);
 
     try {
-      const requestBody = {
-        question: message,
-        ...(sessionId && { sessionId }),
-      };
-
-      const response = await actions.chatCompletion(state, requestBody);
-
-      if (!response.ok) {
-        throw new Error(
-          response.status === 401
-            ? 'Unauthorized'
-            : `Request failed: ${response.status}`
-        );
+      if (useSalesforceApi) {
+        // Use the Salesforce Agent API
+        await sendMessageViaSalesforceApi(message);
+      } else {
+        // Use the Heroku API
+        await sendMessageViaHerokuApi(message, actions, state);
       }
-
-      await processStream(response.body);
     } catch (error) {
       console.error('Chat error:', error);
       setMessages((prev) => {
@@ -67,6 +68,61 @@ const useChatStream = ({ onError } = {}) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Send message using Salesforce Agent API
+  const sendMessageViaSalesforceApi = async (message) => {
+    let isFirstAssistantMessage = true;
+
+    const handleChunk = (content) => {
+      setMessages((prevMessages) => {
+        const updatedMessages = [...prevMessages];
+        if (isFirstAssistantMessage) {
+          isFirstAssistantMessage = false;
+          // Replace the "processing" message with the actual content
+          const filtered = updatedMessages.filter(
+            (msg) => msg.role !== 'agent'
+          );
+          return [...filtered, { role: 'assistant', content }];
+        }
+        // Append to the last message
+        const lastMessage = updatedMessages[updatedMessages.length - 1];
+        if (lastMessage?.role === 'assistant') {
+          lastMessage.content += content;
+        }
+        return updatedMessages;
+      });
+    };
+
+    await sendAgentforceMessage(
+      message,
+      handleChunk,
+      () => setIsLoading(false),
+      (error) => {
+        console.error('Agentforce API error:', error);
+        throw error;
+      }
+    );
+  };
+
+  // Send message using Heroku API
+  const sendMessageViaHerokuApi = async (message, actions, state) => {
+    const requestBody = {
+      question: message,
+      ...(sessionId && { sessionId }),
+    };
+
+    const response = await actions.chatCompletion(state, requestBody);
+
+    if (!response.ok) {
+      throw new Error(
+        response.status === 401
+          ? 'Unauthorized'
+          : `Request failed: ${response.status}`
+      );
+    }
+
+    await processStream(response.body);
   };
 
   const processStream = async (stream) => {
@@ -178,6 +234,15 @@ const useChatStream = ({ onError } = {}) => {
       setIsLoading(false);
     }
   };
+
+  // Clean up resources when the component unmounts
+  useEffect(() => {
+    return () => {
+      if (useSalesforceApi) {
+        closeAgentforceSession().catch(console.error);
+      }
+    };
+  }, [useSalesforceApi]);
 
   return {
     messages,

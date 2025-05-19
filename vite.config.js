@@ -16,4 +16,12 @@ export default defineConfig({
   resolve: {
     alias: [{ find: '@', replacement: root }],
   },
+  optimizeDeps: {
+    exclude: ['pino', 'pino-pretty'],
+  },
+  build: {
+    commonjsOptions: {
+      exclude: ['pino', 'pino-pretty'],
+    },
+  },
 });

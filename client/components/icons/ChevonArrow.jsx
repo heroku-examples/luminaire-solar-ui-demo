@@ -10,9 +10,9 @@ export default function ChevronArrow() {
       <path
         d="M1.5 1.125L6 4.875L10.5 1.125"
         stroke="#596981"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );

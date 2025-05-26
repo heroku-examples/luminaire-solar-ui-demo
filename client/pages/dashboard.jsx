@@ -13,7 +13,6 @@ import {
 } from 'recharts';
 
 import TooltipIcon from '../components/icons/TooltipIcon';
-import { EnergyStats } from '@/components/ui/EnergyStats.jsx';
 import { EnergyForecast } from '../components/ui/EnergyForecast';
 
 export function getMeta(ctx) {

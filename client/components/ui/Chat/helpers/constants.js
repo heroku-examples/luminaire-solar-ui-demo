@@ -207,6 +207,6 @@ export const CLIENT_CONSTANTS = {
  * @type {Object}
  */
 export const AI_TYPES = {
-  HEROKU: 'heroku-ai',
-  SALESFORCE: 'salesforce-ai',
+  HEROKU: 'mia',
+  SALESFORCE: 'agentforce',
 };

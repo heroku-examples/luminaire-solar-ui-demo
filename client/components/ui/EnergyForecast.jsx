@@ -12,7 +12,6 @@ import {
   createConversationEntry,
   parseServerSentEventData,
 } from './Chat/helpers/conversationEntryUtil.js';
-import { MetadataContext } from './Chat/helpers/metadataContext.js';
 import { getAnalysisComponent } from './Chat/helpers/analysisAgentSwitch.js';
 import { AgentforceAvatar } from '../icons/AgentforceAvatar.jsx';
 
@@ -125,12 +124,10 @@ export function MiaAnalysis({ forecast, systemId }) {
 export function AgentforceAnalysis({ forecast, systemId }) {
   if (!forecast) return <div></div>;
 
-  const { metadata } = useContext(MetadataContext);
-
   // construct message for Agentforce; follow the metadata convention for systemId awareness
   const message = JSON.stringify({
     message: `Can you get my system's energy efficiency forecast?`,
-    metadata: { ...metadata, env: 'internal' },
+    metadata: { systemId: systemId, env: 'internal' },
   });
 
   const {
@@ -305,11 +302,12 @@ export function AgentforceAnalysis({ forecast, systemId }) {
     // set analysis
     const text =
       agentResponses[agentResponses.length - 1]?.content?.staticContent?.text;
+    if (!text) return;
     try {
       const parsedText = JSON.parse(text);
       setAgentAnalysis(parsedText);
     } catch (e) {
-      console.log(e);
+      // console.log(e);
     }
   }, [agentResponses]);
 

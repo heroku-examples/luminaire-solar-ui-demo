@@ -39,7 +39,7 @@ export function Login() {
       {open && (
         <div>
           <div
-            className="absolute top-0 left-0 w-[100vw] h-[100vh] z-10 bg-lightest-grey bg-opacity-50"
+            className="absolute top-0 left-0 w-[100vw] h-[100vh] z-10 bg-lightest-grey bg-opacity-50 border border-light-grey"
             onClick={handleOnClose}
           />
           <div className="absolute top-0 left-0 w-[100vw] h-[100vh]">

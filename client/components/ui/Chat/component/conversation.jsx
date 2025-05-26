@@ -5,6 +5,7 @@ import * as EventSourcePolyfill from '../helpers/eventsource-polyfill.js';
 import MessagingHeader from './messagingHeader.jsx';
 import MessagingBody from './messagingBody.jsx';
 import MessagingInputFooter from './messagingInputFooter.jsx';
+import './messagingBody.css';
 
 import {
   setJwt,
@@ -185,7 +186,6 @@ export default function Conversation(props) {
 
     return getAuthenticatedAccessToken(authorization)
       .then((response) => {
-        console.log(response);
         console.log('Successfully fetched an Authenticated access token.');
         // Parse the response object which includes access-token (JWT), configutation data.
         if (typeof response === 'object') {
@@ -1046,7 +1046,9 @@ export default function Conversation(props) {
         <>
           {conversationStatus ===
             CONVERSATION_CONSTANTS.ConversationStatus
-              .NOT_STARTED_CONVERSATION && <p>Loading...</p>}
+              .NOT_STARTED_CONVERSATION && (
+            <p className="loadingText">Loading...</p>
+          )}
           <MessagingBody
             conversationEntries={conversationEntries}
             conversationStatus={conversationStatus}

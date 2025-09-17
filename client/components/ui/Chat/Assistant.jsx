@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { IconCheck } from '@tabler/icons-react';
 import ChatIcon from './icons/ChatIcon.jsx';
@@ -267,9 +267,6 @@ const Message = ({ role, content, isLast }) => {
       ? content.replace(/\\n/g, '\n').replace(/\n\n+/g, '\n\n')
       : content;
 
-  console.log(content);
-  console.log(processedContent);
-
   return (
     <Box style={style}>
       {role === 'agent' ? (
@@ -349,7 +346,7 @@ const Message = ({ role, content, isLast }) => {
   );
 };
 
-const Chat = () => {
+const Chat = ({ suggestions = [] }) => {
   const { state, actions } = useRouteContext();
   const [currentMessage, setCurrentMessage] = useState('');
   const viewportRef = useRef(null);
@@ -388,6 +385,59 @@ const Chat = () => {
     focus();
   };
 
+  const selectedSuggestions = useMemo(() => {
+    if (!Array.isArray(suggestions) || suggestions.length === 0) return [];
+
+    const lastFewMessages = messages.slice(-6);
+    const contextText = lastFewMessages
+      .map((m) => (m?.content || '').toString().toLowerCase())
+      .join(' \n ');
+
+    const withScores = suggestions.map((s, idx) => {
+      const keywords = Array.isArray(s.keywords) ? s.keywords : [];
+      const score = keywords.reduce((acc, kw) => {
+        const needle = (kw || '').toString().toLowerCase();
+        return acc + (needle && contextText.includes(needle) ? 1 : 0);
+      }, 0);
+      return { index: idx, suggestion: s, score };
+    });
+
+    const relevant = withScores
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map((x) => x.suggestion);
+
+    const pickRandom = (pool, count, excludeIds = new Set()) => {
+      const available = pool.filter((s) => !excludeIds.has(s.id));
+      for (let i = available.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [available[i], available[j]] = [available[j], available[i]];
+      }
+      return available.slice(0, count);
+    };
+
+    const chosen = relevant.slice(0, 3);
+    if (chosen.length < 3) {
+      const chosenIds = new Set(chosen.map((s) => s.id));
+      const filler = pickRandom(suggestions, 3 - chosen.length, chosenIds);
+      return [...chosen, ...filler].slice(0, 3);
+    }
+    return chosen.slice(0, 3);
+  }, [messages, suggestions]);
+
+  const lastMessage = messages[messages.length - 1];
+  const showSuggestions =
+    !isLoading &&
+    lastMessage?.role === 'assistant' &&
+    selectedSuggestions.length > 0;
+
+  const handleSuggestionClick = async (text) => {
+    if (!text || isLoading) return;
+    await sendMessage(text, actions, state);
+    setCurrentMessage('');
+    focus();
+  };
+
   return (
     <>
       <div className="h-full flex flex-col">
@@ -402,6 +452,25 @@ const Chat = () => {
               />
             ))}
           </Stack>
+          {showSuggestions && (
+            <div className="mt-2 mb-4">
+              <div className="flex flex-wrap gap-2">
+                {selectedSuggestions.map((s) => (
+                  <button
+                    key={s.id}
+                    className="text-xs px-3 py-2 rounded-full border border-dark-grey bg-white hover:bg-light-grey transition-colors"
+                    onClick={() =>
+                      handleSuggestionClick(s.label || s.text || '')
+                    }
+                    disabled={isLoading}
+                    aria-label={`Ask: ${s.label || s.text}`}
+                  >
+                    {s.label || s.text}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
         <div className="bg-lightest-grey rounded-b-3xl px-6 pt-4 pb-8">
           <div className="flex gap-4 bg-white border border-dark-grey rounded-3xl py-[2px] pl-2 pr-[2px]">
@@ -430,6 +499,114 @@ const Chat = () => {
 export function Assistant() {
   const [open, setOpen] = useState(false);
 
+  const suggestions = [
+    {
+      id: 'energy_produced_7d',
+      label: 'How much energy did I produce in the past 7 days?',
+      keywords: [
+        'produce',
+        'production',
+        'past 7 days',
+        'last week',
+        'energy produced',
+        'generation',
+      ],
+    },
+    {
+      id: 'energy_saved_7d',
+      label: 'How much energy was saved in the past 7 days?',
+      keywords: ['saved', 'savings', 'past 7 days', 'last week', 'reduced'],
+    },
+    {
+      id: 'chart_prod_vs_cons_7d',
+      label:
+        'Chart the comparison between production and consumption in the past 7 days',
+      keywords: [
+        'chart',
+        'comparison',
+        'production',
+        'consumption',
+        'past 7 days',
+        'last week',
+        'compare',
+      ],
+    },
+    {
+      id: 'energy_consumed_7d',
+      label: 'How much energy did I consume in the past 7 days?',
+      keywords: [
+        'consume',
+        'consumption',
+        'past 7 days',
+        'last week',
+        'energy used',
+      ],
+    },
+    {
+      id: 'peak_production_7d',
+      label: 'What was the peak production in the past 7 days?',
+      keywords: ['peak', 'maximum', 'production', 'past 7 days', 'last week'],
+    },
+    {
+      id: 'peak_consumption_7d',
+      label: 'What was the peak consumption in the past 7 days?',
+      keywords: ['peak', 'maximum', 'consumption', 'past 7 days', 'last week'],
+    },
+    {
+      id: 'compare_prod_week_over_week',
+      label: 'Compare this week’s production to last week',
+      keywords: ['compare', 'week', 'production', 'this week', 'last week'],
+    },
+    {
+      id: 'compare_prod_month_over_month',
+      label: 'Compare this month’s production to last month',
+      keywords: ['compare', 'month', 'production', 'this month', 'last month'],
+    },
+    {
+      id: 'chart_hourly_production_today',
+      label: 'Chart the hourly production for today',
+      keywords: ['chart', 'hourly', 'today', 'production', 'generation'],
+    },
+    {
+      id: 'grid_imports_7d',
+      label: 'How much energy did I import from the grid in the past 7 days?',
+      keywords: ['grid', 'import', 'imports', 'past 7 days', 'last week'],
+    },
+    {
+      id: 'grid_exports_7d',
+      label: 'How much energy did I export to the grid in the past 7 days?',
+      keywords: ['grid', 'export', 'exports', 'past 7 days', 'last week'],
+    },
+    {
+      id: 'co2_avoided_7d',
+      label: 'How much CO₂ did I avoid in the past 7 days?',
+      keywords: [
+        'co2',
+        'carbon',
+        'emissions',
+        'avoided',
+        'past 7 days',
+        'last week',
+      ],
+    },
+    {
+      id: 'top3_days_last_month',
+      label: 'What were my top 3 production days last month?',
+      keywords: ['top', 'best', 'production', 'days', 'last month'],
+    },
+    {
+      id: 'overnight_consumption_7d',
+      label: 'How much overnight energy did I consume in the past 7 days?',
+      keywords: [
+        'overnight',
+        'night',
+        'consumption',
+        'past 7 days',
+        'last week',
+      ],
+    },
+  ];
+
   const handleChatToggle = () => {
     setOpen(!open);
   };
@@ -445,7 +622,7 @@ export function Assistant() {
             <CloseIcon />
           </div>
         </div>
-        <Chat />
+        <Chat suggestions={suggestions} />
       </div>
       <div
         className="w-fit ml-auto mt-8 cursor-pointer hover:opacity-95"

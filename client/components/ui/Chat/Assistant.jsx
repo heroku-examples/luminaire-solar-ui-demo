@@ -1,11 +1,18 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { IconCheck } from '@tabler/icons-react';
+import { IconCheck, IconTools } from '@tabler/icons-react';
 import ChatIcon from './icons/ChatIcon.jsx';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import { useRouteContext } from '/:core.jsx';
-import { Box, Text, Stack, Loader, useMantineTheme } from '@mantine/core';
+import {
+  Box,
+  Text,
+  Stack,
+  Loader,
+  useMantineTheme,
+  Modal,
+} from '@mantine/core';
 import SendIcon from './icons/SendIcon.jsx';
 import CloseIcon from './icons/CloseIcon.jsx';
 import { flushSync } from 'react-dom';
@@ -94,9 +101,12 @@ const useChatStream = ({ onError } = {}) => {
             /[.!:?]$/.test(content.trim()) ||
             /^(#{1,6}) /.test(content.trim()) ||
             /^\`{3}.*\`{3}$/.test(content.trim()) ||
-            /^(\s*[\*\-]|\s*\d+\.|\s*\-{3,})/.test(content.trim())
+            /^(\s*[\*\-]|\s*\d+\.|\s*\-{3,})/.test(content.trim()) ||
+            /^!\[[^\]]*\]\([^\)]+\)\s*$/.test(content.trim()) ||
+            /<img\b[^>]*>\s*$/i.test(content.trim())
           ) {
-            content += '\n';
+            // Ensure a clear block break after images and block endings
+            content += '\n\n';
           } else {
             content += ' ';
           }
@@ -118,7 +128,7 @@ const useChatStream = ({ onError } = {}) => {
     const processAgentBuffer = () => {
       try {
         const message = JSON.parse(agentBuffer);
-        if (message.role === 'agent') {
+        if (message.role === 'agent' || message.role === 'tool') {
           handleAgentMessage(message);
         } else {
           buffer += agentBuffer;
@@ -219,7 +229,7 @@ const IconWrapper = ({ isLast }) => {
   );
 };
 
-const Message = ({ role, content, isLast }) => {
+const Message = ({ role, content, isLast, onImageClick }) => {
   const theme = useMantineTheme();
   const messageStyles = {
     base: {
@@ -247,6 +257,13 @@ const Message = ({ role, content, isLast }) => {
       marginBottom: 0,
       borderRadius: 0,
     },
+    tool: {
+      fontStyle: 'italic',
+      color: '#666666',
+      padding: 0,
+      marginBottom: 0,
+      borderRadius: 0,
+    },
     error: {
       background: '#ffebee',
       color: '#d32f2f',
@@ -257,6 +274,7 @@ const Message = ({ role, content, isLast }) => {
     ...messageStyles.base,
     ...(role === 'user' ? messageStyles.user : {}),
     ...(role === 'assistant' ? messageStyles.assistant : {}),
+    ...(role === 'tool' ? messageStyles.tool : {}),
     ...(role === 'agent' ? messageStyles.agent : {}),
     ...(role === 'error' ? messageStyles.error : {}),
   };
@@ -269,8 +287,17 @@ const Message = ({ role, content, isLast }) => {
 
   return (
     <Box style={style}>
-      {role === 'agent' ? (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+      {role === 'agent' || role === 'tool' ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span
+            style={{
+              display: 'inline-flex',
+              width: 16,
+              justifyContent: 'center',
+            }}
+          >
+            {role === 'tool' ? <IconTools size={14} color="#666666" /> : null}
+          </span>
           <Text size="xs" style={{ flex: 1 }}>
             {processedContent}
           </Text>
@@ -281,6 +308,18 @@ const Message = ({ role, content, isLast }) => {
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[rehypeRaw]}
           components={{
+            img: ({ src, alt }) => (
+              <img
+                src={src}
+                alt={alt}
+                style={{
+                  maxWidth: '100%',
+                  borderRadius: '6px',
+                  cursor: 'zoom-in',
+                }}
+                onClick={() => onImageClick?.(src, alt)}
+              />
+            ),
             a: ({ children, href, target }) => (
               <a
                 style={{
@@ -351,6 +390,9 @@ const Chat = ({ suggestions = [] }) => {
   const [currentMessage, setCurrentMessage] = useState('');
   const viewportRef = useRef(null);
   const inputRef = useRef(null);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [zoomImageSrc, setZoomImageSrc] = useState('');
+  const [zoomImageAlt, setZoomImageAlt] = useState('');
 
   const { messages, isLoading, sendMessage } = useChatStream({
     onError: () => focus(),
@@ -383,6 +425,13 @@ const Chat = ({ suggestions = [] }) => {
     await sendMessage(currentMessage, actions, state);
     setCurrentMessage('');
     focus();
+  };
+
+  const handleImageClick = (src, alt) => {
+    if (!src) return;
+    setZoomImageSrc(src);
+    setZoomImageAlt(alt || '');
+    setIsImageModalOpen(true);
   };
 
   const selectedSuggestions = useMemo(() => {
@@ -449,6 +498,7 @@ const Chat = ({ suggestions = [] }) => {
                 role={msg.role}
                 content={msg.content}
                 isLast={i === messages.length - 1}
+                onImageClick={handleImageClick}
               />
             ))}
           </Stack>
@@ -472,6 +522,33 @@ const Chat = ({ suggestions = [] }) => {
             </div>
           )}
         </div>
+        <Modal
+          opened={isImageModalOpen}
+          onClose={() => setIsImageModalOpen(false)}
+          closeOnClickOutside={false}
+          closeOnEscape={false}
+          centered
+          size="auto"
+          radius="md"
+          overlayProps={{ opacity: 0.4, blur: 1 }}
+          withCloseButton
+          title={zoomImageAlt || 'Preview'}
+        >
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            {zoomImageSrc ? (
+              <img
+                src={zoomImageSrc}
+                alt={zoomImageAlt}
+                style={{
+                  maxWidth: '90vw',
+                  maxHeight: '80vh',
+                  objectFit: 'contain',
+                  borderRadius: '8px',
+                }}
+              />
+            ) : null}
+          </div>
+        </Modal>
         <div className="bg-lightest-grey rounded-b-3xl px-6 pt-4 pb-8">
           <div className="flex gap-4 bg-white border border-dark-grey rounded-3xl py-[2px] pl-2 pr-[2px]">
             <input

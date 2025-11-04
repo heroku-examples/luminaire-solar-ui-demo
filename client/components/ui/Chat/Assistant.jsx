@@ -1,6 +1,17 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { IconCheck, IconTools } from '@tabler/icons-react';
+import {
+  IconCheck,
+  IconTools,
+  IconDatabase,
+  IconFileText,
+  IconWorldWww,
+  IconFileTypePdf,
+  IconCode,
+  IconTerminal,
+  IconPlayerStop,
+  IconRefresh,
+} from '@tabler/icons-react';
 import ChatIcon from './icons/ChatIcon.jsx';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
@@ -48,9 +59,32 @@ const useChatStream = ({ onError } = {}) => {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState(null);
+  const abortControllerRef = useRef(null);
+
+  const abortRequest = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+      setIsLoading(false);
+      setMessages((prev) => {
+        const filtered = prev.filter((msg) => msg.role !== 'agent');
+        return [
+          ...filtered,
+          {
+            role: 'assistant',
+            content: 'Request cancelled.',
+            timestamp: new Date().toISOString(),
+          },
+        ];
+      });
+    }
+  };
 
   const sendMessage = async (message, actions, state) => {
     if (!message.trim()) return;
+
+    // Create new abort controller for this request
+    abortControllerRef.current = new AbortController();
 
     const userMessage = {
       role: 'user',
@@ -83,6 +117,10 @@ const useChatStream = ({ onError } = {}) => {
 
       await processStream(response.body);
     } catch (error) {
+      // Don't show error if request was aborted
+      if (error.name === 'AbortError') {
+        return;
+      }
       console.error('Chat error:', error);
       setMessages((prev) => {
         const filtered = prev.filter((msg) => msg.role !== 'agent');
@@ -101,6 +139,7 @@ const useChatStream = ({ onError } = {}) => {
       onError?.(error);
     } finally {
       setIsLoading(false);
+      abortControllerRef.current = null;
     }
   };
 
@@ -110,6 +149,7 @@ const useChatStream = ({ onError } = {}) => {
     let buffer = '';
     let agentBuffer = '';
     let isFirstAssistantMessage = true;
+    const signal = abortControllerRef.current?.signal;
 
     const handleAgentMessage = (message) => {
       if (message.sessionId && !sessionId) {
@@ -194,6 +234,13 @@ const useChatStream = ({ onError } = {}) => {
 
     try {
       while (true) {
+        // Check if request was aborted
+        if (signal?.aborted) {
+          const error = new Error('Request aborted');
+          error.name = 'AbortError';
+          throw error;
+        }
+
         const { value, done } = await reader.read();
         if (done) break;
 
@@ -217,6 +264,11 @@ const useChatStream = ({ onError } = {}) => {
         chunks.forEach(processChunk);
       }
     } catch (error) {
+      // Don't show error message if request was aborted
+      if (error.name === 'AbortError') {
+        return;
+      }
+
       console.error('Stream error:', error);
       const errorMessage =
         error.message === 'Unauthorized'
@@ -246,6 +298,7 @@ const useChatStream = ({ onError } = {}) => {
     messages,
     isLoading,
     sendMessage,
+    abortRequest,
   };
 };
 
@@ -267,7 +320,24 @@ const IconWrapper = ({ isLast }) => {
   );
 };
 
-const Message = ({ role, content, isLast, onImageClick, timestamp }) => {
+const getToolIcon = (toolName) => {
+  const iconMap = {
+    html_to_markdown: IconWorldWww,
+    pdf_to_markdown: IconFileTypePdf,
+    code_exec_python: IconCode,
+    code_exec_ruby: IconCode,
+    code_exec_node: IconCode,
+    code_exec_go: IconCode,
+    postgres_get_schema: IconFileText,
+    postgres_run_query: IconDatabase,
+    dyno_run_command: IconTerminal,
+    unknown: IconTools, // Explicit fallback for unknown tools
+  };
+
+  return iconMap[toolName] || IconTools; // Default fallback
+};
+
+const Message = ({ role, content, isLast, onImageClick, timestamp, tool }) => {
   const theme = useMantineTheme();
 
   const formatTimestamp = (isoString) => {
@@ -319,16 +389,18 @@ const Message = ({ role, content, isLast, onImageClick, timestamp }) => {
     agent: {
       fontStyle: 'italic',
       color: palette.agentText,
-      padding: 0,
-      marginBottom: 0,
-      borderRadius: 0,
+      padding: '4px 8px',
+      marginBottom: '1px',
+      borderRadius: '4px',
+      background: 'rgba(148, 163, 184, 0.05)', // Very subtle grey background
     },
     tool: {
       fontStyle: 'italic',
       color: palette.agentText,
-      padding: 0,
-      marginBottom: 0,
-      borderRadius: 0,
+      padding: '4px 8px',
+      marginBottom: '1px',
+      borderRadius: '4px',
+      background: 'rgba(148, 163, 184, 0.05)', // Very subtle grey background
     },
     error: {
       background: palette.errorBackground,
@@ -353,8 +425,14 @@ const Message = ({ role, content, isLast, onImageClick, timestamp }) => {
       ? content.replace(/\\n/g, '\n').replace(/\n\n+/g, '\n\n')
       : content;
 
+  const ToolIcon = role === 'tool' && tool ? getToolIcon(tool) : IconTools;
+
   return (
-    <div style={{ marginBottom: '8px' }}>
+    <div
+      style={{
+        marginBottom: role === 'agent' || role === 'tool' ? '1px' : '8px',
+      }}
+    >
       <Box style={style}>
         {role === 'agent' || role === 'tool' ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -366,7 +444,7 @@ const Message = ({ role, content, isLast, onImageClick, timestamp }) => {
               }}
             >
               {role === 'tool' ? (
-                <IconTools size={14} color={palette.agentText} />
+                <ToolIcon size={14} color={palette.agentText} />
               ) : null}
             </span>
             <Text size="xs" style={{ flex: 1 }}>
@@ -471,7 +549,7 @@ const Message = ({ role, content, isLast, onImageClick, timestamp }) => {
   );
 };
 
-const Chat = ({ suggestions = [] }) => {
+const Chat = ({ suggestions = [], isOpen = false }) => {
   const { state, actions } = useRouteContext();
   const [currentMessage, setCurrentMessage] = useState('');
   const viewportRef = useRef(null);
@@ -480,10 +558,49 @@ const Chat = ({ suggestions = [] }) => {
   const [zoomImageSrc, setZoomImageSrc] = useState('');
   const [zoomImageAlt, setZoomImageAlt] = useState('');
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const [toolSettings, setToolSettings] = useState(null);
+  const [randomSeed, setRandomSeed] = useState(Date.now());
 
-  const { messages, isLoading, sendMessage } = useChatStream({
+  const { messages, isLoading, sendMessage, abortRequest } = useChatStream({
     onError: () => focus(),
   });
+
+  // Fetch tool settings on mount
+  useEffect(() => {
+    const fetchToolSettings = async () => {
+      try {
+        if (!state.apiUrl || !state.authorization) return;
+        const response = await fetch(`${state.apiUrl}/api/tool-settings`, {
+          headers: {
+            Authorization: `Bearer ${state.authorization}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setToolSettings(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch tool settings:', error);
+        // Default to all tools enabled if fetch fails
+        setToolSettings({
+          tools: {
+            postgres_query: true,
+            html_to_markdown: true,
+            pdf_to_markdown: true,
+            code_exec_python: true,
+          },
+        });
+      }
+    };
+    fetchToolSettings();
+  }, [state.apiUrl, state.authorization]);
+
+  // Randomize suggestions when chat opens
+  useEffect(() => {
+    if (isOpen) {
+      setRandomSeed(Date.now());
+    }
+  }, [isOpen]);
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
@@ -553,13 +670,17 @@ const Chat = ({ suggestions = [] }) => {
       alignItems: 'center',
       borderRadius: '50%',
       border: '1px solid rgba(255, 255, 255, 0.28)',
-      background: `linear-gradient(135deg, ${palette.primary} 0%, ${palette.primaryHover} 100%)`,
-      boxShadow: '0 18px 34px rgba(93, 62, 255, 0.26)',
+      background: isLoading
+        ? `linear-gradient(135deg, #D64141 0%, #B83636 100%)`
+        : `linear-gradient(135deg, ${palette.primary} 0%, ${palette.primaryHover} 100%)`,
+      boxShadow: isLoading
+        ? '0 18px 34px rgba(214, 65, 65, 0.26)'
+        : '0 18px 34px rgba(93, 62, 255, 0.26)',
       color: '#FFFFFF',
       transition:
-        'transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease',
-      cursor: isLoading || !currentMessage.trim() ? 'not-allowed' : 'pointer',
-      opacity: isLoading || !currentMessage.trim() ? 0.65 : 1,
+        'transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease, background 0.2s ease',
+      cursor: !isLoading && !currentMessage.trim() ? 'not-allowed' : 'pointer',
+      opacity: !isLoading && !currentMessage.trim() ? 0.65 : 1,
     }),
     [currentMessage, isLoading]
   );
@@ -573,13 +694,35 @@ const Chat = ({ suggestions = [] }) => {
 
   const selectedSuggestions = useMemo(() => {
     if (!Array.isArray(suggestions) || suggestions.length === 0) return [];
+    if (!toolSettings) return []; // Wait for settings to load
+
+    // Filter suggestions based on enabled tools
+    const isToolEnabled = (requiredTools) => {
+      if (!requiredTools || requiredTools.length === 0) return true; // No tools required
+
+      const toolMap = {
+        database: toolSettings.tools?.postgres_query,
+        web: toolSettings.tools?.html_to_markdown,
+        pdf: toolSettings.tools?.pdf_to_markdown,
+        code: toolSettings.tools?.code_exec_python,
+      };
+
+      // All required tools must be enabled
+      return requiredTools.every((tool) => toolMap[tool] === true);
+    };
+
+    const availableSuggestions = suggestions.filter((s) =>
+      isToolEnabled(s.requiredTools)
+    );
+
+    if (availableSuggestions.length === 0) return [];
 
     const lastFewMessages = messages.slice(-6);
     const contextText = lastFewMessages
       .map((m) => (m?.content || '').toString().toLowerCase())
       .join(' \n ');
 
-    const withScores = suggestions.map((s, idx) => {
+    const withScores = availableSuggestions.map((s, idx) => {
       const keywords = Array.isArray(s.keywords) ? s.keywords : [];
       const score = keywords.reduce((acc, kw) => {
         const needle = (kw || '').toString().toLowerCase();
@@ -595,21 +738,48 @@ const Chat = ({ suggestions = [] }) => {
 
     const pickRandom = (pool, count, excludeIds = new Set()) => {
       const available = pool.filter((s) => !excludeIds.has(s.id));
-      for (let i = available.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [available[i], available[j]] = [available[j], available[i]];
+      if (available.length === 0) return [];
+
+      // Use randomSeed to ensure different order each time
+      const seededRandom = (seed, i) => {
+        const x = Math.sin(seed + i) * 10000;
+        return x - Math.floor(x);
+      };
+
+      // Fisher-Yates shuffle with seeded random
+      const shuffled = [...available];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(seededRandom(randomSeed, i) * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
       }
-      return available.slice(0, count);
+      return shuffled.slice(0, count);
     };
 
-    const chosen = relevant.slice(0, 3);
-    if (chosen.length < 3) {
-      const chosenIds = new Set(chosen.map((s) => s.id));
-      const filler = pickRandom(suggestions, 3 - chosen.length, chosenIds);
-      return [...chosen, ...filler].slice(0, 3);
+    // If we have relevant suggestions, prioritize them but still randomize
+    if (relevant.length > 0) {
+      // Pick randomly from relevant suggestions first
+      const chosen = pickRandom(
+        relevant,
+        Math.min(3, relevant.length),
+        new Set()
+      );
+
+      // If we need more to reach 3, pick from all available (excluding already chosen)
+      if (chosen.length < 3) {
+        const chosenIds = new Set(chosen.map((s) => s.id));
+        const filler = pickRandom(
+          availableSuggestions,
+          3 - chosen.length,
+          chosenIds
+        );
+        return [...chosen, ...filler];
+      }
+      return chosen;
     }
-    return chosen.slice(0, 3);
-  }, [messages, suggestions]);
+
+    // No relevant suggestions, just pick 3 random ones
+    return pickRandom(availableSuggestions, 3, new Set());
+  }, [messages, suggestions, toolSettings, randomSeed]);
 
   const lastMessage = messages[messages.length - 1];
   const showSuggestions =
@@ -631,10 +801,18 @@ const Chat = ({ suggestions = [] }) => {
     focus();
   };
 
+  const handleRefreshSuggestions = () => {
+    setRandomSeed(Date.now());
+  };
+
   return (
     <>
-      <div className="h-full flex flex-col">
-        <div className="flex-1 overflow-y-auto pt-6 px-6" ref={viewportRef}>
+      <div className="h-full flex flex-col" style={{ minHeight: 0 }}>
+        <div
+          className="flex-1 overflow-y-auto pt-6 px-6"
+          ref={viewportRef}
+          style={{ minHeight: 0 }}
+        >
           <Stack spacing="xs">
             {messages.map((msg, i) => (
               <Message
@@ -644,48 +822,64 @@ const Chat = ({ suggestions = [] }) => {
                 isLast={i === messages.length - 1}
                 onImageClick={handleImageClick}
                 timestamp={msg.timestamp}
+                tool={msg.tool}
               />
             ))}
           </Stack>
           {showSuggestions && (
             <div className="mt-2 mb-4">
-              <div className="flex flex-wrap gap-2">
-                {selectedSuggestions.map((s) => (
-                  <button
-                    key={s.id}
-                    className="text-xs px-3 py-2 rounded-2xl border transition-all duration-200 font-medium"
-                    style={{
-                      ...suggestionButtonStyle,
-                      opacity: isLoading ? 0.6 : 1,
-                      cursor: isLoading ? 'not-allowed' : 'pointer',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow =
-                        '0 12px 28px rgba(93, 62, 255, 0.25)';
-                      e.currentTarget.style.borderColor =
-                        'rgba(117, 38, 227, 0.5)';
-                      e.currentTarget.style.background =
-                        'linear-gradient(135deg, rgba(117, 38, 227, 0.12) 0%, rgba(165, 113, 255, 0.18) 100%)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow =
-                        '0 10px 24px rgba(24, 34, 78, 0.09)';
-                      e.currentTarget.style.borderColor =
-                        suggestionButtonStyle.borderColor;
-                      e.currentTarget.style.background =
-                        suggestionButtonStyle.background;
-                    }}
-                    onClick={() =>
-                      handleSuggestionClick(s.label || s.text || '')
-                    }
-                    disabled={isLoading}
-                    aria-label={`Ask: ${s.label || s.text}`}
-                  >
-                    {s.label || s.text}
-                  </button>
-                ))}
+              <div className="flex items-center gap-2">
+                <div className="flex flex-wrap gap-2 flex-1">
+                  {selectedSuggestions.map((s) => (
+                    <button
+                      key={s.id}
+                      className="text-xs px-3 py-2 rounded-2xl border transition-all duration-200 font-medium"
+                      style={{
+                        ...suggestionButtonStyle,
+                        opacity: isLoading ? 0.6 : 1,
+                        cursor: isLoading ? 'not-allowed' : 'pointer',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow =
+                          '0 12px 28px rgba(93, 62, 255, 0.25)';
+                        e.currentTarget.style.borderColor =
+                          'rgba(117, 38, 227, 0.5)';
+                        e.currentTarget.style.background =
+                          'linear-gradient(135deg, rgba(117, 38, 227, 0.12) 0%, rgba(165, 113, 255, 0.18) 100%)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow =
+                          '0 10px 24px rgba(24, 34, 78, 0.09)';
+                        e.currentTarget.style.borderColor =
+                          suggestionButtonStyle.borderColor;
+                        e.currentTarget.style.background =
+                          suggestionButtonStyle.background;
+                      }}
+                      onClick={() =>
+                        handleSuggestionClick(s.label || s.text || '')
+                      }
+                      disabled={isLoading}
+                      aria-label={`Ask: ${s.label || s.text}`}
+                    >
+                      {s.label || s.text}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={handleRefreshSuggestions}
+                  disabled={isLoading}
+                  className="flex-shrink-0 p-2 rounded-full transition-all duration-200 hover:bg-purple-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    color: palette.suggestionText,
+                    cursor: isLoading ? 'not-allowed' : 'pointer',
+                  }}
+                  aria-label="Refresh suggestions"
+                  title="Show different suggestions"
+                >
+                  <IconRefresh size={16} />
+                </button>
               </div>
             </div>
           )}
@@ -717,7 +911,10 @@ const Chat = ({ suggestions = [] }) => {
             ) : null}
           </div>
         </Modal>
-        <div className="bg-lightest-grey rounded-b-3xl px-6 pt-4 pb-8">
+        <div
+          className="bg-lightest-grey rounded-b-3xl px-6 pt-4 pb-8"
+          style={{ flexShrink: 0 }}
+        >
           <div className="flex gap-3 w-full" style={inputWrapperStyle}>
             <input
               className="overflow-hidden overflow-ellipsis"
@@ -733,24 +930,27 @@ const Chat = ({ suggestions = [] }) => {
             />
             <button
               className="ml-auto"
-              onClick={handleSend}
+              onClick={isLoading ? abortRequest : handleSend}
               style={sendButtonStyle}
-              disabled={isLoading || !currentMessage.trim()}
+              disabled={!isLoading && !currentMessage.trim()}
               onMouseDown={(e) => e.preventDefault()}
               onMouseOver={(e) => {
-                if (isLoading || !currentMessage.trim()) return;
+                if (!isLoading && !currentMessage.trim()) return;
                 e.currentTarget.style.transform =
                   'translateY(-1px) scale(1.02)';
-                e.currentTarget.style.boxShadow =
-                  '0 20px 42px rgba(93, 62, 255, 0.32)';
+                e.currentTarget.style.boxShadow = isLoading
+                  ? '0 20px 42px rgba(214, 65, 65, 0.32)'
+                  : '0 20px 42px rgba(93, 62, 255, 0.32)';
               }}
               onMouseOut={(e) => {
                 e.currentTarget.style.transform = 'none';
-                e.currentTarget.style.boxShadow =
-                  '0 18px 34px rgba(93, 62, 255, 0.26)';
+                e.currentTarget.style.boxShadow = isLoading
+                  ? '0 18px 34px rgba(214, 65, 65, 0.26)'
+                  : '0 18px 34px rgba(93, 62, 255, 0.26)';
               }}
+              aria-label={isLoading ? 'Stop generation' : 'Send message'}
             >
-              <SendIcon />
+              {isLoading ? <IconPlayerStop size={20} /> : <SendIcon />}
             </button>
           </div>
         </div>
@@ -894,113 +1094,323 @@ export function Assistant() {
     []
   );
 
-  const suggestions = [
-    {
-      id: 'energy_produced_7d',
-      label: 'How much energy did I produce in the past 7 days?',
-      keywords: [
-        'produce',
-        'production',
-        'past 7 days',
-        'last week',
-        'energy produced',
-        'generation',
-      ],
-    },
-    {
-      id: 'energy_saved_7d',
-      label: 'How much energy was saved in the past 7 days?',
-      keywords: ['saved', 'savings', 'past 7 days', 'last week', 'reduced'],
-    },
-    {
-      id: 'chart_prod_vs_cons_7d',
-      label:
-        'Chart the comparison between production and consumption in the past 7 days',
-      keywords: [
-        'chart',
-        'comparison',
-        'production',
-        'consumption',
-        'past 7 days',
-        'last week',
-        'compare',
-      ],
-    },
-    {
-      id: 'energy_consumed_7d',
-      label: 'How much energy did I consume in the past 7 days?',
-      keywords: [
-        'consume',
-        'consumption',
-        'past 7 days',
-        'last week',
-        'energy used',
-      ],
-    },
-    {
-      id: 'peak_production_7d',
-      label: 'What was the peak production in the past 7 days?',
-      keywords: ['peak', 'maximum', 'production', 'past 7 days', 'last week'],
-    },
-    {
-      id: 'peak_consumption_7d',
-      label: 'What was the peak consumption in the past 7 days?',
-      keywords: ['peak', 'maximum', 'consumption', 'past 7 days', 'last week'],
-    },
-    {
-      id: 'compare_prod_week_over_week',
-      label: 'Compare this week’s production to last week',
-      keywords: ['compare', 'week', 'production', 'this week', 'last week'],
-    },
-    {
-      id: 'compare_prod_month_over_month',
-      label: 'Compare this month’s production to last month',
-      keywords: ['compare', 'month', 'production', 'this month', 'last month'],
-    },
-    {
-      id: 'chart_hourly_production_today',
-      label: 'Chart the hourly production for today',
-      keywords: ['chart', 'hourly', 'today', 'production', 'generation'],
-    },
-    {
-      id: 'grid_imports_7d',
-      label: 'How much energy did I import from the grid in the past 7 days?',
-      keywords: ['grid', 'import', 'imports', 'past 7 days', 'last week'],
-    },
-    {
-      id: 'grid_exports_7d',
-      label: 'How much energy did I export to the grid in the past 7 days?',
-      keywords: ['grid', 'export', 'exports', 'past 7 days', 'last week'],
-    },
-    {
-      id: 'co2_avoided_7d',
-      label: 'How much CO₂ did I avoid in the past 7 days?',
-      keywords: [
-        'co2',
-        'carbon',
-        'emissions',
-        'avoided',
-        'past 7 days',
-        'last week',
-      ],
-    },
-    {
-      id: 'top3_days_last_month',
-      label: 'What were my top 3 production days last month?',
-      keywords: ['top', 'best', 'production', 'days', 'last month'],
-    },
-    {
-      id: 'overnight_consumption_7d',
-      label: 'How much overnight energy did I consume in the past 7 days?',
-      keywords: [
-        'overnight',
-        'night',
-        'consumption',
-        'past 7 days',
-        'last week',
-      ],
-    },
-  ];
+  const suggestions = useMemo(
+    () => [
+      {
+        id: 'energy_produced_7d',
+        label: 'How much energy did I produce in the past 7 days?',
+        keywords: [
+          'produce',
+          'production',
+          'past 7 days',
+          'last week',
+          'energy produced',
+          'generation',
+        ],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'energy_saved_7d',
+        label: 'How much energy was saved in the past 7 days?',
+        keywords: ['saved', 'savings', 'past 7 days', 'last week', 'reduced'],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'chart_prod_vs_cons_7d',
+        label:
+          'Chart the comparison between production and consumption in the past 7 days',
+        keywords: [
+          'chart',
+          'comparison',
+          'production',
+          'consumption',
+          'past 7 days',
+          'last week',
+          'compare',
+        ],
+        requiredTools: ['database', 'code'], // postgres_query + code_exec_python
+      },
+      {
+        id: 'energy_consumed_7d',
+        label: 'How much energy did I consume in the past 7 days?',
+        keywords: [
+          'consume',
+          'consumption',
+          'past 7 days',
+          'last week',
+          'energy used',
+        ],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'peak_production_7d',
+        label: 'What was the peak production in the past 7 days?',
+        keywords: ['peak', 'maximum', 'production', 'past 7 days', 'last week'],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'peak_consumption_7d',
+        label: 'What was the peak consumption in the past 7 days?',
+        keywords: [
+          'peak',
+          'maximum',
+          'consumption',
+          'past 7 days',
+          'last week',
+        ],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'compare_prod_week_over_week',
+        label: "Compare this week's production to last week",
+        keywords: ['compare', 'week', 'production', 'this week', 'last week'],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'compare_prod_month_over_month',
+        label: "Compare this month's production to last month",
+        keywords: [
+          'compare',
+          'month',
+          'production',
+          'this month',
+          'last month',
+        ],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'chart_hourly_production_today',
+        label: 'Chart the hourly production for today',
+        keywords: ['chart', 'hourly', 'today', 'production', 'generation'],
+        requiredTools: ['database', 'code'], // postgres_query + code_exec_python
+      },
+      {
+        id: 'grid_imports_7d',
+        label: 'How much energy did I import from the grid in the past 7 days?',
+        keywords: ['grid', 'import', 'imports', 'past 7 days', 'last week'],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'grid_exports_7d',
+        label: 'How much energy did I export to the grid in the past 7 days?',
+        keywords: ['grid', 'export', 'exports', 'past 7 days', 'last week'],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'co2_avoided_7d',
+        label: 'How much CO₂ did I avoid in the past 7 days?',
+        keywords: [
+          'co2',
+          'carbon',
+          'emissions',
+          'avoided',
+          'past 7 days',
+          'last week',
+        ],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'top3_days_last_month',
+        label: 'What were my top 3 production days last month?',
+        keywords: ['top', 'best', 'production', 'days', 'last month'],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'overnight_consumption_7d',
+        label: 'How much overnight energy did I consume in the past 7 days?',
+        keywords: [
+          'overnight',
+          'night',
+          'consumption',
+          'past 7 days',
+          'last week',
+        ],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'explain_solar_panels',
+        label: 'How do solar panels work?',
+        keywords: ['solar', 'panels', 'work', 'explain', 'how'],
+        requiredTools: [], // No special tools needed
+      },
+      {
+        id: 'weather_impact',
+        label: 'How does weather affect my solar production?',
+        keywords: ['weather', 'impact', 'affect', 'solar', 'production'],
+        requiredTools: [], // No special tools needed
+      },
+      {
+        id: 'maintenance_tips',
+        label: 'What maintenance does my solar system need?',
+        keywords: ['maintenance', 'care', 'solar', 'system', 'tips'],
+        requiredTools: [], // No special tools needed
+      },
+      {
+        id: 'savings_calculation',
+        label: 'How are my energy savings calculated?',
+        keywords: ['savings', 'calculate', 'calculation', 'how', 'energy'],
+        requiredTools: [], // No special tools needed
+      },
+      {
+        id: 'system_efficiency',
+        label: 'What is my system efficiency this month?',
+        keywords: [
+          'efficiency',
+          'performance',
+          'system',
+          'this month',
+          'effective',
+        ],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'battery_storage_status',
+        label: 'What is my current battery storage level?',
+        keywords: ['battery', 'storage', 'level', 'current', 'charge'],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'daily_production_trend',
+        label: 'Show me my daily production trend for the last 30 days',
+        keywords: ['daily', 'trend', 'production', '30 days', 'month'],
+        requiredTools: ['database', 'code'], // postgres_query + code_exec_python
+      },
+      {
+        id: 'best_production_hour',
+        label: 'What time of day produces the most energy?',
+        keywords: ['time', 'hour', 'best', 'most', 'production', 'peak'],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'worst_production_day',
+        label: 'What was my lowest production day this month?',
+        keywords: [
+          'lowest',
+          'worst',
+          'minimum',
+          'production',
+          'day',
+          'this month',
+        ],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'net_energy',
+        label: 'What is my net energy for the past month?',
+        keywords: ['net', 'energy', 'balance', 'past month', 'total'],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'luminaire_products',
+        label: 'What products does Luminaire Solar offer?',
+        keywords: ['products', 'offer', 'luminaire', 'available', 'catalog'],
+        requiredTools: ['web'], // html_to_markdown
+      },
+      {
+        id: 'about_luminaire',
+        label: 'Tell me about Luminaire Solar company',
+        keywords: ['about', 'company', 'luminaire', 'who', 'information'],
+        requiredTools: ['web'], // html_to_markdown
+      },
+      {
+        id: 'epa_solar_technology',
+        label: 'What does the EPA say about solar cell technology?',
+        keywords: ['epa', 'solar', 'technology', 'cell', 'guidelines'],
+        requiredTools: ['pdf'], // pdf_to_markdown
+      },
+      {
+        id: 'epa_environmental_claims',
+        label: 'What are the EPA guidelines for solar environmental claims?',
+        keywords: [
+          'epa',
+          'environmental',
+          'claims',
+          'guidelines',
+          'regulations',
+        ],
+        requiredTools: ['pdf'], // pdf_to_markdown
+      },
+      {
+        id: 'monthly_comparison',
+        label: 'Compare my energy production for the last 3 months',
+        keywords: ['compare', 'months', 'production', 'last', 'quarterly'],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'chart_weekly_consumption',
+        label: 'Chart my weekly consumption pattern',
+        keywords: [
+          'chart',
+          'weekly',
+          'consumption',
+          'pattern',
+          'visualization',
+        ],
+        requiredTools: ['database', 'code'], // postgres_query + code_exec_python
+      },
+      {
+        id: 'grid_dependence',
+        label: 'How dependent am I on the grid this month?',
+        keywords: ['grid', 'dependent', 'dependence', 'reliance', 'this month'],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'energy_independence',
+        label: 'What percentage of my energy is self-generated?',
+        keywords: ['self', 'generated', 'independent', 'percentage', 'own'],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'cost_savings_estimate',
+        label: 'Estimate my cost savings based on current production',
+        keywords: ['cost', 'savings', 'money', 'estimate', 'financial'],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'seasonal_comparison',
+        label: 'How does my winter production compare to summer?',
+        keywords: ['seasonal', 'winter', 'summer', 'compare', 'season'],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'production_forecast',
+        label: 'What is my production forecast for next week?',
+        keywords: ['forecast', 'prediction', 'next', 'week', 'expected'],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'system_health',
+        label: 'Is my system performing normally?',
+        keywords: ['health', 'normal', 'performing', 'status', 'check'],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'carbon_offset',
+        label: 'How much carbon have I offset this year?',
+        keywords: ['carbon', 'offset', 'environmental', 'year', 'impact'],
+        requiredTools: ['database'], // postgres_query
+      },
+      {
+        id: 'chart_prod_cons_monthly',
+        label: 'Chart my monthly production vs consumption',
+        keywords: [
+          'chart',
+          'monthly',
+          'production',
+          'consumption',
+          'comparison',
+        ],
+        requiredTools: ['database', 'code'], // postgres_query + code_exec_python
+      },
+      {
+        id: 'peak_hours_analysis',
+        label: 'Analyze my peak production hours today',
+        keywords: ['analyze', 'peak', 'hours', 'today', 'production'],
+        requiredTools: ['database', 'code'], // postgres_query + code_exec_python
+      },
+    ],
+    []
+  );
 
   const handleChatToggle = () => {
     setOpen((prev) => !prev);
@@ -1044,7 +1454,7 @@ export function Assistant() {
                 <CloseIcon />
               </button>
             </div>
-            <Chat suggestions={suggestions} />
+            <Chat suggestions={suggestions} isOpen={open} />
           </div>
         </div>
       ) : null}

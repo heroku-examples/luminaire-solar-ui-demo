@@ -1,11 +1,12 @@
-export default function CartIcon({ className }) {
+export default function ChatIcon({ className }) {
   return (
     <svg
-      width="70"
-      height="70"
+      width="100%"
+      height="100%"
       viewBox="0 0 70 70"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      style={{ display: 'block' }}
     >
       <circle cx="35" cy="35" r="35" fill="#7526E3" />
       <path

@@ -3,9 +3,18 @@ import { Header } from '@/components/ui/Header.jsx';
 import { Footer } from '@/components/ui/Footer';
 import { ErrorBoundary } from 'react-error-boundary';
 import { getChatbotComponent } from '@/components/ui/Chat/helpers/chatbotSwitch';
+import { useLocation } from 'react-router-dom';
+import { useRouteContext } from '/:core.jsx';
 
 export default function Default({ children }) {
   const ChatbotComponent = getChatbotComponent();
+  const location = useLocation();
+  const { snapshot } = useRouteContext();
+
+  // Only show chat on dashboard when a system is selected
+  const isDashboard = location.pathname === '/dashboard';
+  const hasSystemSelected = snapshot?.system?.id != null;
+  const showChat = isDashboard && hasSystemSelected;
 
   function fallbackRender({ error, resetErrorBoundary }) {
     return (
@@ -33,11 +42,7 @@ export default function Default({ children }) {
           </ErrorBoundary>
         </div>
         <Footer />
-        {ChatbotComponent && (
-          <div className="fixed bottom-8 right-8 drop-shadow-xl z-50">
-            <ChatbotComponent />
-          </div>
-        )}
+        {ChatbotComponent && showChat && <ChatbotComponent />}
       </Suspense>
     </div>
   );

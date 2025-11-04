@@ -335,7 +335,7 @@ function AnalysisDisplay({ analysis }) {
   }
 
   return (
-    <div className="col-span-1 border rounded-lg border-[#e5e7eb] bg-white p-4">
+    <div className="col-span-1 bg-white border-solid border-2 border-gray-200 rounded-xl shadow-md p-4">
       <div className="w-full flex justify-between">
         <p className="uppercase text-xs text-[#596981] font-bold">
           7 day predicted energy savings
@@ -375,7 +375,7 @@ function EfficiencyForecast({ forecast }) {
   if (!forecast) return;
   const dayOfWeek = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
   return (
-    <div className="col-span-1 border rounded-lg bg-white border-[#e5e7eb] p-4">
+    <div className="col-span-1 bg-white border-solid border-2 border-gray-200 rounded-xl shadow-md p-4">
       <p className="uppercase text-xs text-[#596981] font-bold">
         7 day solar production forecast
       </p>

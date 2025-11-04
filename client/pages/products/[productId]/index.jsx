@@ -39,7 +39,7 @@ export default function Product() {
         / <p>{snapshot.product.name}</p>
       </div>
       <div className="flex items-center">
-        <div className="p-10 w-2/5 bg-white border-[1px] border-light-grey rounded-[4px]">
+        <div className="p-10 w-2/5 bg-white border-solid border-2 border-gray-200 rounded-xl shadow-md">
           <img src={snapshot.product.imageUrl} className="" />
         </div>
         <div className="w-1/2 pl-28 flex flex-col gap-12">
@@ -57,7 +57,7 @@ export default function Product() {
               : 'Call for price'}
           </p>
           <button
-            className="text-white bg-purple-40 rounded-full text-semibold py-2.5 px-5 cursor-pointer max-w-min text-nowrap disabled:cursor-not-allowed disabled:opacity-20"
+            className="text-white bg-purple-40 rounded-full text-semibold py-2.5 px-5 cursor-pointer max-w-min text-nowrap disabled:cursor-not-allowed disabled:opacity-20 shadow-lg shadow-purple-40/30 transition-all duration-200 hover:shadow-xl hover:shadow-purple-40/40 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md disabled:hover:translate-y-0 disabled:hover:shadow-lg"
             onClick={addToCart(snapshot.product)}
             disabled={!snapshot.product.price}
           >

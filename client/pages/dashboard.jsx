@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useRouteContext } from '/:core.jsx';
 import { title } from '@/theme.js';
@@ -23,6 +24,7 @@ export function getMeta(ctx) {
 
 export default function Dashboard() {
   const { snapshot, state, actions } = useRouteContext();
+  const navigate = useNavigate();
   const [system, setSystem] = useState(null);
   const [performanceTimeFrame, setPerformanceTimeFrame] = useState('daily');
 
@@ -34,17 +36,20 @@ export default function Dashboard() {
     setSystem(value);
   };
 
+  // Redirect if not logged in
+  useEffect(() => {
+    if (!state.user) {
+      navigate('/');
+    }
+  }, [state.user, navigate]);
+
   useEffect(() => {
     async function fetchForecast() {
-      if (!system) return;
+      if (!system || !state.user) return;
       await actions.getForecastBySystem(state, system);
     }
     fetchForecast();
-  }, [system]);
-
-  // if (!state.user) {
-  //   throw new Error('Unauthorized');
-  // }
+  }, [system, state.user]);
 
   // Get systems by user
   useEffect(() => {
@@ -53,22 +58,22 @@ export default function Dashboard() {
       await actions.getSystemsByUser(state);
     }
     fetchSystems();
-  }, [state]);
+  }, [state.user]);
 
   useEffect(() => {
     async function fetchSystemDetails() {
-      if (!system) return;
+      if (!system || !state.user) return;
       await actions.getSystemDetailsBySystem(state, system);
       await actions.getSystemWeatherBySystem(state, system);
       await actions.getActivityHistoryBySystem(state, system);
     }
     fetchSystemDetails();
-  }, [system]);
+  }, [system, state.user]);
 
   // Get metrics by system
   useEffect(() => {
     async function fetchMetrics() {
-      if (!system) return;
+      if (!system || !state.user) return;
       await actions.getMetricsSummaryBySystem(
         state,
         system,
@@ -76,7 +81,12 @@ export default function Dashboard() {
       );
     }
     fetchMetrics();
-  }, [system]);
+  }, [system, state.user]);
+
+  // Don't render dashboard if no user
+  if (!state.user) {
+    return null;
+  }
 
   return (
     <div className="pb-28">
@@ -87,7 +97,7 @@ export default function Dashboard() {
         </p>
         <div className="relative flex-grow">
           <select
-            className="w-full appearance-none pl-3 pr-8 my-2 relative"
+            className="w-full appearance-none pl-4 pr-10 py-3.5 my-2 relative border border-gray-300 rounded-full bg-white transition-all duration-200 focus:outline-none focus:border-purple-40 focus:shadow-lg focus:shadow-purple-40/20 hover:border-purple-40 hover:shadow-md hover:shadow-purple-40/10 min-h-[52px]"
             onChange={(value, _option) => {
               const systemId = value.target.selectedOptions[0].value;
               handleSetSystem(systemId);
@@ -98,7 +108,7 @@ export default function Dashboard() {
               {' '}
               -- Select a system --{' '}
             </option>
-            {snapshot.systems.map((s) => {
+            {snapshot.systems?.map((s) => {
               return (
                 <option value={s.id} key={`dashboard-list-${s.id}`}>
                   {`🏡 ${s.address}, ${s.city}, ${s.state}, ${s.zip}, ${s.country}`}
@@ -106,14 +116,14 @@ export default function Dashboard() {
               );
             })}
           </select>
-          <div className="absolute top-2.5 right-2.5">
+          <div className="absolute top-1/2 right-3 -translate-y-1/2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="black"
               viewBox="0 0 24 24"
               strokeWidth="1.2"
               stroke="black"
-              className="h-5 w-5 absolute top-0 right-0 translate-y-1/4 text-slate-700 pointer-events-none"
+              className="h-5 w-5 text-slate-700 pointer-events-none"
             >
               <path
                 strokeLinecap="round"
@@ -240,11 +250,11 @@ const LargeMetricsCard = ({
       <div className="w-full h-full p-6 flex gap-3 justify-between bg-white border-solid border-2 border-gray-200 rounded-xl shadow-md">
         <div className="flex flex-col justify-start gap-5 relative">
           <p className="font-bold text-dark-grey text-h5">{title}</p>
-          <div className="flex items-center rounded-md border border-light-grey cursor-pointer">
+          <div className="flex items-center rounded-full border border-gray-300 cursor-pointer transition-all duration-200 hover:border-purple-40 hover:shadow-md hover:shadow-purple-40/10 focus-within:border-purple-40 focus-within:shadow-lg focus-within:shadow-purple-40/20 min-h-[44px]">
             <select
               value={timeFrame}
               onChange={(e) => handleTimeFrameChange(e.target.value)}
-              className="h-9 bg-transparent p-1 appearance-none focus:outline-none"
+              className="h-full bg-transparent px-3 py-2 appearance-none focus:outline-none"
             >
               {effectiveOptions.map((option, idx) => (
                 <option className="" key={`option-${idx}`} value={option.value}>
@@ -258,7 +268,7 @@ const LargeMetricsCard = ({
               viewBox="0 0 24 24"
               strokeWidth="1.2"
               stroke="black"
-              className="h-5 w-5 text-slate-700 pointer-events-none"
+              className="h-4 w-4 text-slate-700 pointer-events-none mr-2"
             >
               <path
                 strokeLinecap="round"

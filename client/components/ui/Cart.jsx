@@ -33,7 +33,10 @@ function CartList({ cart }) {
               <p>x</p>
               <p className="">{item.quantity}</p>
             </div>
-            <button className="text-heroku-red" onClick={removeFromCart(item)}>
+            <button
+              className="text-heroku-red font-semibold px-3 py-1 rounded-full transition-all duration-200 hover:bg-red-50 hover:shadow-md active:shadow-sm"
+              onClick={removeFromCart(item)}
+            >
               Remove
             </button>
           </div>
@@ -71,7 +74,7 @@ export function CartModal({ snapshot, setOpen }) {
         onClick={() => setOpen((prev) => !prev)}
       />
       <div className="relative">
-        <div className="absolute left-0 top-0 -translate-x-[90%] translate-y-8  bg-lightest-grey p-5 border-dark-gray border-2 text-nowrap w-[33vw] rounded-md">
+        <div className="absolute left-0 top-0 -translate-x-[90%] translate-y-8 bg-white border-solid border-2 border-gray-200 rounded-xl shadow-md p-5 text-nowrap w-[33vw]">
           <CartList cart={snapshot.cart} />
         </div>
       </div>

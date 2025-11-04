@@ -17,11 +17,33 @@ import SendIcon from './icons/SendIcon.jsx';
 import CloseIcon from './icons/CloseIcon.jsx';
 import { flushSync } from 'react-dom';
 
+const palette = {
+  primary: '#5D3EFF',
+  primaryHover: '#4C36D1',
+  assistantBackground: '#F4F6FF',
+  assistantBorder: '#D8DDF8',
+  userGradient:
+    'linear-gradient(135deg, rgba(107, 70, 255, 0.96) 0%, rgba(165, 113, 255, 0.92) 100%)',
+  userShadow: '0 12px 28px rgba(89, 62, 214, 0.28)',
+  textDark: '#1B2033',
+  agentText: '#5B6A91',
+  errorBackground: '#FFECEE',
+  errorText: '#D14343',
+  inputBackground: 'rgba(255, 255, 255, 0.92)',
+  inputBorder: 'rgba(182, 193, 237, 0.9)',
+  inputShadow: '0 20px 36px rgba(16, 24, 64, 0.10)',
+  suggestionBackground:
+    'linear-gradient(135deg, rgba(117, 38, 227, 0.08) 0%, rgba(165, 113, 255, 0.12) 100%)',
+  suggestionBorder: 'rgba(117, 38, 227, 0.35)',
+  suggestionText: '#5D3EFF',
+};
+
 const useChatStream = ({ onError } = {}) => {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
       content: "Hello, I'm Luminaire Agent, how can I help you today?",
+      timestamp: new Date().toISOString(),
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);
@@ -30,10 +52,15 @@ const useChatStream = ({ onError } = {}) => {
   const sendMessage = async (message, actions, state) => {
     if (!message.trim()) return;
 
-    const userMessage = { role: 'user', content: message };
+    const userMessage = {
+      role: 'user',
+      content: message,
+      timestamp: new Date().toISOString(),
+    };
     const agentMessage = {
       role: 'agent',
       content: 'Luminaire Agent is processing your request...',
+      timestamp: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, userMessage, agentMessage]);
     setIsLoading(true);
@@ -67,6 +94,7 @@ const useChatStream = ({ onError } = {}) => {
               error.message === 'Unauthorized'
                 ? 'Session expired. Please refresh the page.'
                 : 'Sorry, there was an error processing your message',
+            timestamp: new Date().toISOString(),
           },
         ];
       });
@@ -88,7 +116,10 @@ const useChatStream = ({ onError } = {}) => {
         setSessionId(message.sessionId);
       }
       flushSync(() => {
-        setMessages((prevMessages) => [...prevMessages, message]);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { ...message, timestamp: new Date().toISOString() },
+        ]);
       });
     };
 
@@ -115,7 +146,10 @@ const useChatStream = ({ onError } = {}) => {
         const updatedMessages = [...prevMessages];
         if (isFirstAssistantMessage) {
           isFirstAssistantMessage = false;
-          return [...updatedMessages, { role: 'assistant', content }];
+          return [
+            ...updatedMessages,
+            { role: 'assistant', content, timestamp: new Date().toISOString() },
+          ];
         }
         const lastMessage = updatedMessages[updatedMessages.length - 1];
         if (lastMessage?.role === 'assistant') {
@@ -191,7 +225,11 @@ const useChatStream = ({ onError } = {}) => {
 
       setMessages((prev) => [
         ...prev,
-        { role: 'error', content: errorMessage },
+        {
+          role: 'error',
+          content: errorMessage,
+          timestamp: new Date().toISOString(),
+        },
       ]);
     } finally {
       try {
@@ -221,52 +259,82 @@ const IconWrapper = ({ isLast }) => {
       }}
     >
       {isLast ? (
-        <Loader size="xs" color="blue" />
+        <Loader size="xs" color={palette.primary} />
       ) : (
-        <IconCheck size={14} color="green" />
+        <IconCheck size={14} color={palette.primary} />
       )}
     </div>
   );
 };
 
-const Message = ({ role, content, isLast, onImageClick }) => {
+const Message = ({ role, content, isLast, onImageClick, timestamp }) => {
   const theme = useMantineTheme();
+
+  const formatTimestamp = (isoString) => {
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+
+    if (isToday) {
+      return date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      });
+    }
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  };
+
   const messageStyles = {
     base: {
       padding: '12px 10px',
       maxWidth: '80%',
       borderRadius: '16px',
       marginBottom: '16px',
+      border: '1px solid transparent',
+      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+      backdropFilter: 'blur(8px)',
     },
     user: {
       marginLeft: 'auto',
-      background: '#7526E3',
+      background: palette.userGradient,
       color: 'white',
-      borderBottomRightRadius: '4px',
+      borderBottomRightRadius: '10px',
+      boxShadow: palette.userShadow,
     },
     assistant: {
-      background: '#F7F8FB',
-      border: '1px solid #D0D7E5',
-      color: '#333',
-      borderBottomLeftRadius: '4px',
+      background: palette.assistantBackground,
+      border: `1px solid ${palette.assistantBorder}`,
+      color: palette.textDark,
+      borderBottomLeftRadius: '10px',
+      boxShadow: '0 14px 32px rgba(15, 23, 42, 0.06)',
     },
     agent: {
       fontStyle: 'italic',
-      color: '#666666',
+      color: palette.agentText,
       padding: 0,
       marginBottom: 0,
       borderRadius: 0,
     },
     tool: {
       fontStyle: 'italic',
-      color: '#666666',
+      color: palette.agentText,
       padding: 0,
       marginBottom: 0,
       borderRadius: 0,
     },
     error: {
-      background: '#ffebee',
-      color: '#d32f2f',
+      background: palette.errorBackground,
+      color: palette.errorText,
+      border: '1px solid rgba(209, 67, 67, 0.22)',
+      boxShadow: '0 10px 20px rgba(209, 67, 67, 0.12)',
     },
   };
 
@@ -286,102 +354,120 @@ const Message = ({ role, content, isLast, onImageClick }) => {
       : content;
 
   return (
-    <Box style={style}>
-      {role === 'agent' || role === 'tool' ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span
-            style={{
-              display: 'inline-flex',
-              width: 16,
-              justifyContent: 'center',
+    <div style={{ marginBottom: '8px' }}>
+      <Box style={style}>
+        {role === 'agent' || role === 'tool' ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span
+              style={{
+                display: 'inline-flex',
+                width: 16,
+                justifyContent: 'center',
+              }}
+            >
+              {role === 'tool' ? (
+                <IconTools size={14} color={palette.agentText} />
+              ) : null}
+            </span>
+            <Text size="xs" style={{ flex: 1 }}>
+              {processedContent}
+            </Text>
+            <IconWrapper isLast={isLast} />
+          </div>
+        ) : role === 'assistant' ? (
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw]}
+            components={{
+              img: ({ src, alt }) => (
+                <img
+                  src={src}
+                  alt={alt}
+                  style={{
+                    maxWidth: '100%',
+                    borderRadius: '6px',
+                    cursor: 'zoom-in',
+                  }}
+                  onClick={() => onImageClick?.(src, alt)}
+                />
+              ),
+              a: ({ children, href, target }) => (
+                <a
+                  style={{
+                    color: theme.colors.violet[4],
+                    textDecoration: 'underline',
+                  }}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {children}
+                </a>
+              ),
+              ul: ({ children }) => (
+                <ul
+                  style={{
+                    paddingLeft: '2rem',
+                    listStyle: 'disc',
+                    marginBottom: '1rem',
+                  }}
+                >
+                  {children}
+                </ul>
+              ),
+              ol: ({ children }) => (
+                <ol
+                  style={{
+                    paddingLeft: '2rem',
+                    listStyle: 'decimal',
+                    marginBottom: '1rem',
+                  }}
+                >
+                  {children}
+                </ol>
+              ),
+              pre: ({ children }) => (
+                <pre
+                  style={{
+                    background: '#eaecef',
+                    padding: '12px',
+                    borderRadius: '4px',
+                  }}
+                >
+                  {children}
+                </pre>
+              ),
+              code: ({ children }) => (
+                <code style={{ background: '#eaecef', padding: '2px 4px' }}>
+                  {children}
+                </code>
+              ),
+              p: ({ children }) => (
+                <p style={{ marginBottom: '4px' }}>{children}</p>
+              ),
             }}
           >
-            {role === 'tool' ? <IconTools size={14} color="#666666" /> : null}
-          </span>
-          <Text size="xs" style={{ flex: 1 }}>
             {processedContent}
-          </Text>
-          <IconWrapper isLast={isLast} />
-        </div>
-      ) : role === 'assistant' ? (
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          rehypePlugins={[rehypeRaw]}
-          components={{
-            img: ({ src, alt }) => (
-              <img
-                src={src}
-                alt={alt}
-                style={{
-                  maxWidth: '100%',
-                  borderRadius: '6px',
-                  cursor: 'zoom-in',
-                }}
-                onClick={() => onImageClick?.(src, alt)}
-              />
-            ),
-            a: ({ children, href, target }) => (
-              <a
-                style={{
-                  color: theme.colors.violet[4],
-                  textDecoration: 'underline',
-                }}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {children}
-              </a>
-            ),
-            ul: ({ children }) => (
-              <ul
-                style={{
-                  paddingLeft: '2rem',
-                  listStyle: 'disc',
-                  marginBottom: '1rem',
-                }}
-              >
-                {children}
-              </ul>
-            ),
-            ol: ({ children }) => (
-              <ol
-                style={{
-                  paddingLeft: '2rem',
-                  listStyle: 'decimal',
-                  marginBottom: '1rem',
-                }}
-              >
-                {children}
-              </ol>
-            ),
-            pre: ({ children }) => (
-              <pre
-                style={{
-                  background: '#eaecef',
-                  padding: '12px',
-                  borderRadius: '4px',
-                }}
-              >
-                {children}
-              </pre>
-            ),
-            code: ({ children }) => (
-              <code style={{ background: '#eaecef', padding: '2px 4px' }}>
-                {children}
-              </code>
-            ),
-            p: ({ children }) => (
-              <p style={{ marginBottom: '4px' }}>{children}</p>
-            ),
+          </ReactMarkdown>
+        ) : (
+          <div>{processedContent}</div>
+        )}
+      </Box>
+      {timestamp && role !== 'agent' && role !== 'tool' && (
+        <div
+          style={{
+            fontSize: '10px',
+            color: '#9CA3AF',
+            marginTop: '4px',
+            textAlign: role === 'user' ? 'right' : 'left',
+            paddingLeft: role === 'user' ? '0' : '10px',
+            paddingRight: role === 'user' ? '10px' : '0',
           }}
         >
-          {processedContent}
-        </ReactMarkdown>
-      ) : (
-        <div>{processedContent}</div>
+          {formatTimestamp(timestamp)}
+        </div>
       )}
-    </Box>
+    </div>
   );
 };
 
@@ -393,6 +479,7 @@ const Chat = ({ suggestions = [] }) => {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [zoomImageSrc, setZoomImageSrc] = useState('');
   const [zoomImageAlt, setZoomImageAlt] = useState('');
+  const [isInputFocused, setIsInputFocused] = useState(false);
 
   const { messages, isLoading, sendMessage } = useChatStream({
     onError: () => focus(),
@@ -426,6 +513,56 @@ const Chat = ({ suggestions = [] }) => {
     setCurrentMessage('');
     focus();
   };
+
+  const inputWrapperStyle = useMemo(
+    () => ({
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+      background: palette.inputBackground,
+      border: `1px solid ${isInputFocused ? palette.primary : palette.inputBorder}`,
+      borderRadius: '999px',
+      padding: '10px 10px 10px 20px',
+      boxShadow: isInputFocused
+        ? '0 16px 38px rgba(93, 62, 255, 0.20)'
+        : palette.inputShadow,
+      transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+      backdropFilter: 'blur(12px)',
+    }),
+    [isInputFocused]
+  );
+
+  const inputStyle = useMemo(
+    () => ({
+      background: 'transparent',
+      border: 'none',
+      outline: 'none',
+      fontSize: '14px',
+      color: palette.textDark,
+      width: '100%',
+    }),
+    []
+  );
+
+  const sendButtonStyle = useMemo(
+    () => ({
+      height: '40px',
+      width: '40px',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: '50%',
+      border: '1px solid rgba(255, 255, 255, 0.28)',
+      background: `linear-gradient(135deg, ${palette.primary} 0%, ${palette.primaryHover} 100%)`,
+      boxShadow: '0 18px 34px rgba(93, 62, 255, 0.26)',
+      color: '#FFFFFF',
+      transition:
+        'transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease',
+      cursor: isLoading || !currentMessage.trim() ? 'not-allowed' : 'pointer',
+      opacity: isLoading || !currentMessage.trim() ? 0.65 : 1,
+    }),
+    [currentMessage, isLoading]
+  );
 
   const handleImageClick = (src, alt) => {
     if (!src) return;
@@ -480,6 +617,13 @@ const Chat = ({ suggestions = [] }) => {
     lastMessage?.role === 'assistant' &&
     selectedSuggestions.length > 0;
 
+  const suggestionButtonStyle = {
+    background: palette.suggestionBackground,
+    borderColor: palette.suggestionBorder,
+    color: palette.suggestionText,
+    boxShadow: '0 10px 24px rgba(24, 34, 78, 0.09)',
+  };
+
   const handleSuggestionClick = async (text) => {
     if (!text || isLoading) return;
     await sendMessage(text, actions, state);
@@ -499,6 +643,7 @@ const Chat = ({ suggestions = [] }) => {
                 content={msg.content}
                 isLast={i === messages.length - 1}
                 onImageClick={handleImageClick}
+                timestamp={msg.timestamp}
               />
             ))}
           </Stack>
@@ -508,7 +653,30 @@ const Chat = ({ suggestions = [] }) => {
                 {selectedSuggestions.map((s) => (
                   <button
                     key={s.id}
-                    className="text-xs px-3 py-2 rounded-full border border-dark-grey bg-white hover:bg-light-grey transition-colors"
+                    className="text-xs px-3 py-2 rounded-2xl border transition-all duration-200 font-medium"
+                    style={{
+                      ...suggestionButtonStyle,
+                      opacity: isLoading ? 0.6 : 1,
+                      cursor: isLoading ? 'not-allowed' : 'pointer',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow =
+                        '0 12px 28px rgba(93, 62, 255, 0.25)';
+                      e.currentTarget.style.borderColor =
+                        'rgba(117, 38, 227, 0.5)';
+                      e.currentTarget.style.background =
+                        'linear-gradient(135deg, rgba(117, 38, 227, 0.12) 0%, rgba(165, 113, 255, 0.18) 100%)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow =
+                        '0 10px 24px rgba(24, 34, 78, 0.09)';
+                      e.currentTarget.style.borderColor =
+                        suggestionButtonStyle.borderColor;
+                      e.currentTarget.style.background =
+                        suggestionButtonStyle.background;
+                    }}
                     onClick={() =>
                       handleSuggestionClick(s.label || s.text || '')
                     }
@@ -550,19 +718,37 @@ const Chat = ({ suggestions = [] }) => {
           </div>
         </Modal>
         <div className="bg-lightest-grey rounded-b-3xl px-6 pt-4 pb-8">
-          <div className="flex gap-4 bg-white border border-dark-grey rounded-3xl py-[2px] pl-2 pr-[2px]">
+          <div className="flex gap-3 w-full" style={inputWrapperStyle}>
             <input
-              className="bg-transparent focus:outline-none overflow-hidden overflow-ellipsis w-[840px]"
+              className="overflow-hidden overflow-ellipsis"
               placeholder="Type your message here..."
               value={currentMessage}
               ref={inputRef}
               onChange={(e) => setCurrentMessage(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               disabled={isLoading}
+              style={inputStyle}
+              onFocus={() => setIsInputFocused(true)}
+              onBlur={() => setIsInputFocused(false)}
             />
             <button
-              className="h-8 w-8 flex justify-center items-center ml-auto bg-purple-40 rounded-full text-white"
+              className="ml-auto"
               onClick={handleSend}
+              style={sendButtonStyle}
+              disabled={isLoading || !currentMessage.trim()}
+              onMouseDown={(e) => e.preventDefault()}
+              onMouseOver={(e) => {
+                if (isLoading || !currentMessage.trim()) return;
+                e.currentTarget.style.transform =
+                  'translateY(-1px) scale(1.02)';
+                e.currentTarget.style.boxShadow =
+                  '0 20px 42px rgba(93, 62, 255, 0.32)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = 'none';
+                e.currentTarget.style.boxShadow =
+                  '0 18px 34px rgba(93, 62, 255, 0.26)';
+              }}
             >
               <SendIcon />
             </button>
@@ -575,6 +761,138 @@ const Chat = ({ suggestions = [] }) => {
 
 export function Assistant() {
   const [open, setOpen] = useState(false);
+
+  const panelShellStyle = useMemo(
+    () => ({
+      position: 'fixed',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 999999,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'flex-end',
+      gap: '16px',
+    }),
+    []
+  );
+
+  const panelStyle = useMemo(
+    () => ({
+      width: '600px',
+      minWidth: '500px',
+      maxWidth: '900px',
+      height: '100%',
+      background:
+        'linear-gradient(180deg, rgba(255,255,255,0.96) 0%, #F6F7FF 100%)',
+      borderRadius: '0',
+      boxShadow: '0 34px 84px rgba(15, 23, 42, 0.28)',
+      border: '1px solid rgba(99, 102, 241, 0.18)',
+      resize: 'none',
+      overflow: 'hidden',
+      backdropFilter: 'blur(18px)',
+      display: 'flex',
+      flexDirection: 'column',
+    }),
+    []
+  );
+
+  const headerStyle = useMemo(
+    () => ({
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '22px 26px',
+      background: `linear-gradient(130deg, ${palette.primary} 0%, #7B5CFF 62%, ${palette.primaryHover} 100%)`,
+      borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
+      color: '#FFFFFF',
+    }),
+    []
+  );
+
+  const headerInfoStyle = useMemo(
+    () => ({
+      display: 'flex',
+      alignItems: 'center',
+      gap: '14px',
+    }),
+    []
+  );
+
+  const headerBadgeStyle = useMemo(
+    () => ({
+      height: '44px',
+      width: '44px',
+      borderRadius: '16px',
+      background: 'rgba(255, 255, 255, 0.22)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      boxShadow: '0 16px 24px rgba(15, 16, 64, 0.18)',
+      overflow: 'hidden',
+    }),
+    []
+  );
+
+  const headerTitleStyle = useMemo(
+    () => ({
+      margin: 0,
+      fontSize: '17px',
+      fontWeight: 600,
+      color: '#FFFFFF',
+    }),
+    []
+  );
+
+  const headerSubtitleStyle = useMemo(
+    () => ({
+      margin: '4px 0 0',
+      fontSize: '12px',
+      fontWeight: 400,
+      color: 'rgba(255, 255, 255, 0.75)',
+    }),
+    []
+  );
+
+  const closeButtonStyle = useMemo(
+    () => ({
+      height: '38px',
+      width: '38px',
+      borderRadius: '14px',
+      border: '1px solid rgba(255, 255, 255, 0.28)',
+      background: 'rgba(255, 255, 255, 0.18)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: '#FFFFFF',
+      cursor: 'pointer',
+      transition: 'transform 0.15s ease, background 0.15s ease',
+    }),
+    []
+  );
+
+  const toggleButtonStyle = useMemo(
+    () => ({
+      position: 'fixed',
+      bottom: '32px',
+      right: '32px',
+      zIndex: 999999,
+      height: '56px',
+      width: '56px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '0',
+      borderRadius: '50%',
+      border: '1px solid rgba(93, 62, 255, 0.34)',
+      background: `linear-gradient(135deg, ${palette.primary} 0%, ${palette.primaryHover} 100%)`,
+      boxShadow: '0 22px 44px rgba(93, 62, 255, 0.32)',
+      color: '#FFFFFF',
+      cursor: 'pointer',
+      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+    }),
+    []
+  );
 
   const suggestions = [
     {
@@ -685,28 +1003,73 @@ export function Assistant() {
   ];
 
   const handleChatToggle = () => {
-    setOpen(!open);
+    setOpen((prev) => !prev);
   };
 
   return (
     <>
-      <div
-        className={`flex flex-col w-[900px] h-[800px] z-[999999] bg-white shadow-xl border border-light-grey rounded-3xl ${open ? '' : 'hidden'}`}
-      >
-        <div className="flex justify-between items-center bg-light-grey py-4 px-6 rounded-t-3xl">
-          <p className="font-semibold text-sm">Luminaire Agent Chat</p>
-          <div onClick={handleChatToggle} className="hover:cursor-pointer">
-            <CloseIcon />
+      {open ? (
+        <div style={panelShellStyle}>
+          <div className="chat-panel flex flex-col" style={panelStyle}>
+            <div style={headerStyle}>
+              <div style={headerInfoStyle}>
+                <div style={headerBadgeStyle}>
+                  <div style={{ width: '28px', height: '28px' }}>
+                    <ChatIcon />
+                  </div>
+                </div>
+                <div>
+                  <p style={headerTitleStyle}>Luminaire Agent</p>
+                  <p style={headerSubtitleStyle}>
+                    Smart guidance for your solar data
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleChatToggle}
+                style={closeButtonStyle}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.04)';
+                  e.currentTarget.style.background =
+                    'rgba(255, 255, 255, 0.28)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.background =
+                    'rgba(255, 255, 255, 0.18)';
+                }}
+                aria-label="Close chat"
+              >
+                <CloseIcon />
+              </button>
+            </div>
+            <Chat suggestions={suggestions} />
           </div>
         </div>
-        <Chat suggestions={suggestions} />
-      </div>
-      <div
-        className="w-fit ml-auto mt-8 cursor-pointer hover:opacity-95"
+      ) : null}
+      <button
+        type="button"
         onClick={handleChatToggle}
+        style={{
+          ...toggleButtonStyle,
+          display: open ? 'none' : 'flex',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'scale(1.08)';
+          e.currentTarget.style.boxShadow =
+            '0 26px 48px rgba(93, 62, 255, 0.42)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow =
+            '0 22px 44px rgba(93, 62, 255, 0.32)';
+        }}
+        aria-expanded={open}
+        aria-label="Open chat"
       >
         <ChatIcon />
-      </div>
+      </button>
     </>
   );
 }

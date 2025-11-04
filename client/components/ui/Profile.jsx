@@ -24,12 +24,12 @@ function ProfileModal({ setOpen }) {
         className="absolute top-0 left-0 w-[100vw] h-[100vh] bg-transparent"
         onClick={() => setOpen((prev) => !prev)}
       />
-      <div className="absolute -translate-x-1/2 flex flex-col bg-lightest-grey drop-shadow-md rounded-md p-8 gap-4">
+      <div className="absolute -translate-x-1/2 flex flex-col bg-white border-solid border-2 border-gray-200 rounded-xl shadow-md p-8 gap-4">
         <p className="text-nowrap">
           {state.user.name} {state.user.last_name}
         </p>
         <button
-          className="text-white bg-purple-40 px-6 py-1.5 rounded-full cursor-pointer"
+          className="text-white bg-purple-40 px-6 py-1.5 rounded-full cursor-pointer shadow-lg shadow-purple-40/30 transition-all duration-200 hover:shadow-xl hover:shadow-purple-40/40 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
           onClick={async () => {
             navigate('/');
             await new Promise((resolve) => setTimeout(resolve, 1000));

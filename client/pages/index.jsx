@@ -25,7 +25,9 @@ const Hero = () => {
   const NavButton = ({ children, url, className }) => {
     return (
       <Link to={url}>
-        <button className={`rounded-full py-2.5 px-[6.5625rem] ${className}`}>
+        <button
+          className={`rounded-full py-2.5 px-[6.5625rem] shadow-lg shadow-purple-40/30 transition-all duration-200 hover:shadow-xl hover:shadow-purple-40/40 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md ${className}`}
+        >
           {children}
         </button>
       </Link>

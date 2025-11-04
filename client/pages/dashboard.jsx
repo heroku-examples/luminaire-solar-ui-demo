@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
 import { useRouteContext } from '/:core.jsx';
 import { title } from '@/theme.js';
@@ -24,7 +24,6 @@ export function getMeta(ctx) {
 
 export default function Dashboard() {
   const { snapshot, state, actions } = useRouteContext();
-  const navigate = useNavigate();
   const [system, setSystem] = useState(null);
   const [performanceTimeFrame, setPerformanceTimeFrame] = useState('daily');
 
@@ -36,12 +35,10 @@ export default function Dashboard() {
     setSystem(value);
   };
 
-  // Redirect if not logged in
-  useEffect(() => {
-    if (!state.user) {
-      navigate('/');
-    }
-  }, [state.user, navigate]);
+  // Redirect if not logged in - using Navigate component (no useEffect needed)
+  if (!state.user) {
+    return <Navigate to="/" replace />;
+  }
 
   useEffect(() => {
     async function fetchForecast() {
@@ -83,11 +80,6 @@ export default function Dashboard() {
     fetchMetrics();
   }, [system, state.user]);
 
-  // Don't render dashboard if no user
-  if (!state.user) {
-    return null;
-  }
-
   return (
     <div className="pb-28">
       <h1 className="text-h3 font-semibold py-6">Solar Panel Activity</h1>
@@ -97,33 +89,36 @@ export default function Dashboard() {
         </p>
         <div className="relative flex-grow">
           <select
-            className="w-full appearance-none pl-4 pr-10 py-3.5 my-2 relative border border-gray-300 rounded-full bg-white transition-all duration-200 focus:outline-none focus:border-purple-40 focus:shadow-lg focus:shadow-purple-40/20 hover:border-purple-40 hover:shadow-md hover:shadow-purple-40/10 min-h-[52px]"
+            className="w-full appearance-none pl-4 pr-10 py-3.5 my-2 relative border border-gray-300 rounded-full bg-white transition-all duration-200 focus:outline-none focus:border-purple-40 focus:shadow-lg focus:shadow-purple-40/20 hover:border-purple-40 hover:shadow-md hover:shadow-purple-40/10 min-h-[52px] text-base text-gray-900 leading-normal"
             onChange={(value, _option) => {
               const systemId = value.target.selectedOptions[0].value;
               handleSetSystem(systemId);
             }}
             defaultValue={'null'}
           >
-            <option disabled value="null">
-              {' '}
-              -- Select a system --{' '}
+            <option disabled value="null" className="text-base text-gray-500">
+              -- Select a system --
             </option>
             {snapshot.systems?.map((s) => {
               return (
-                <option value={s.id} key={`dashboard-list-${s.id}`}>
+                <option
+                  value={s.id}
+                  key={`dashboard-list-${s.id}`}
+                  className="text-base text-gray-900"
+                >
                   {`🏡 ${s.address}, ${s.city}, ${s.state}, ${s.zip}, ${s.country}`}
                 </option>
               );
             })}
           </select>
-          <div className="absolute top-1/2 right-3 -translate-y-1/2">
+          <div className="absolute top-1/2 right-3 -translate-y-1/2 pointer-events-none">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="black"
               viewBox="0 0 24 24"
               strokeWidth="1.2"
               stroke="black"
-              className="h-5 w-5 text-slate-700 pointer-events-none"
+              className="h-5 w-5 text-slate-700"
             >
               <path
                 strokeLinecap="round"
@@ -254,10 +249,14 @@ const LargeMetricsCard = ({
             <select
               value={timeFrame}
               onChange={(e) => handleTimeFrameChange(e.target.value)}
-              className="h-full bg-transparent px-3 py-2 appearance-none focus:outline-none"
+              className="h-full bg-transparent px-3 py-2 appearance-none focus:outline-none text-base text-gray-900 leading-normal"
             >
               {effectiveOptions.map((option, idx) => (
-                <option className="" key={`option-${idx}`} value={option.value}>
+                <option
+                  className="text-base text-gray-900"
+                  key={`option-${idx}`}
+                  value={option.value}
+                >
                   {option.label}
                 </option>
               ))}

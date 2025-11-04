@@ -895,6 +895,7 @@ const Chat = ({ suggestions = [], isOpen = false }) => {
           overlayProps={{ opacity: 0.4, blur: 1 }}
           withCloseButton
           title={zoomImageAlt || 'Preview'}
+          zIndex={1000000}
         >
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             {zoomImageSrc ? (

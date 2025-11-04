@@ -212,7 +212,7 @@ export default function Settings() {
         onClose={() => setShowResetDialog(false)}
         onConfirm={handleResetDemo}
         title="Reset Demo Data?"
-        message="This will delete all data and reseed with fresh demo data. You will need to log in again after the reset."
+        message="This will delete all data and reseed with fresh demo data."
         confirmText="Reset Demo"
         cancelText="Cancel"
         loading={resetLoading}

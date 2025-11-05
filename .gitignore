@@ -62,3 +62,4 @@ profile-*
 .next
 .claude
 .cursor
+tsconfig.tsbuildinfo

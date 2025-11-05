@@ -995,16 +995,6 @@ export function Assistant() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {isLoading && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={abortRequest}
-                    className="text-gray-500 hover:text-red-500"
-                  >
-                    <Square className="w-4 h-4" />
-                  </Button>
-                )}
                 <Button
                   variant="ghost"
                   size="icon"

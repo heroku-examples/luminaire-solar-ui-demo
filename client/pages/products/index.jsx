@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useRouteContext } from '/:core.jsx';
 import { title } from '@/theme.js';
 import { Product } from '@/components/ui/Product.jsx';
@@ -12,19 +11,19 @@ export function getMeta() {
 export default function Products() {
   const { snapshot, state, actions } = useRouteContext();
 
-  useEffect(() => {
+  const needsProducts = !snapshot?.products || snapshot.products.length === 0;
+
+  if (needsProducts && actions && !state._loadingProducts) {
+    state._loadingProducts = true;
     async function fetchProducts() {
       await actions.getProducts(state);
+      state._loadingProducts = false;
     }
     fetchProducts();
-  }, []);
+  }
 
-  if (
-    !snapshot ||
-    snapshot.products == null ||
-    snapshot.products.length === 0
-  ) {
-    return <div>No products found</div>;
+  if (needsProducts) {
+    return <div>Loading products...</div>;
   }
 
   return (

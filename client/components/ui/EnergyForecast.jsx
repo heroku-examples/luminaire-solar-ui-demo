@@ -111,8 +111,26 @@ export function MiaAnalysis({ forecast, systemId }) {
 
   // Trigger the analysis when forecast changes.
   useEffect(() => {
-    fetchAnalysis();
-  }, [forecast]);
+    if (!forecast) return;
+
+    async function runAnalysis() {
+      setAnalysisData(null);
+      const requestBody = { question: message };
+
+      try {
+        const response = await actions.chatCompletion(state, requestBody);
+        if (!response.ok) {
+          throw new Error(`Request failed: ${response.status}`);
+        }
+        await processStream(response.body);
+      } catch (error) {
+        console.error('AI analysis error:', error);
+      }
+    }
+
+    runAnalysis();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [forecast, systemId]);
 
   return (
     <AnalysisDisplay
@@ -290,12 +308,21 @@ export function AgentforceAnalysis({ forecast, systemId }) {
     } catch (e) {
       console.log(e);
     }
+
+    return () => {
+      // Cleanup: end conversation if it was started
+      if (conversationId && authenticatedAccessToken) {
+        handleEndConversation();
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [systemId]);
 
   useEffect(() => {
     if (agentJoined) {
       handleInitialQuery();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agentJoined]);
 
   useEffect(() => {

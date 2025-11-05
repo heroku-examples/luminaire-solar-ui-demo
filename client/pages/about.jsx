@@ -1,7 +1,7 @@
 import { title } from '@/theme.js';
 import { Container, Text, Title, Grid, Image, Group } from '@mantine/core';
 import residential from '@/assets/img/residential.jpg';
-import Logo from '../components/icons/Logo';
+import Logo from '@/components/icons/Logo';
 
 function AboutPage() {
   return (
@@ -24,11 +24,7 @@ function AboutPage() {
           </Text>
 
           <Grid.Col span={12} md={6}>
-            <Image
-              src={residential}
-              alt="Solar panels and wind turbines"
-              withPlaceholder
-            />
+            <Image src={residential} alt="Solar panels and wind turbines" />
           </Grid.Col>
 
           <Text size="lg" align="left" my="lg">

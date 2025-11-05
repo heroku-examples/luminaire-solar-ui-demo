@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Image, Modal, Tooltip } from '@mantine/core';
 import { Link } from 'react-router-dom';
+import { useRouteContext } from '/:core.jsx';
 import { title } from '@/theme.js';
 import architecture from '@/assets/img/architecture.png';
 import {
@@ -20,7 +21,10 @@ export function getMeta(ctx) {
 }
 
 export default function Demo() {
+  const { state } = useRouteContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const loggedIn = state.user && state.user.username != null;
 
   const tools = [
     {
@@ -83,16 +87,18 @@ export default function Demo() {
         </p>
       </header>
 
-      {/* Demo Configuration Link */}
-      <div className="mb-6">
-        <Link
-          to="/settings"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors"
-        >
-          <IconSettings size={20} />
-          Demo Configuration
-        </Link>
-      </div>
+      {/* Demo Configuration Link - Only show when logged in */}
+      {loggedIn && (
+        <div className="mb-6">
+          <Link
+            to="/settings"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors"
+          >
+            <IconSettings size={20} />
+            Demo Configuration
+          </Link>
+        </div>
+      )}
 
       {/* Architecture Diagram */}
       <div className="mb-8">

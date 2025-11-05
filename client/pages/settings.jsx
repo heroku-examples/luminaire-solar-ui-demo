@@ -39,20 +39,6 @@ export default function Settings() {
   const [resetLoading, setResetLoading] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
 
-  // Redirect if not logged in
-  useEffect(() => {
-    if (!state.user) {
-      navigate('/');
-    }
-  }, [state.user, navigate]);
-
-  // Load settings on mount
-  useEffect(() => {
-    if (state.user && state.authorization) {
-      loadSettings();
-    }
-  }, [state.user, state.authorization]);
-
   // Toast management
   const addToast = useCallback((message, type = 'success') => {
     const id = Date.now();
@@ -63,7 +49,7 @@ export default function Settings() {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
-  const loadSettings = async () => {
+  const loadSettings = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -78,7 +64,21 @@ export default function Settings() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [state.apiUrl, state.authorization, addToast]);
+
+  // Redirect if not logged in
+  useEffect(() => {
+    if (!state.user) {
+      navigate('/');
+    }
+  }, [state.user, navigate]);
+
+  // Load settings on mount
+  useEffect(() => {
+    if (state.user && state.authorization) {
+      loadSettings();
+    }
+  }, [state.user, state.authorization, loadSettings]);
 
   const handleToggleTool = async (key, value) => {
     if (!settings) return;
@@ -201,8 +201,12 @@ export default function Settings() {
             addToast={addToast}
           />
 
-          {/* Demo Management Section */}
-          <DemoManagementSection onResetDemo={() => setShowResetDialog(true)} />
+          {/* Demo Management Section - Only show if user is logged in */}
+          {state.user && (
+            <DemoManagementSection
+              onResetDemo={() => setShowResetDialog(true)}
+            />
+          )}
         </>
       )}
 

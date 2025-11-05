@@ -28,24 +28,28 @@ export function Header() {
     { link: '/dashboard', label: 'My Dashboard' },
   ];
 
-  const items = links.map((link) => {
-    if (link.label === 'My Dashboard' && !loggedIn) return null;
-    const className = classes.link + ' nav-link';
-    return (
-      <Link
-        key={link.link}
-        to={link.link}
-        className={`${className} text-dark-grey font-medium`}
-        style={{ padding: 0 }}
-      >
-        <div
-          className={`text-dark-grey font-bold ${pathname === link.link ? 'border-b-2 border-purple-40' : ''}`}
+  const items = links
+    .filter((link) => {
+      if (link.label === 'My Dashboard' && !loggedIn) return false;
+      return true;
+    })
+    .map((link) => {
+      const className = classes.link + ' nav-link';
+      return (
+        <Link
+          key={link.link}
+          to={link.link}
+          className={`${className} text-dark-grey font-medium`}
+          style={{ padding: 0 }}
         >
-          {link.label}
-        </div>
-      </Link>
-    );
-  });
+          <div
+            className={`text-dark-grey font-bold ${pathname === link.link ? 'border-b-2 border-purple-40' : ''}`}
+          >
+            {link.label}
+          </div>
+        </Link>
+      );
+    });
 
   return (
     <header className="z-20 w-full h-16 bg-white fixed top-0 border-b-[1px] border-light-grey">

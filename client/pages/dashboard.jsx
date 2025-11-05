@@ -1,6 +1,4 @@
-import { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
-
+import { useState } from 'react';
 import { useRouteContext } from '/:core.jsx';
 import { title } from '@/theme.js';
 
@@ -13,8 +11,8 @@ import {
   CartesianGrid,
 } from 'recharts';
 
-import TooltipIcon from '../components/icons/TooltipIcon';
-import { EnergyForecast } from '../components/ui/EnergyForecast';
+import TooltipIcon from '@/components/icons/TooltipIcon';
+import { EnergyForecast } from '@/components/ui/EnergyForecast';
 
 export function getMeta(ctx) {
   return {
@@ -35,50 +33,41 @@ export default function Dashboard() {
     setSystem(value);
   };
 
-  // Redirect if not logged in - using Navigate component (no useEffect needed)
-  if (!state.user) {
-    return <Navigate to="/" replace />;
+  if (!state?.user) {
+    return <div>Please log in to view dashboard</div>;
   }
 
-  useEffect(() => {
-    async function fetchForecast() {
-      if (!system || !state.user) return;
-      await actions.getForecastBySystem(state, system);
-    }
-    fetchForecast();
-  }, [system, state.user]);
+  const needsSystems =
+    !snapshot?.systems ||
+    (Array.isArray(snapshot.systems) && snapshot.systems.length === 0);
+  const needsSystemData =
+    system && state.user && snapshot?.system?.id !== system;
 
-  // Get systems by user
-  useEffect(() => {
+  if (needsSystems && actions && !state._loadingSystems) {
+    state._loadingSystems = true;
     async function fetchSystems() {
-      if (!state.user) return;
       await actions.getSystemsByUser(state);
+      state._loadingSystems = false;
     }
     fetchSystems();
-  }, [state.user]);
+  }
 
-  useEffect(() => {
-    async function fetchSystemDetails() {
-      if (!system || !state.user) return;
+  if (needsSystemData && actions && state._loadingSystemData !== system) {
+    state._loadingSystemData = system;
+    async function fetchData() {
       await actions.getSystemDetailsBySystem(state, system);
       await actions.getSystemWeatherBySystem(state, system);
       await actions.getActivityHistoryBySystem(state, system);
-    }
-    fetchSystemDetails();
-  }, [system, state.user]);
-
-  // Get metrics by system
-  useEffect(() => {
-    async function fetchMetrics() {
-      if (!system || !state.user) return;
+      await actions.getForecastBySystem(state, system);
       await actions.getMetricsSummaryBySystem(
         state,
         system,
         new Date().toISOString().split('T')[0]
       );
+      state._loadingSystemData = null;
     }
-    fetchMetrics();
-  }, [system, state.user]);
+    fetchData();
+  }
 
   return (
     <div className="pb-28">

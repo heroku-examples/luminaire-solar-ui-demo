@@ -1,20 +1,8 @@
-import {
-  Card,
-  Image,
-  Text,
-  Group,
-  Center,
-  Button,
-  NumberFormatter,
-} from '@mantine/core';
 import { useRouteContext } from '/:core.jsx';
-import classes from '@/components/ui/Product.module.css';
 import { Link } from 'react-router-dom';
 
 export function Product({ product, className }) {
   const { state, actions } = useRouteContext();
-
-  const loggedIn = state.user && state.user.username != null;
 
   const addToCart = (product) => () => {
     actions.addToCart(state, product);
@@ -37,7 +25,13 @@ export function Product({ product, className }) {
               }).format(product.price)
             : 'Call for price'}
         </p>
-        <img src={product.imageUrl} className="w-40 mx-auto pt-2" />
+        <img
+          src={product.imageUrl}
+          alt={product.name}
+          className="w-40 mx-auto pt-2"
+          loading="lazy"
+          decoding="async"
+        />
       </div>
       <hr className="-mx-10 mt-6" />
       <div className="flex flex-col pt-6">

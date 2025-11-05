@@ -1,7 +1,5 @@
-import { useEffect, useState } from 'react';
 import { useRouteContext } from '/:core.jsx';
 import { title } from '@/theme.js';
-import { Cart } from '@/components/ui/Cart.jsx';
 import { useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 
@@ -19,15 +17,20 @@ export default function Product() {
     actions.addToCart(state, product);
   };
 
-  useEffect(() => {
+  const needsProduct =
+    !snapshot?.product || String(snapshot.product.id) !== String(productId);
+
+  if (needsProduct && actions && state._loadingProduct !== productId) {
+    state._loadingProduct = productId;
     async function fetchProduct() {
       await actions.getProductById(state, productId);
+      state._loadingProduct = null;
     }
     fetchProduct();
-  }, []);
+  }
 
-  if (!snapshot || snapshot.product == null) {
-    return <div>No products found</div>;
+  if (needsProduct) {
+    return <div>Loading product...</div>;
   }
 
   return (
@@ -40,7 +43,13 @@ export default function Product() {
       </div>
       <div className="flex items-center">
         <div className="p-10 w-2/5 bg-white border-solid border-2 border-gray-200 rounded-xl shadow-md">
-          <img src={snapshot.product.imageUrl} className="" />
+          <img
+            src={snapshot.product.imageUrl}
+            alt={snapshot.product.name}
+            className=""
+            loading="eager"
+            decoding="async"
+          />
         </div>
         <div className="w-1/2 pl-28 flex flex-col gap-12">
           <p className="text-h3 font-semibold">{snapshot.product.name}</p>

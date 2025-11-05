@@ -3,16 +3,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/lib/store';
-import { 
-  toolSettingsApi, 
-  type ToolSettings, 
+import {
+  toolSettingsApi,
+  type ToolSettings,
   type ToolsConfig,
   type CacheConfig,
   type Whitelists,
   type WhitelistUrl,
   type WhitelistPdf,
   type UpdateToolSettingsRequest,
-  type ToastItem 
+  type ToastItem,
 } from '@/lib/toolSettings';
 import { ToggleSwitch } from '@/components/ui/toggle-switch';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -39,16 +39,21 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<ToolSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [toggleLoading, setToggleLoading] = useState<Record<string, boolean>>({});
+  const [toggleLoading, setToggleLoading] = useState<Record<string, boolean>>(
+    {}
+  );
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [resetLoading, setResetLoading] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
 
   // Toast management
-  const addToast = useCallback((message: string, type: 'success' | 'error' | 'warning' = 'success') => {
-    const id = Date.now();
-    setToasts((prev) => [...prev, { id, message, type, duration: 4000 }]);
-  }, []);
+  const addToast = useCallback(
+    (message: string, type: 'success' | 'error' | 'warning' = 'success') => {
+      const id = Date.now();
+      setToasts((prev) => [...prev, { id, message, type, duration: 4000 }]);
+    },
+    []
+  );
 
   const removeToast = useCallback((id: number) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
@@ -56,14 +61,15 @@ export default function SettingsPage() {
 
   const loadSettings = useCallback(async () => {
     if (!authorization) return;
-    
+
     try {
       setLoading(true);
       setError(null);
       const data = await toolSettingsApi.getSettings(apiUrl, authorization);
       setSettings(data);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to load settings';
+      const message =
+        err instanceof Error ? err.message : 'Failed to load settings';
       setError(message);
       addToast(message, 'error');
     } finally {
@@ -105,13 +111,16 @@ export default function SettingsPage() {
 
     try {
       setToggleLoading({ ...toggleLoading, [key]: true });
-      const data = await toolSettingsApi.updateSettings(apiUrl, authorization, { [key]: value } as UpdateToolSettingsRequest);
+      const data = await toolSettingsApi.updateSettings(apiUrl, authorization, {
+        [key]: value,
+      } as UpdateToolSettingsRequest);
       setSettings(data);
       addToast('Settings updated successfully', 'success');
     } catch (err) {
       // Revert on error
       setSettings(previousSettings);
-      const message = err instanceof Error ? err.message : 'Failed to update settings';
+      const message =
+        err instanceof Error ? err.message : 'Failed to update settings';
       addToast(message, 'error');
     } finally {
       setToggleLoading({ ...toggleLoading, [key]: false });
@@ -120,7 +129,7 @@ export default function SettingsPage() {
 
   const handleResetDemo = async () => {
     if (!authorization) return;
-    
+
     try {
       setResetLoading(true);
       const response = await fetch(`${apiUrl}/api/admin/reset-demo`, {
@@ -144,7 +153,8 @@ export default function SettingsPage() {
         window.location.href = '/';
       }, 2000);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to reset demo';
+      const message =
+        err instanceof Error ? err.message : 'Failed to reset demo';
       addToast(message, 'error');
       setResetLoading(false);
     }
@@ -540,7 +550,8 @@ function URLWhitelistSection({
       setDeleteDialog(null);
       onUpdate();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to delete URL';
+      const message =
+        err instanceof Error ? err.message : 'Failed to delete URL';
       addToast(message, 'error');
     } finally {
       setDeleteLoading(false);
@@ -747,7 +758,8 @@ function PDFWhitelistSection({
       setDeleteDialog(null);
       onUpdate();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to delete PDF';
+      const message =
+        err instanceof Error ? err.message : 'Failed to delete PDF';
       addToast(message, 'error');
     } finally {
       setDeleteLoading(false);
@@ -913,7 +925,11 @@ function WhitelistItem({
       <Icon size={24} className="text-gray-600 shrink-0" />
       <div className="flex-1 min-w-0">
         <a
-          href={primaryText.startsWith('http') ? primaryText : (secondaryText || undefined)}
+          href={
+            primaryText.startsWith('http')
+              ? primaryText
+              : secondaryText || undefined
+          }
           target="_blank"
           rel="noopener noreferrer"
           className="text-sm font-medium text-blue-600 hover:text-blue-800 break-all"
@@ -1008,7 +1024,13 @@ function LoadingSkeleton() {
 }
 
 // Error State
-function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
+function ErrorState({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry: () => void;
+}) {
   return (
     <div className="pb-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="text-center py-16">

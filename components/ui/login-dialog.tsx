@@ -40,7 +40,7 @@ export function LoginDialog() {
       setOpen(false);
       setUsername('');
       setPassword('');
-      
+
       // Reload the page to ensure session is properly loaded
       window.location.href = '/dashboard';
     } catch (err) {

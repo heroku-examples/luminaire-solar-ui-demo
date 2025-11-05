@@ -1,13 +1,11 @@
 {
-  "name": "Lumina Solar - Data Cloud",
-  "description": "Integrate Heroku and Data Cloud using the Heroku Postgres Connector and the Web SDK",
-  "repository": "https://github.com/heroku-reference-apps/lumina-solar-datacloud",
-  "keywords": ["nodejs", "postgres", "fastify", "vite"],
+  "name": "Luminaire Solar - Heroku AI",
+  "description": "Integrate Heroku AI with Next.js",
+  "repository": "https://github.com/heroku-reference-apps/lumina-solar-ui",
+  "keywords": ["nodejs", "nextjs", "heroku", "ai"],
   "environments": {
     "test": {
-      "scripts": {
-        "test": "node --test test/**/*.test.js"
-      }
+      "scripts": { "test": "pnpm test" }
     }
   }
 }

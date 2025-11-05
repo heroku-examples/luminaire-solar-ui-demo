@@ -207,10 +207,14 @@ const useChatStream = ({
           isFirstAssistantMessage = false;
           return [
             ...prevMessages,
-            { role: 'assistant' as const, content, timestamp: new Date().toISOString() },
+            {
+              role: 'assistant' as const,
+              content,
+              timestamp: new Date().toISOString(),
+            },
           ];
         }
-        
+
         const lastMessage = prevMessages[prevMessages.length - 1];
         if (lastMessage?.role === 'assistant') {
           // Create a new array with updated last message
@@ -219,7 +223,7 @@ const useChatStream = ({
             { ...lastMessage, content: lastMessage.content + content },
           ];
         }
-        
+
         return prevMessages;
       });
     };
@@ -357,7 +361,10 @@ const IconWrapper = ({ isLast }: { isLast: boolean }) => {
 };
 
 const getToolIcon = (toolName: string) => {
-  const iconMap: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
+  const iconMap: Record<
+    string,
+    React.ComponentType<{ className?: string; style?: React.CSSProperties }>
+  > = {
     html_to_markdown: Globe,
     pdf_to_markdown: FileType,
     code_exec_python: Code,
@@ -476,7 +483,10 @@ const MessageComponent = ({
     return (
       <div style={style}>
         <div className="flex items-center gap-2">
-          <ToolIcon className="w-3.5 h-3.5" style={{ color: palette.primary }} />
+          <ToolIcon
+            className="w-3.5 h-3.5"
+            style={{ color: palette.primary }}
+          />
           <span className="text-xs flex-1 truncate">{content}</span>
           <IconWrapper isLast={isLast} />
         </div>
@@ -543,9 +553,7 @@ const MessageComponent = ({
                 </h4>
               ),
               p: ({ children }) => (
-                <p className="mb-3 leading-relaxed text-gray-700">
-                  {children}
-                </p>
+                <p className="mb-3 leading-relaxed text-gray-700">{children}</p>
               ),
               ul: ({ children }) => (
                 <ul className="mb-3 ml-4 space-y-1 list-disc text-gray-700">
@@ -558,19 +566,13 @@ const MessageComponent = ({
                 </ol>
               ),
               li: ({ children }) => (
-                <li className="ml-1 leading-relaxed">
-                  {children}
-                </li>
+                <li className="ml-1 leading-relaxed">{children}</li>
               ),
               strong: ({ children }) => (
-                <strong className="font-bold text-gray-900">
-                  {children}
-                </strong>
+                <strong className="font-bold text-gray-900">{children}</strong>
               ),
               em: ({ children }) => (
-                <em className="italic text-gray-700">
-                  {children}
-                </em>
+                <em className="italic text-gray-700">{children}</em>
               ),
               blockquote: ({ children }) => (
                 <blockquote className="border-l-4 border-purple-500 pl-4 py-2 my-3 bg-purple-50 text-gray-700 italic">
@@ -592,7 +594,9 @@ const MessageComponent = ({
                   src={src}
                   alt={alt}
                   className="cursor-pointer rounded-lg max-w-full my-3 shadow-sm"
-                  onClick={() => onImageClick?.(typeof src === 'string' ? src : '')}
+                  onClick={() =>
+                    onImageClick?.(typeof src === 'string' ? src : '')
+                  }
                 />
               ),
               pre: ({ children }) => (
@@ -610,9 +614,7 @@ const MessageComponent = ({
                   <code className={className}>{children}</code>
                 );
               },
-              hr: () => (
-                <hr className="my-4 border-gray-300" />
-              ),
+              hr: () => <hr className="my-4 border-gray-300" />,
               table: ({ children }) => (
                 <div className="overflow-x-auto my-3">
                   <table className="min-w-full divide-y divide-gray-300 border border-gray-300 rounded-lg">
@@ -621,29 +623,21 @@ const MessageComponent = ({
                 </div>
               ),
               thead: ({ children }) => (
-                <thead className="bg-gray-50">
-                  {children}
-                </thead>
+                <thead className="bg-gray-50">{children}</thead>
               ),
               tbody: ({ children }) => (
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {children}
                 </tbody>
               ),
-              tr: ({ children }) => (
-                <tr>
-                  {children}
-                </tr>
-              ),
+              tr: ({ children }) => <tr>{children}</tr>,
               th: ({ children }) => (
                 <th className="px-4 py-2 text-left text-sm font-semibold text-gray-900">
                   {children}
                 </th>
               ),
               td: ({ children }) => (
-                <td className="px-4 py-2 text-sm text-gray-700">
-                  {children}
-                </td>
+                <td className="px-4 py-2 text-sm text-gray-700">{children}</td>
               ),
             }}
           >
@@ -750,19 +744,39 @@ export function Assistant() {
       {
         id: 'energy_produced_7d',
         label: 'How much energy did I produce in the past 7 days?',
-        keywords: ['produce', 'production', 'past 7 days', 'last week', 'energy produced'],
+        keywords: [
+          'produce',
+          'production',
+          'past 7 days',
+          'last week',
+          'energy produced',
+        ],
         requiredTools: ['database'],
       },
       {
         id: 'worst_production_day',
         label: 'What was my lowest production day this month?',
-        keywords: ['lowest', 'worst', 'minimum', 'production', 'day', 'this month'],
+        keywords: [
+          'lowest',
+          'worst',
+          'minimum',
+          'production',
+          'day',
+          'this month',
+        ],
         requiredTools: ['database'],
       },
       {
         id: 'chart_prod_vs_cons_7d',
         label: 'Compare production vs consumption in the past 7 days',
-        keywords: ['chart', 'comparison', 'production', 'consumption', 'past 7 days', 'compare'],
+        keywords: [
+          'chart',
+          'comparison',
+          'production',
+          'consumption',
+          'past 7 days',
+          'compare',
+        ],
         requiredTools: ['database', 'code'],
       },
       {
@@ -774,7 +788,13 @@ export function Assistant() {
       {
         id: 'energy_consumed_7d',
         label: 'How much energy did I consume in the past 7 days?',
-        keywords: ['consume', 'consumption', 'past 7 days', 'last week', 'energy used'],
+        keywords: [
+          'consume',
+          'consumption',
+          'past 7 days',
+          'last week',
+          'energy used',
+        ],
         requiredTools: ['database'],
       },
       {
@@ -792,7 +812,13 @@ export function Assistant() {
       {
         id: 'system_efficiency',
         label: 'What is my system efficiency this month?',
-        keywords: ['efficiency', 'performance', 'system', 'this month', 'effective'],
+        keywords: [
+          'efficiency',
+          'performance',
+          'system',
+          'this month',
+          'effective',
+        ],
         requiredTools: ['database'],
       },
       {
@@ -822,7 +848,13 @@ export function Assistant() {
       {
         id: 'compare_prod_month',
         label: "Compare this month's production to last month",
-        keywords: ['compare', 'month', 'production', 'this month', 'last month'],
+        keywords: [
+          'compare',
+          'month',
+          'production',
+          'this month',
+          'last month',
+        ],
         requiredTools: ['database'],
       },
     ],
@@ -873,7 +905,16 @@ export function Assistant() {
       .map((x) => x.suggestion);
 
     // Random picker with seed
-    const pickRandom = (pool: { id: string; label: string; keywords: string[]; requiredTools: string[] }[], count: number, excludeIds = new Set<string>()) => {
+    const pickRandom = (
+      pool: {
+        id: string;
+        label: string;
+        keywords: string[];
+        requiredTools: string[];
+      }[],
+      count: number,
+      excludeIds = new Set<string>()
+    ) => {
       const available = pool.filter((s) => !excludeIds.has(s.id));
       if (available.length === 0) return [];
 
@@ -892,10 +933,18 @@ export function Assistant() {
 
     // Pick 3 relevant or random suggestions
     if (relevant.length > 0) {
-      const chosen = pickRandom(relevant, Math.min(3, relevant.length), new Set());
+      const chosen = pickRandom(
+        relevant,
+        Math.min(3, relevant.length),
+        new Set()
+      );
       if (chosen.length < 3) {
         const chosenIds = new Set(chosen.map((s) => s.id));
-        const filler = pickRandom(availableSuggestions, 3 - chosen.length, chosenIds);
+        const filler = pickRandom(
+          availableSuggestions,
+          3 - chosen.length,
+          chosenIds
+        );
         return [...chosen, ...filler];
       }
       return chosen;
@@ -940,7 +989,9 @@ export function Assistant() {
                 </div>
                 <div>
                   <h3 className="font-semibold">Luminaire Agent</h3>
-                  <p className="text-xs text-gray-500">AI-powered solar assistant</p>
+                  <p className="text-xs text-gray-500">
+                    AI-powered solar assistant
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -967,20 +1018,20 @@ export function Assistant() {
 
             {/* Messages Area */}
             <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
-        <div className="space-y-2">
-          {messages.map((message, index) => (
-            <MessageComponent
-              key={index}
-              role={message.role}
-              content={message.content}
-              timestamp={message.timestamp}
-              tool={message.tool}
-              isLast={index === messages.length - 1 && isLoading}
-              onImageClick={setImagePreview}
-            />
-          ))}
-        </div>
-      </ScrollArea>
+              <div className="space-y-2">
+                {messages.map((message, index) => (
+                  <MessageComponent
+                    key={index}
+                    role={message.role}
+                    content={message.content}
+                    timestamp={message.timestamp}
+                    tool={message.tool}
+                    isLast={index === messages.length - 1 && isLoading}
+                    onImageClick={setImagePreview}
+                  />
+                ))}
+              </div>
+            </ScrollArea>
 
             {/* Suggested Prompts - Always visible */}
             <div className="px-4 pb-2 border-t pt-3">
@@ -1018,37 +1069,37 @@ export function Assistant() {
 
             {/* Input Area */}
             <div className="p-4 border-t">
-        <div className="flex gap-2">
-          <Input
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Type your message..."
-            disabled={isLoading}
-            className="flex-1"
-            style={{
-              background: palette.inputBackground,
-              borderColor: palette.inputBorder,
-            }}
-          />
-          {isLoading ? (
-            <Button
-              onClick={abortRequest}
-              className="bg-red-500 hover:bg-red-600 text-white"
-            >
-              <Square className="w-4 h-4" />
-            </Button>
-          ) : (
-            <Button
-              onClick={handleSend}
-              disabled={!input.trim()}
-              className="bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
-          )}
-            </div>
+              <div className="flex gap-2">
+                <Input
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Type your message..."
+                  disabled={isLoading}
+                  className="flex-1"
+                  style={{
+                    background: palette.inputBackground,
+                    borderColor: palette.inputBorder,
+                  }}
+                />
+                {isLoading ? (
+                  <Button
+                    onClick={abortRequest}
+                    className="bg-red-500 hover:bg-red-600 text-white"
+                  >
+                    <Square className="w-4 h-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleSend}
+                    disabled={!input.trim()}
+                    className="bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50"
+                  >
+                    <Send className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </>

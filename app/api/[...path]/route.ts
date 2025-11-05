@@ -43,14 +43,14 @@ async function handleRequest(
     const apiPath = path.join('/');
     const url = new URL(request.url);
     const queryString = url.search;
-    
+
     // Forward the authorization header
     const headers: Record<string, string> = {};
     const authorization = request.headers.get('authorization');
     if (authorization) {
       headers['Authorization'] = authorization;
     }
-    
+
     // Forward content-type for POST/PUT requests
     const contentType = request.headers.get('content-type');
     if (contentType) {
@@ -87,7 +87,7 @@ async function handleRequest(
 
     // Get response text
     const responseText = await response.text();
-    
+
     // Try to parse as JSON, otherwise return as text
     let responseData;
     try {
@@ -96,15 +96,9 @@ async function handleRequest(
       responseData = responseText;
     }
 
-    return NextResponse.json(
-      responseData,
-      { status: response.status }
-    );
+    return NextResponse.json(responseData, { status: response.status });
   } catch (error) {
     console.error('API proxy error:', error);
-    return NextResponse.json(
-      { error: 'API request failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'API request failed' }, { status: 500 });
   }
 }

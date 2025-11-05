@@ -45,7 +45,9 @@ export default function DashboardPage() {
     setForecast,
   } = useStore();
   const [selectedSystemId, setSelectedSystemId] = useState<string | null>(null);
-  const [performanceTimeFrame, setPerformanceTimeFrame] = useState<'daily' | 'weekly' | 'monthly'>('daily');
+  const [performanceTimeFrame, setPerformanceTimeFrame] = useState<
+    'daily' | 'weekly' | 'monthly'
+  >('daily');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -124,7 +126,7 @@ export default function DashboardPage() {
   return (
     <div className="pb-28 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto">
       <h1 className="text-3xl font-bold py-6">Solar Panel Activity</h1>
-      
+
       {/* System Selector */}
       <div className="flex items-center gap-4 mb-8">
         <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
@@ -142,7 +144,9 @@ export default function DashboardPage() {
               <SelectItem key={s.id} value={s.id}>
                 <div className="flex items-center gap-2">
                   <Home className="h-4 w-4 text-muted-foreground" />
-                  <span>{s.address}, {s.city}, {s.state}, {s.zip}, {s.country}</span>
+                  <span>
+                    {s.address}, {s.city}, {s.state}, {s.zip}, {s.country}
+                  </span>
                 </div>
               </SelectItem>
             ))}
@@ -157,10 +161,7 @@ export default function DashboardPage() {
             <h2 className="text-lg font-semibold mb-4">
               7 Day Performance Forecast
             </h2>
-            <EnergyForecast
-              forecast={forecast}
-              systemId={selectedSystemId}
-            />
+            <EnergyForecast forecast={forecast} systemId={selectedSystemId} />
           </div>
 
           {/* Current System Information */}
@@ -168,7 +169,7 @@ export default function DashboardPage() {
             <h2 className="text-lg font-semibold mb-4">
               Current System Information
             </h2>
-            
+
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-4">
               {/* Performance Card */}
               <Card className="lg:col-span-3 shadow-sm">
@@ -219,8 +220,12 @@ export default function DashboardPage() {
                         Total Energy Output
                       </p>
                       <p className="text-2xl font-bold">
-                        {metricsSummary?.[performanceTimeFrame]?.total_energy_produced?.toLocaleString() || 0}{' '}
-                        <span className="text-sm font-normal text-muted-foreground">kWh</span>
+                        {metricsSummary?.[
+                          performanceTimeFrame
+                        ]?.total_energy_produced?.toLocaleString() || 0}{' '}
+                        <span className="text-sm font-normal text-muted-foreground">
+                          kWh
+                        </span>
                       </p>
                     </div>
                     <div>
@@ -228,28 +233,41 @@ export default function DashboardPage() {
                         Total Energy Usage
                       </p>
                       <p className="text-2xl font-bold">
-                        {metricsSummary?.[performanceTimeFrame]?.total_energy_consumed?.toLocaleString() || 0}{' '}
-                        <span className="text-sm font-normal text-muted-foreground">kWh</span>
+                        {metricsSummary?.[
+                          performanceTimeFrame
+                        ]?.total_energy_consumed?.toLocaleString() || 0}{' '}
+                        <span className="text-sm font-normal text-muted-foreground">
+                          kWh
+                        </span>
                       </p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground mb-1">
                         Total Energy Savings
                       </p>
-                      <p className={`text-2xl font-bold ${
-                        ((metricsSummary?.[performanceTimeFrame]?.total_energy_produced || 0) -
-                         (metricsSummary?.[performanceTimeFrame]?.total_energy_consumed || 0)) < 0
-                          ? 'text-red-600'
-                          : 'text-green-600'
-                      }`}>
+                      <p
+                        className={`text-2xl font-bold ${
+                          (metricsSummary?.[performanceTimeFrame]
+                            ?.total_energy_produced || 0) -
+                            (metricsSummary?.[performanceTimeFrame]
+                              ?.total_energy_consumed || 0) <
+                          0
+                            ? 'text-red-600'
+                            : 'text-green-600'
+                        }`}
+                      >
                         {(
-                          (metricsSummary?.[performanceTimeFrame]?.total_energy_produced || 0) -
-                          (metricsSummary?.[performanceTimeFrame]?.total_energy_consumed || 0)
+                          (metricsSummary?.[performanceTimeFrame]
+                            ?.total_energy_produced || 0) -
+                          (metricsSummary?.[performanceTimeFrame]
+                            ?.total_energy_consumed || 0)
                         ).toLocaleString('en-US', {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
                         })}{' '}
-                        <span className="text-sm font-normal text-muted-foreground">kWh</span>
+                        <span className="text-sm font-normal text-muted-foreground">
+                          kWh
+                        </span>
                       </p>
                     </div>
                   </div>
@@ -265,7 +283,9 @@ export default function DashboardPage() {
                   <Battery className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{system?.battery_storage || 0}%</div>
+                  <div className="text-2xl font-bold">
+                    {system?.battery_storage || 0}%
+                  </div>
                   <p className="text-xs text-muted-foreground mb-2">
                     of total capacity
                   </p>
@@ -301,7 +321,8 @@ export default function DashboardPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  {system?.activityHistory?.pastMonth && system.activityHistory.pastMonth.length > 0 ? (
+                  {system?.activityHistory?.pastMonth &&
+                  system.activityHistory.pastMonth.length > 0 ? (
                     <ResponsiveContainer width="100%" height={300}>
                       <LineChart
                         data={system.activityHistory.pastMonth}
@@ -357,7 +378,9 @@ export default function DashboardPage() {
                     </ResponsiveContainer>
                   ) : (
                     <div className="flex items-center justify-center h-[300px] text-muted-foreground">
-                      {system?.activityHistory ? 'No data points available' : 'Loading...'}
+                      {system?.activityHistory
+                        ? 'No data points available'
+                        : 'Loading...'}
                     </div>
                   )}
                 </CardContent>
@@ -375,16 +398,18 @@ export default function DashboardPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {system?.components?.map((c: { name: string; active: boolean }, idx: number) => (
-                        <div key={idx} className="flex items-center gap-2">
-                          <div
-                            className={`h-2 w-2 rounded-full ${
-                              c.active ? 'bg-green-500' : 'bg-red-500'
-                            }`}
-                          />
-                          <span className="text-sm">{c.name}</span>
-                        </div>
-                      ))}
+                      {system?.components?.map(
+                        (c: { name: string; active: boolean }, idx: number) => (
+                          <div key={idx} className="flex items-center gap-2">
+                            <div
+                              className={`h-2 w-2 rounded-full ${
+                                c.active ? 'bg-green-500' : 'bg-red-500'
+                              }`}
+                            />
+                            <span className="text-sm">{c.name}</span>
+                          </div>
+                        )
+                      )}
                     </div>
                   </CardContent>
                 </Card>

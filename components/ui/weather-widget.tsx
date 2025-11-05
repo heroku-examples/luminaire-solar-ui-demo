@@ -32,7 +32,9 @@ export function WeatherWidget({ weather }: WeatherWidgetProps) {
           <CardTitle className="text-sm font-medium">Local Weather</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">No weather data available</p>
+          <p className="text-sm text-muted-foreground">
+            No weather data available
+          </p>
         </CardContent>
       </Card>
     );
@@ -133,4 +135,3 @@ export function WeatherWidget({ weather }: WeatherWidgetProps) {
     </Card>
   );
 }
-

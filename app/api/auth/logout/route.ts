@@ -26,7 +26,10 @@ const sessionOptions = {
 
 export async function POST() {
   try {
-    const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
+    const session = await getIronSession<SessionData>(
+      await cookies(),
+      sessionOptions
+    );
     session.destroy();
 
     return NextResponse.json({ success: true });

@@ -108,7 +108,7 @@ function MiaAnalysis({
 
     async function runAnalysis() {
       if (!authorization) return; // Type guard for TypeScript
-      
+
       setAnalysisData(null);
       const requestBody = { question: message };
 
@@ -212,7 +212,11 @@ function AnalysisDisplay({
 }
 
 // Efficiency Forecast Component (7 day bars)
-function EfficiencyForecast({ forecast }: { forecast?: ForecastItem[] | null }) {
+function EfficiencyForecast({
+  forecast,
+}: {
+  forecast?: ForecastItem[] | null;
+}) {
   if (!forecast) return null;
 
   const dayOfWeek = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
@@ -267,18 +271,16 @@ function EfficiencyForecast({ forecast }: { forecast?: ForecastItem[] | null }) 
                 <p className="text-xs text-gray-600 text-center font-medium">
                   {day.irradiation?.toFixed(1) || '0.0'}
                 </p>
-                <p className="text-[10px] text-gray-500 text-center">
-                  kWh/m²
-                </p>
+                <p className="text-[10px] text-gray-500 text-center">kWh/m²</p>
               </div>
             </div>
           );
         })}
       </div>
       <p className="text-xs text-gray-500 mt-3 text-center">
-        Solar irradiation measures energy from the sun in kilowatt-hours per square meter
+        Solar irradiation measures energy from the sun in kilowatt-hours per
+        square meter
       </p>
     </div>
   );
 }
-

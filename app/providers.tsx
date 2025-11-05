@@ -23,7 +23,7 @@ export function Providers({ children }: { children: ReactNode }) {
         console.log('No active session');
       }
     };
-    
+
     checkSession();
   }, [setUser, setAuthorization]);
 

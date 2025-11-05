@@ -30,4 +30,3 @@ export async function POST(request: NextRequest) {
     message: 'Demo data has been reset successfully',
   });
 }
-

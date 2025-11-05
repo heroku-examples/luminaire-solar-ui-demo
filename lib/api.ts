@@ -42,10 +42,10 @@ export const api = {
 
   async getSystemsByUser(authorization: string) {
     const response = await fetch('/api/systems', {
-      headers: { 
-        Authorization: authorization.startsWith('Bearer ') 
-          ? authorization 
-          : `Bearer ${authorization}`
+      headers: {
+        Authorization: authorization.startsWith('Bearer ')
+          ? authorization
+          : `Bearer ${authorization}`,
       },
     });
     if (response.ok) {
@@ -56,10 +56,10 @@ export const api = {
 
   async getSystemDetails(systemId: string, authorization: string) {
     const response = await fetch(`/api/system/${systemId}`, {
-      headers: { 
-        Authorization: authorization.startsWith('Bearer ') 
-          ? authorization 
-          : `Bearer ${authorization}`
+      headers: {
+        Authorization: authorization.startsWith('Bearer ')
+          ? authorization
+          : `Bearer ${authorization}`,
       },
     });
     if (response.ok) {
@@ -70,10 +70,10 @@ export const api = {
 
   async getSystemWeather(systemId: string, authorization: string) {
     const response = await fetch(`/api/system/${systemId}/weather`, {
-      headers: { 
-        Authorization: authorization.startsWith('Bearer ') 
-          ? authorization 
-          : `Bearer ${authorization}`
+      headers: {
+        Authorization: authorization.startsWith('Bearer ')
+          ? authorization
+          : `Bearer ${authorization}`,
       },
     });
     if (response.ok) {
@@ -83,16 +83,13 @@ export const api = {
   },
 
   async getActivityHistory(systemId: string, authorization: string) {
-    const response = await fetch(
-      `/api/system/${systemId}/activityHistory`,
-      {
-        headers: { 
-          Authorization: authorization.startsWith('Bearer ') 
-            ? authorization 
-            : `Bearer ${authorization}`
-        },
-      }
-    );
+    const response = await fetch(`/api/system/${systemId}/activityHistory`, {
+      headers: {
+        Authorization: authorization.startsWith('Bearer ')
+          ? authorization
+          : `Bearer ${authorization}`,
+      },
+    });
     if (response.ok) {
       return response.json();
     }
@@ -100,16 +97,13 @@ export const api = {
   },
 
   async getMetrics(systemId: string, date: string, authorization: string) {
-    const response = await fetch(
-      `/api/metrics/${systemId}?date=${date}`,
-      {
-        headers: { 
-          Authorization: authorization.startsWith('Bearer ') 
-            ? authorization 
-            : `Bearer ${authorization}`
-        },
-      }
-    );
+    const response = await fetch(`/api/metrics/${systemId}?date=${date}`, {
+      headers: {
+        Authorization: authorization.startsWith('Bearer ')
+          ? authorization
+          : `Bearer ${authorization}`,
+      },
+    });
     if (response.ok) {
       return response.json();
     }
@@ -121,16 +115,13 @@ export const api = {
     date: string,
     authorization: string
   ) {
-    const response = await fetch(
-      `/api/summary/${systemId}?date=${date}`,
-      {
-        headers: { 
-          Authorization: authorization.startsWith('Bearer ') 
-            ? authorization 
-            : `Bearer ${authorization}`
-        },
-      }
-    );
+    const response = await fetch(`/api/summary/${systemId}?date=${date}`, {
+      headers: {
+        Authorization: authorization.startsWith('Bearer ')
+          ? authorization
+          : `Bearer ${authorization}`,
+      },
+    });
     if (response.ok) {
       return response.json();
     }
@@ -155,10 +146,10 @@ export const api = {
 
   async getForecast(systemId: string, authorization: string) {
     const response = await fetch(`/api/forecast/${systemId}`, {
-      headers: { 
-        Authorization: authorization.startsWith('Bearer ') 
-          ? authorization 
-          : `Bearer ${authorization}`
+      headers: {
+        Authorization: authorization.startsWith('Bearer ')
+          ? authorization
+          : `Bearer ${authorization}`,
       },
     });
     if (response.ok) {
@@ -172,8 +163,8 @@ export const api = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: authorization.startsWith('Bearer ') 
-          ? authorization 
+        Authorization: authorization.startsWith('Bearer ')
+          ? authorization
           : `Bearer ${authorization}`,
       },
       body: JSON.stringify(body),

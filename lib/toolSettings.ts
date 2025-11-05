@@ -75,7 +75,11 @@ export interface ToastItem {
  */
 async function fetchWithAuth(
   url: string,
-  options: { method?: string; body?: string; headers?: Record<string, string> } = {},
+  options: {
+    method?: string;
+    body?: string;
+    headers?: Record<string, string>;
+  } = {},
   token: string
 ) {
   const response = await fetch(url, {
@@ -196,4 +200,3 @@ export const toolSettingsApi = {
       token
     ),
 };
-

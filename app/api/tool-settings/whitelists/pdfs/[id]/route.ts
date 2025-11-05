@@ -57,4 +57,3 @@ export async function DELETE(
     message: 'PDF removed from whitelist',
   });
 }
-

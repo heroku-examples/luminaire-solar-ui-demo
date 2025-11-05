@@ -61,4 +61,3 @@ export async function DELETE(
     message: 'URL removed from whitelist',
   });
 }
-

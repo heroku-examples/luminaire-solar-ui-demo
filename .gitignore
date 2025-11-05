@@ -59,4 +59,6 @@ profile-*
 # environment
 .env
 
-Client/dist
+.next
+.claude
+.cursor

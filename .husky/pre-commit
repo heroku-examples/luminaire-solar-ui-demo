@@ -1,1 +1,1 @@
-npm test && npm run precommit
+pnpm lint && pnpm type-check

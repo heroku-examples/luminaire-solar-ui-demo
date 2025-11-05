@@ -28,7 +28,7 @@ const herokuTools = [
     icon: Database,
     description: 'Get database schema information',
     docsUrl:
-      'https://devcenter.heroku.com/articles/heroku-managed-inference-agents#postgres_get_schema',
+      'https://devcenter.heroku.com/articles/heroku-inference-tools#heroku-tool-postgres_get_schema',
   },
   {
     name: 'Database Query',
@@ -36,7 +36,7 @@ const herokuTools = [
     icon: Database,
     description: 'Execute SQL queries on PostgreSQL databases',
     docsUrl:
-      'https://devcenter.heroku.com/articles/heroku-managed-inference-agents#postgres_run_query',
+      'https://devcenter.heroku.com/articles/heroku-inference-tools#heroku-tool-postgres_run_query',
   },
   {
     name: 'Web Browsing',
@@ -44,7 +44,7 @@ const herokuTools = [
     icon: Globe,
     description: 'Convert web pages to markdown',
     docsUrl:
-      'https://devcenter.heroku.com/articles/heroku-managed-inference-agents#html_to_markdown',
+      'https://devcenter.heroku.com/articles/heroku-inference-tools#heroku-tool-html_to_markdown',
   },
   {
     name: 'PDF Reading',
@@ -52,7 +52,7 @@ const herokuTools = [
     icon: FileText,
     description: 'Extract and convert PDF content to markdown',
     docsUrl:
-      'https://devcenter.heroku.com/articles/heroku-managed-inference-agents#pdf_to_markdown',
+      'https://devcenter.heroku.com/articles/heroku-inference-tools#heroku-tool-pdf_to_markdown',
   },
   {
     name: 'Python Code Execution',
@@ -60,7 +60,7 @@ const herokuTools = [
     icon: Code,
     description: 'Execute Python code in a secure environment',
     docsUrl:
-      'https://devcenter.heroku.com/articles/heroku-managed-inference-agents#code_exec_python',
+      'https://devcenter.heroku.com/articles/heroku-inference-tools#heroku-tool-code_exec_',
   },
 ];
 
@@ -156,12 +156,12 @@ export default function DemoPage() {
             </div>
             <div className="mt-6 text-center">
               <a
-                href="https://devcenter.heroku.com/articles/heroku-managed-inference-agents"
+                href="https://devcenter.heroku.com/categories/heroku-inference"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-purple-600 hover:text-purple-800 font-medium inline-flex items-center gap-1"
               >
-                Learn more about Heroku Inference Tools
+                Learn more about Heroku Managed Inference and Agents
                 <ExternalLink className="w-4 h-4" />
               </a>
             </div>

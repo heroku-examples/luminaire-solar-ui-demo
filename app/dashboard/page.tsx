@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useStore } from '@/lib/store';
 import { api } from '@/lib/api';
 import {
@@ -24,12 +25,29 @@ import {
   YAxis,
   ResponsiveContainer,
   CartesianGrid,
-  Tooltip,
+  Tooltip as RechartsTooltip,
 } from 'recharts';
-import { Battery, Zap, TrendingUp, Home } from 'lucide-react';
+import {
+  Battery,
+  Zap,
+  TrendingUp,
+  Home,
+  Cpu,
+  ArrowUp,
+  ArrowDown,
+  CheckCircle2,
+  XCircle,
+} from 'lucide-react';
 import { Assistant } from '@/components/ui/assistant';
 import { EnergyForecast } from '@/components/ui/energy-forecast';
 import { WeatherWidget } from '@/components/ui/weather-widget';
+import { LoadingOverlay } from '@/components/ui/loading-overlay';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export default function DashboardPage() {
   const {
@@ -45,9 +63,6 @@ export default function DashboardPage() {
     setForecast,
   } = useStore();
   const [selectedSystemId, setSelectedSystemId] = useState<string | null>(null);
-  const [performanceTimeFrame, setPerformanceTimeFrame] = useState<
-    'daily' | 'weekly' | 'monthly'
-  >('daily');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -125,34 +140,49 @@ export default function DashboardPage() {
 
   return (
     <div className="pb-28 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto">
-      <h1 className="text-3xl font-bold py-6">Solar Panel Activity</h1>
+      <h1 className="text-3xl font-bold py-6">Solar System Dashboard</h1>
 
       {/* System Selector */}
-      <div className="flex items-center gap-4 mb-8">
-        <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
-          System Location
-        </span>
-        <Select
-          onValueChange={setSelectedSystemId}
-          value={selectedSystemId || undefined}
-        >
-          <SelectTrigger className="w-full max-w-2xl">
-            <SelectValue placeholder="-- Select a system --" />
-          </SelectTrigger>
-          <SelectContent>
-            {systems.map((s) => (
-              <SelectItem key={s.id} value={s.id}>
-                <div className="flex items-center gap-2">
-                  <Home className="h-4 w-4 text-muted-foreground" />
-                  <span>
-                    {s.address}, {s.city}, {s.state}, {s.zip}, {s.country}
-                  </span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <svg
+              className="h-5 w-5 text-yellow-500"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M4 4h4v4H4V4zm6 0h4v4h-4V4zm6 0h4v4h-4V4zM4 10h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4zM4 16h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4z" />
+            </svg>
+            Select Your Solar System
+          </CardTitle>
+          <CardDescription>
+            A system represents a solar panel installation at a specific
+            location. Choose one to view its performance data and analytics.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Select
+            onValueChange={setSelectedSystemId}
+            value={selectedSystemId || undefined}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="-- Select a system --" />
+            </SelectTrigger>
+            <SelectContent>
+              {systems.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  <div className="flex items-center gap-2">
+                    <Home className="h-5 w-5 text-purple-600" />
+                    <span>
+                      {s.address}, {s.city}, {s.state}, {s.zip}, {s.country}
+                    </span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
 
       {selectedSystemId && !loading && (
         <>
@@ -171,132 +201,171 @@ export default function DashboardPage() {
             </h2>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-4">
-              {/* Performance Card */}
+              {/* Current Energy Performance - Calculator Style */}
               <Card className="lg:col-span-3 shadow-sm">
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Zap className="h-5 w-5 text-purple-600" />
-                      <CardTitle>Performance</CardTitle>
-                    </div>
-                    <div className="inline-flex items-center rounded-lg border bg-muted p-1">
-                      <button
-                        onClick={() => setPerformanceTimeFrame('daily')}
-                        className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                          performanceTimeFrame === 'daily'
-                            ? 'bg-background text-foreground shadow-sm'
-                            : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                      >
-                        Today
-                      </button>
-                      <button
-                        onClick={() => setPerformanceTimeFrame('weekly')}
-                        className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                          performanceTimeFrame === 'weekly'
-                            ? 'bg-background text-foreground shadow-sm'
-                            : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                      >
-                        Last 7 Days
-                      </button>
-                      <button
-                        onClick={() => setPerformanceTimeFrame('monthly')}
-                        className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                          performanceTimeFrame === 'monthly'
-                            ? 'bg-background text-foreground shadow-sm'
-                            : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                      >
-                        Last 30 Days
-                      </button>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <Zap className="h-5 w-5 text-yellow-500" />
+                    <CardTitle>Current Energy Performance</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">
-                        Total Energy Output
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {/* Daily */}
+                    <div className="bg-linear-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
+                      <p className="text-sm text-blue-900 font-medium mb-2">
+                        Daily
                       </p>
-                      <p className="text-2xl font-bold">
-                        {metricsSummary?.[
-                          performanceTimeFrame
-                        ]?.total_energy_produced?.toLocaleString() || 0}{' '}
-                        <span className="text-sm font-normal text-muted-foreground">
-                          kWh
-                        </span>
+                      <p className="text-2xl font-bold text-blue-900">
+                        {metricsSummary?.daily?.total_energy_produced?.toFixed(
+                          2
+                        ) || '0.00'}{' '}
+                        kWh
                       </p>
+                      <p className="text-xs text-blue-700 mt-1">Produced</p>
+                      <p className="text-xl font-semibold text-blue-800 mt-2">
+                        {metricsSummary?.daily?.total_energy_consumed?.toFixed(
+                          2
+                        ) || '0.00'}{' '}
+                        kWh
+                      </p>
+                      <p className="text-xs text-blue-700">Consumed</p>
+
+                      {(() => {
+                        const produced =
+                          metricsSummary?.daily?.total_energy_produced || 0;
+                        const consumed =
+                          metricsSummary?.daily?.total_energy_consumed || 0;
+                        const net = produced - consumed;
+                        const isPositive = net >= 0;
+
+                        return (
+                          <div
+                            className={`mt-3 pt-3 border-t border-blue-300 flex items-center gap-2 ${isPositive ? 'text-green-700' : 'text-red-700'}`}
+                          >
+                            {isPositive ? (
+                              <ArrowUp className="h-4 w-4" />
+                            ) : (
+                              <ArrowDown className="h-4 w-4" />
+                            )}
+                            <div>
+                              <p className="text-sm font-semibold">
+                                {Math.abs(net).toFixed(2)} kWh
+                              </p>
+                              <p className="text-xs">
+                                {isPositive ? 'Net savings' : 'Net deficit'}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">
-                        Total Energy Usage
+
+                    {/* Weekly */}
+                    <div className="bg-linear-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-4">
+                      <p className="text-sm text-purple-900 font-medium mb-2">
+                        Weekly
                       </p>
-                      <p className="text-2xl font-bold">
-                        {metricsSummary?.[
-                          performanceTimeFrame
-                        ]?.total_energy_consumed?.toLocaleString() || 0}{' '}
-                        <span className="text-sm font-normal text-muted-foreground">
-                          kWh
-                        </span>
+                      <p className="text-2xl font-bold text-purple-900">
+                        {metricsSummary?.weekly?.total_energy_produced?.toFixed(
+                          2
+                        ) || '0.00'}{' '}
+                        kWh
                       </p>
+                      <p className="text-xs text-purple-700 mt-1">Produced</p>
+                      <p className="text-xl font-semibold text-purple-800 mt-2">
+                        {metricsSummary?.weekly?.total_energy_consumed?.toFixed(
+                          2
+                        ) || '0.00'}{' '}
+                        kWh
+                      </p>
+                      <p className="text-xs text-purple-700">Consumed</p>
+
+                      {(() => {
+                        const produced =
+                          metricsSummary?.weekly?.total_energy_produced || 0;
+                        const consumed =
+                          metricsSummary?.weekly?.total_energy_consumed || 0;
+                        const net = produced - consumed;
+                        const isPositive = net >= 0;
+
+                        return (
+                          <div
+                            className={`mt-3 pt-3 border-t border-purple-300 flex items-center gap-2 ${isPositive ? 'text-green-700' : 'text-red-700'}`}
+                          >
+                            {isPositive ? (
+                              <ArrowUp className="h-4 w-4" />
+                            ) : (
+                              <ArrowDown className="h-4 w-4" />
+                            )}
+                            <div>
+                              <p className="text-sm font-semibold">
+                                {Math.abs(net).toFixed(2)} kWh
+                              </p>
+                              <p className="text-xs">
+                                {isPositive ? 'Net savings' : 'Net deficit'}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">
-                        Total Energy Savings
+
+                    {/* Monthly */}
+                    <div className="bg-linear-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-4">
+                      <p className="text-sm text-green-900 font-medium mb-2">
+                        Monthly
                       </p>
-                      <p
-                        className={`text-2xl font-bold ${
-                          (metricsSummary?.[performanceTimeFrame]
-                            ?.total_energy_produced || 0) -
-                            (metricsSummary?.[performanceTimeFrame]
-                              ?.total_energy_consumed || 0) <
-                          0
-                            ? 'text-red-600'
-                            : 'text-green-600'
-                        }`}
-                      >
-                        {(
-                          (metricsSummary?.[performanceTimeFrame]
-                            ?.total_energy_produced || 0) -
-                          (metricsSummary?.[performanceTimeFrame]
-                            ?.total_energy_consumed || 0)
-                        ).toLocaleString('en-US', {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}{' '}
-                        <span className="text-sm font-normal text-muted-foreground">
-                          kWh
-                        </span>
+                      <p className="text-2xl font-bold text-green-900">
+                        {metricsSummary?.monthly?.total_energy_produced?.toFixed(
+                          2
+                        ) || '0.00'}{' '}
+                        kWh
                       </p>
+                      <p className="text-xs text-green-700 mt-1">Produced</p>
+                      <p className="text-xl font-semibold text-green-800 mt-2">
+                        {metricsSummary?.monthly?.total_energy_consumed?.toFixed(
+                          2
+                        ) || '0.00'}{' '}
+                        kWh
+                      </p>
+                      <p className="text-xs text-green-700">Consumed</p>
+
+                      {(() => {
+                        const produced =
+                          metricsSummary?.monthly?.total_energy_produced || 0;
+                        const consumed =
+                          metricsSummary?.monthly?.total_energy_consumed || 0;
+                        const net = produced - consumed;
+                        const isPositive = net >= 0;
+
+                        return (
+                          <div
+                            className={`mt-3 pt-3 border-t border-green-300 flex items-center gap-2 ${isPositive ? 'text-green-700' : 'text-red-700'}`}
+                          >
+                            {isPositive ? (
+                              <ArrowUp className="h-4 w-4" />
+                            ) : (
+                              <ArrowDown className="h-4 w-4" />
+                            )}
+                            <div>
+                              <p className="text-sm font-semibold">
+                                {Math.abs(net).toFixed(2)} kWh
+                              </p>
+                              <p className="text-xs">
+                                {isPositive ? 'Net savings' : 'Net deficit'}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Battery Storage Card */}
-              <Card className="shadow-sm">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Battery Storage
-                  </CardTitle>
-                  <Battery className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {system?.battery_storage || 0}%
-                  </div>
-                  <p className="text-xs text-muted-foreground mb-2">
-                    of total capacity
-                  </p>
-                  <div className="w-full bg-secondary rounded-full h-2">
-                    <div
-                      className="bg-gradient-to-r from-orange-500 to-orange-600 h-2 rounded-full transition-all"
-                      style={{ width: `${system?.battery_storage || 0}%` }}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Weather Card */}
+              <WeatherWidget weather={system?.weather || null} />
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -343,7 +412,7 @@ export default function DashboardPage() {
                           stroke="#9ca3af"
                           domain={[0, 'auto']}
                         />
-                        <Tooltip
+                        <RechartsTooltip
                           contentStyle={{
                             backgroundColor: 'white',
                             border: '1px solid #e5e7eb',
@@ -386,49 +455,138 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
 
-              {/* System Components & Weather */}
+              {/* System Components & Battery Storage */}
               <div className="space-y-4">
                 {/* System Components Card */}
                 <Card className="shadow-sm">
                   <CardHeader>
-                    <CardTitle className="text-sm font-medium">
+                    <CardTitle className="flex items-center gap-2">
+                      <Cpu className="h-5 w-5 text-purple-600" />
                       System Components
                     </CardTitle>
                     <CardDescription>Installed hardware status</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
-                      {system?.components?.map(
-                        (c: { name: string; active: boolean }, idx: number) => (
-                          <div key={idx} className="flex items-center gap-2">
-                            <div
-                              className={`h-2 w-2 rounded-full ${
-                                c.active ? 'bg-green-500' : 'bg-red-500'
-                              }`}
-                            />
-                            <span className="text-sm">{c.name}</span>
-                          </div>
-                        )
-                      )}
-                    </div>
+                    <TooltipProvider>
+                      <div className="space-y-3">
+                        {system?.components?.map(
+                          (
+                            c: {
+                              name: string;
+                              active: boolean;
+                              product_id?: string;
+                            },
+                            idx: number
+                          ) => (
+                            <div key={idx} className="flex items-center gap-2">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="shrink-0">
+                                    {c.active ? (
+                                      <CheckCircle2 className="h-5 w-5 text-green-600" />
+                                    ) : (
+                                      <XCircle className="h-5 w-5 text-red-500" />
+                                    )}
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>
+                                    {c.active
+                                      ? 'Active and operational'
+                                      : 'Inactive or offline'}
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                              <Link
+                                href={
+                                  c.product_id
+                                    ? `/products/${c.product_id}`
+                                    : '/products'
+                                }
+                                className="text-sm text-purple-600 hover:text-purple-800 hover:underline transition-colors"
+                              >
+                                {c.name}
+                              </Link>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </TooltipProvider>
                   </CardContent>
                 </Card>
 
-                {/* Weather Card */}
-                <WeatherWidget weather={system?.weather || null} />
+                {/* Battery Storage Card */}
+                <Card className="shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Battery
+                        className={`h-5 w-5 ${
+                          (system?.battery_storage || 0) > 60
+                            ? 'text-green-600'
+                            : (system?.battery_storage || 0) > 30
+                              ? 'text-orange-500'
+                              : 'text-red-500'
+                        }`}
+                      />
+                      Battery Storage
+                    </CardTitle>
+                    <CardDescription>Current charge level</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <div className="text-3xl font-bold text-gray-900">
+                          {system?.battery_storage || 0}%
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          of total capacity
+                        </p>
+                      </div>
+
+                      {/* Enhanced Progress Bar */}
+                      <div className="w-full bg-gray-200 rounded-full h-3 shadow-inner">
+                        <div
+                          className={`h-3 rounded-full transition-all duration-500 shadow-sm ${
+                            (system?.battery_storage || 0) > 60
+                              ? 'bg-linear-to-r from-green-500 to-green-600'
+                              : (system?.battery_storage || 0) > 30
+                                ? 'bg-linear-to-r from-orange-400 to-orange-500'
+                                : 'bg-linear-to-r from-red-400 to-red-500'
+                          }`}
+                          style={{ width: `${system?.battery_storage || 0}%` }}
+                        />
+                      </div>
+
+                      {/* Status indicator */}
+                      <div className="flex items-center gap-2 text-xs">
+                        <div
+                          className={`h-2 w-2 rounded-full ${
+                            (system?.battery_storage || 0) > 60
+                              ? 'bg-green-500'
+                              : (system?.battery_storage || 0) > 30
+                                ? 'bg-orange-500'
+                                : 'bg-red-500'
+                          }`}
+                        />
+                        <span className="text-gray-600">
+                          {(system?.battery_storage || 0) > 60
+                            ? 'Good charge level'
+                            : (system?.battery_storage || 0) > 30
+                              ? 'Moderate charge level'
+                              : 'Low charge level'}
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </div>
         </>
       )}
 
-      {loading && (
-        <div className="flex items-center justify-center h-64">
-          <div className="text-lg text-muted-foreground">
-            Loading system data...
-          </div>
-        </div>
-      )}
+      {/* Loading Overlay */}
+      {loading && <LoadingOverlay message="Loading your solar system data" />}
 
       {/* Floating Assistant Button - Only show when system is selected */}
       {selectedSystemId && <Assistant />}

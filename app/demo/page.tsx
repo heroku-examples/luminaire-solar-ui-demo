@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { InlineCode } from '@/components/ui/code-block';
 import {
   Settings,
   Database,
@@ -116,7 +117,16 @@ export default function DemoPage() {
         {/* Heroku AI Tools */}
         <Card>
           <CardHeader>
-            <CardTitle>Heroku AI Tools</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Image
+                src="/mia-icon.png"
+                alt="Mia AI"
+                width={24}
+                height={24}
+                className="inline-block"
+              />
+              Heroku AI Tools
+            </CardTitle>
             <CardDescription>
               The Luminaire Solar AI Assistant uses Heroku Managed Inference and
               Agents add-on with the following tools. Click on any tool to view
@@ -147,9 +157,9 @@ export default function DemoPage() {
                     <p className="text-sm text-gray-600 mb-2">
                       {tool.description}
                     </p>
-                    <code className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-700 mt-auto">
+                    <InlineCode className="text-xs mt-auto block">
                       {tool.tool}
-                    </code>
+                    </InlineCode>
                   </a>
                 );
               })}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useStore } from '@/lib/store';
+import { formatCurrency } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -51,7 +52,7 @@ export function CartSheet() {
               <div className="flex-1">
                 <h4 className="font-medium">{item.name}</h4>
                 <p className="text-sm text-muted-foreground">
-                  ${item.price.toFixed(2)}
+                  {formatCurrency(item.price)} each
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -80,7 +81,7 @@ export function CartSheet() {
           <div className="mt-8 space-y-4">
             <div className="flex justify-between text-lg font-semibold">
               <span>Total:</span>
-              <span>${totalPrice.toFixed(2)}</span>
+              <span>{formatCurrency(totalPrice)}</span>
             </div>
             <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
               Checkout

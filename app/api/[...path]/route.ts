@@ -39,27 +39,7 @@ async function handleRequest(
   method: string
 ) {
   try {
-    // Determine API URL based on environment
-    let apiUrl = process.env.API_URL;
-
-    if (!apiUrl) {
-      // In production/staging on Heroku, detect from request
-      const requestUrl = new URL(request.url);
-      const isProduction = requestUrl.hostname.includes('luminaire.ukoreh.com');
-      const isStaging = requestUrl.hostname.includes('staging');
-
-      if (isProduction) {
-        // Production API URL - adjust based on your API deployment
-        apiUrl = process.env.API_URL || requestUrl.origin;
-      } else if (isStaging) {
-        // Staging API URL
-        apiUrl = process.env.API_URL || requestUrl.origin;
-      } else {
-        // Local development
-        apiUrl = 'http://0.0.0.0:3001';
-      }
-    }
-
+    const apiUrl = process.env.API_URL || 'http://0.0.0.0:3001';
     const apiPath = path.join('/');
     const url = new URL(request.url);
     const queryString = url.search;
@@ -105,12 +85,13 @@ async function handleRequest(
       fetchOptions
     );
 
-    // Check if response is a stream (for chat completions)
+    // Check if response is a stream (for chat completions and forecast analysis)
     const responseContentType = response.headers.get('content-type') || '';
 
-    // For chat endpoint, always stream the response
+    // For chat endpoint and forecast analysis, always stream the response
     if (
       apiPath === 'chat' ||
+      (apiPath.includes('forecast') && apiPath.includes('analysis')) ||
       responseContentType.includes('text/event-stream') ||
       responseContentType.includes('text/plain') ||
       responseContentType.includes('application/x-ndjson')

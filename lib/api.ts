@@ -171,4 +171,22 @@ export const api = {
     });
     return response;
   },
+
+  async generateForecastAnalysis(
+    systemId: string,
+    forecast: { date: string; irradiation: number }[],
+    authorization: string
+  ) {
+    const response = await fetch(`/api/forecast/${systemId}/analysis`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: authorization.startsWith('Bearer ')
+          ? authorization
+          : `Bearer ${authorization}`,
+      },
+      body: JSON.stringify({ forecast }),
+    });
+    return response;
+  },
 };

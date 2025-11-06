@@ -26,6 +26,7 @@ export function Header() {
     { href: '/', label: 'Home' },
     { href: '/products', label: 'Products' },
     { href: '/about', label: 'About' },
+    { href: '/solar-calculator', label: 'Calculator', requiresAuth: true },
     { href: '/dashboard', label: 'My Dashboard', requiresAuth: true },
   ];
 

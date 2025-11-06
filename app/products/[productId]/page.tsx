@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useStore } from '@/lib/store';
 import { api } from '@/lib/api';
+import { formatPrice } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ShoppingCart } from 'lucide-react';
 
@@ -32,15 +33,6 @@ export default function ProductPage() {
       </div>
     );
   }
-
-  const formatPrice = (price: number) => {
-    if (!price) return 'Call for price';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumSignificantDigits: 1,
-    }).format(price);
-  };
 
   return (
     <div className="container mx-auto px-4 py-8">

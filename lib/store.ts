@@ -12,6 +12,7 @@ interface Component {
   name: string;
   active: boolean;
   type?: string;
+  product_id?: string;
 }
 
 interface Weather {

@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useStore } from '@/lib/store';
 import { api } from '@/lib/api';
+import { DollarSign, Zap } from 'lucide-react';
 
 interface ForecastItem {
   date: string;
@@ -53,11 +55,7 @@ function MiaAnalysis({
 
   const { authorization } = useStore();
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
-
-  const message = JSON.stringify({
-    message: `Please analyze the 7-day forecast for the given system`,
-    metadata: { systemId: systemId, forecast: forecast, env: 'internal' },
-  });
+  const [error, setError] = useState<string | null>(null);
 
   const processStream = async (stream: ReadableStream) => {
     const reader = stream.getReader();
@@ -104,32 +102,47 @@ function MiaAnalysis({
 
   // Trigger the analysis when forecast changes.
   useEffect(() => {
-    if (!forecast || !authorization) return;
+    if (!forecast || !authorization || !systemId) return;
 
     async function runAnalysis() {
-      if (!authorization) return; // Type guard for TypeScript
+      if (!authorization || !systemId) return; // Type guard for TypeScript
 
       setAnalysisData(null);
-      const requestBody = { question: message };
+      setError(null);
 
       try {
-        const response = await api.chatCompletion(requestBody, authorization);
+        const response = await api.generateForecastAnalysis(
+          systemId,
+          forecast as ForecastItem[],
+          authorization
+        );
         if (!response.ok) {
-          throw new Error(`Request failed: ${response.status}`);
+          if (response.status === 404) {
+            throw new Error('Analysis service temporarily unavailable');
+          }
+          throw new Error(`Unable to analyze forecast (${response.status})`);
         }
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         await processStream(response.body!);
       } catch (error) {
+        let errorMessage = 'Failed to connect to analysis service';
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        } else if (error instanceof TypeError) {
+          errorMessage = 'Network connection failed';
+        }
         console.error('AI analysis error:', error);
+        setError(errorMessage);
       }
     }
 
     runAnalysis();
-  }, [forecast, systemId, authorization, message]);
+  }, [forecast, systemId, authorization]);
 
   return (
     <AnalysisDisplay
       analysis={{ source: 'Heroku AI', agentAnalysis: analysisData }}
+      error={error}
     />
   );
 }
@@ -137,8 +150,10 @@ function MiaAnalysis({
 // Analysis Display Component
 function AnalysisDisplay({
   analysis,
+  error,
 }: {
   analysis: { source: string; agentAnalysis: AnalysisData | null };
+  error?: string | null;
 }) {
   const { source, agentAnalysis } = analysis;
 
@@ -156,16 +171,35 @@ function AnalysisDisplay({
   }
 
   return (
-    <div className="col-span-1 bg-white border border-gray-200 rounded-xl shadow-sm p-4">
-      <div className="w-full flex justify-between">
-        <p className="uppercase text-xs text-[#596981] font-bold">
+    <div className="col-span-1 bg-linear-to-br from-green-50 via-emerald-50 to-green-100 border border-green-200 rounded-xl shadow-sm p-4">
+      <div className="w-full flex items-center gap-2 mb-3">
+        <DollarSign className="h-5 w-5 text-green-700" />
+        <h3 className="font-semibold leading-none tracking-tight text-green-900">
           7 day predicted energy savings
-        </p>
-        <p className="text-xs text-[#596981] italic">powered by {source}</p>
+        </h3>
       </div>
-      {!agentAnalysis ? (
-        <div className="mt-6 flex items-center px-2 py-1.5 animate-pulse">
-          <div className="flex-shrink-0 h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center">
+      {error ? (
+        <div className="flex flex-col items-center justify-center px-3 py-2 bg-red-50 border border-red-300 rounded-md text-center">
+          <div className="shrink-0 h-8 w-8 rounded-full bg-red-500 flex items-center justify-center mb-2">
+            <svg
+              className="h-5 w-5 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </div>
+          <p className="text-sm text-red-800 font-medium">{error}</p>
+        </div>
+      ) : !agentAnalysis ? (
+        <div className="flex flex-col items-center justify-center px-3 py-2 animate-pulse">
+          <div className="shrink-0 h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center mb-2">
             <svg
               className="h-5 w-5 text-white"
               fill="none"
@@ -180,33 +214,50 @@ function AnalysisDisplay({
               />
             </svg>
           </div>
-          <p className="pl-2 text-sm text-[#4F5359]">
+          <p className="text-sm text-green-800 font-medium text-center">
             Predicting your system&apos;s efficiency...
           </p>
         </div>
       ) : (
         <div
-          className="mt-6 flex items-center px-2 py-1.5 rounded-md"
+          className="px-3 py-2 rounded-md bg-white border-2"
           style={{
-            background: generateAnalysisColor(agentAnalysis.efficiency, 0.1),
+            borderColor: generateAnalysisColor(agentAnalysis.efficiency, 0.3),
           }}
         >
-          <div
-            className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center"
-            style={{
-              background: generateAnalysisColor(agentAnalysis.efficiency, 1),
-            }}
-          >
-            <span className="text-white text-xs font-bold">✓</span>
+          <div className="flex items-center gap-3 mb-2">
+            <div
+              className="shrink-0 h-10 w-10 rounded-full flex items-center justify-center"
+              style={{
+                background: generateAnalysisColor(agentAnalysis.efficiency, 1),
+              }}
+            >
+              <span className="text-white font-bold">✓</span>
+            </div>
+            <p
+              className="text-2xl font-bold"
+              style={{
+                color: generateAnalysisColor(agentAnalysis.efficiency, 1),
+              }}
+            >
+              {agentAnalysis.efficiency}
+            </p>
           </div>
-          <p className="shrink-0 text-2xl font-bold pl-2">
-            {agentAnalysis.efficiency}
-          </p>
-          <p className="pl-8 text-sm text-[#4F5359]">
+          <p className="text-sm text-gray-700 leading-snug">
             {agentAnalysis.analysis}
           </p>
         </div>
       )}
+      <div className="flex items-center justify-end gap-1 mt-3 pt-2 border-t border-green-200">
+        <p className="text-xs text-green-700 italic">powered by {source}</p>
+        <Image
+          src="/mia-icon.png"
+          alt="Mia AI"
+          width={14}
+          height={14}
+          className="inline-block"
+        />
+      </div>
     </div>
   );
 }
@@ -222,11 +273,14 @@ function EfficiencyForecast({
   const dayOfWeek = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
   return (
-    <div className="col-span-1 bg-white border border-gray-200 rounded-xl shadow-sm p-4">
-      <p className="uppercase text-xs text-[#596981] font-bold">
-        7 day solar production forecast
-      </p>
-      <div className="grid grid-flow-col grid-cols-[auto-fill] pt-4 overflow-x-auto">
+    <div className="col-span-1 bg-linear-to-br from-yellow-50 via-orange-50 to-yellow-100 border border-yellow-200 rounded-xl shadow-sm p-4">
+      <div className="flex items-center gap-2 mb-4">
+        <Zap className="h-5 w-5 text-yellow-600" />
+        <h3 className="font-semibold leading-none tracking-tight text-yellow-900">
+          7 day solar production forecast
+        </h3>
+      </div>
+      <div className="grid grid-flow-col grid-cols-[auto-fill] overflow-x-auto">
         {forecast.map((day) => {
           const date = new Date(day.date);
           const dayOfWeekNumber = date.getDay();
@@ -248,11 +302,11 @@ function EfficiencyForecast({
           return (
             <div
               key={`forecast-${day.date}`}
-              className="flex justify-center border-r border-[#e5e7eb] px-5 last:border-none"
+              className="flex justify-center border-r border-yellow-200 px-5 last:border-none"
             >
               <div className="w-2/5" style={{ minWidth: `${barHeight}rem` }}>
                 <div
-                  className="bg-[#F7F8FB] relative rounded-md"
+                  className="bg-white relative rounded-md"
                   style={{ height: `${barHeight}rem` }}
                 >
                   <div
@@ -265,19 +319,21 @@ function EfficiencyForecast({
                     }}
                   />
                 </div>
-                <p className="uppercase text-xs text-[#596981] text-center pt-1">
+                <p className="text-xs text-yellow-900 font-semibold text-center pt-1 capitalize">
                   {dayOfWeek[dayOfWeekNumber]}
                 </p>
-                <p className="text-xs text-gray-600 text-center font-medium">
+                <p className="text-xs text-yellow-800 text-center font-medium">
                   {day.irradiation?.toFixed(1) || '0.0'}
                 </p>
-                <p className="text-[10px] text-gray-500 text-center">kWh/m²</p>
+                <p className="text-[10px] text-yellow-700 text-center">
+                  kWh/m²
+                </p>
               </div>
             </div>
           );
         })}
       </div>
-      <p className="text-xs text-gray-500 mt-3 text-center">
+      <p className="text-xs text-yellow-800 mt-3 text-center font-medium">
         Solar irradiation measures energy from the sun in kilowatt-hours per
         square meter
       </p>

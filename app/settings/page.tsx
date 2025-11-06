@@ -13,7 +13,7 @@ import {
   type WhitelistPdf,
   type UpdateToolSettingsRequest,
   type ToastItem,
-} from '@/lib/toolSettings';
+} from '@/lib/tool-settings';
 import { ToggleSwitch } from '@/components/ui/toggle-switch';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Toast } from '@/components/ui/toast';
@@ -33,7 +33,7 @@ import {
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { user, apiUrl, authorization } = useStore();
+  const { user, authorization } = useStore();
 
   // State
   const [settings, setSettings] = useState<ToolSettings | null>(null);
@@ -65,7 +65,7 @@ export default function SettingsPage() {
     try {
       setLoading(true);
       setError(null);
-      const data = await toolSettingsApi.getSettings(apiUrl, authorization);
+      const data = await toolSettingsApi.getSettings(authorization);
       setSettings(data);
     } catch (err) {
       const message =
@@ -75,7 +75,7 @@ export default function SettingsPage() {
     } finally {
       setLoading(false);
     }
-  }, [apiUrl, authorization, addToast]);
+  }, [authorization, addToast]);
 
   // Redirect if not logged in
   useEffect(() => {
@@ -111,7 +111,7 @@ export default function SettingsPage() {
 
     try {
       setToggleLoading({ ...toggleLoading, [key]: true });
-      const data = await toolSettingsApi.updateSettings(apiUrl, authorization, {
+      const data = await toolSettingsApi.updateSettings(authorization, {
         [key]: value,
       } as UpdateToolSettingsRequest);
       setSettings(data);
@@ -132,7 +132,7 @@ export default function SettingsPage() {
 
     try {
       setResetLoading(true);
-      const response = await fetch(`${apiUrl}/api/admin/reset-demo`, {
+      const response = await fetch('/api/admin/reset-demo', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${authorization}`,
@@ -210,7 +210,6 @@ export default function SettingsPage() {
           {/* Resource Whitelists Section */}
           <WhitelistsSection
             whitelists={settings.whitelists}
-            apiUrl={apiUrl}
             authorization={authorization || ''}
             onUpdate={loadSettings}
             addToast={addToast}
@@ -444,13 +443,11 @@ function PerformanceSection({
 // Whitelists Section (URLs and PDFs)
 function WhitelistsSection({
   whitelists,
-  apiUrl,
   authorization,
   onUpdate,
   addToast,
 }: {
   whitelists: Whitelists;
-  apiUrl: string;
   authorization: string;
   onUpdate: () => void;
   addToast: (message: string, type?: 'success' | 'error' | 'warning') => void;
@@ -468,7 +465,6 @@ function WhitelistsSection({
         {/* URL Whitelist */}
         <URLWhitelistSection
           urls={whitelists.urls}
-          apiUrl={apiUrl}
           authorization={authorization}
           onUpdate={onUpdate}
           addToast={addToast}
@@ -477,7 +473,6 @@ function WhitelistsSection({
         {/* PDF Whitelist */}
         <PDFWhitelistSection
           pdfs={whitelists.pdfs}
-          apiUrl={apiUrl}
           authorization={authorization}
           onUpdate={onUpdate}
           addToast={addToast}
@@ -490,13 +485,11 @@ function WhitelistsSection({
 // URL Whitelist Section
 function URLWhitelistSection({
   urls,
-  apiUrl,
   authorization,
   onUpdate,
   addToast,
 }: {
   urls: WhitelistUrl[];
-  apiUrl: string;
   authorization: string;
   onUpdate: () => void;
   addToast: (message: string, type?: 'success' | 'error' | 'warning') => void;
@@ -527,7 +520,7 @@ function URLWhitelistSection({
 
     try {
       setFormLoading(true);
-      await toolSettingsApi.addUrl(apiUrl, authorization, formData);
+      await toolSettingsApi.addUrl(authorization, formData);
       setFormData({ url: '', description: '' });
       setShowForm(false);
       addToast('URL added to whitelist', 'success');
@@ -545,7 +538,7 @@ function URLWhitelistSection({
     if (!deleteDialog) return;
     try {
       setDeleteLoading(true);
-      await toolSettingsApi.deleteUrl(apiUrl, authorization, deleteDialog.id);
+      await toolSettingsApi.deleteUrl(authorization, deleteDialog.id);
       addToast('URL removed from whitelist', 'success');
       setDeleteDialog(null);
       onUpdate();
@@ -698,13 +691,11 @@ function URLWhitelistSection({
 // PDF Whitelist Section (similar to URL section)
 function PDFWhitelistSection({
   pdfs,
-  apiUrl,
   authorization,
   onUpdate,
   addToast,
 }: {
   pdfs: WhitelistPdf[];
-  apiUrl: string;
   authorization: string;
   onUpdate: () => void;
   addToast: (message: string, type?: 'success' | 'error' | 'warning') => void;
@@ -735,7 +726,7 @@ function PDFWhitelistSection({
 
     try {
       setFormLoading(true);
-      await toolSettingsApi.addPdf(apiUrl, authorization, formData);
+      await toolSettingsApi.addPdf(authorization, formData);
       setFormData({ pdf_url: '', description: '' });
       setShowForm(false);
       addToast('PDF added to whitelist', 'success');
@@ -753,7 +744,7 @@ function PDFWhitelistSection({
     if (!deleteDialog) return;
     try {
       setDeleteLoading(true);
-      await toolSettingsApi.deletePdf(apiUrl, authorization, deleteDialog.id);
+      await toolSettingsApi.deletePdf(authorization, deleteDialog.id);
       addToast('PDF removed from whitelist', 'success');
       setDeleteDialog(null);
       onUpdate();

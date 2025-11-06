@@ -114,19 +114,18 @@ export const toolSettingsApi = {
   /**
    * Get current tool settings
    */
-  getSettings: (apiUrl: string, token: string): Promise<ToolSettings> =>
-    fetchWithAuth(`${apiUrl}/api/tool-settings`, {}, token),
+  getSettings: (token: string): Promise<ToolSettings> =>
+    fetchWithAuth('/api/tool-settings', {}, token),
 
   /**
    * Update tool settings (partial updates supported)
    */
   updateSettings: (
-    apiUrl: string,
     token: string,
     updates: UpdateToolSettingsRequest
   ): Promise<ToolSettings> =>
     fetchWithAuth(
-      `${apiUrl}/api/tool-settings`,
+      '/api/tool-settings',
       {
         method: 'PUT',
         body: JSON.stringify(updates),
@@ -138,12 +137,11 @@ export const toolSettingsApi = {
    * Add a URL to the whitelist
    */
   addUrl: (
-    apiUrl: string,
     token: string,
     data: AddWhitelistUrlRequest
   ): Promise<WhitelistUrl> =>
     fetchWithAuth(
-      `${apiUrl}/api/tool-settings/whitelists/urls`,
+      '/api/tool-settings/whitelists/urls',
       {
         method: 'POST',
         body: JSON.stringify(data),
@@ -154,13 +152,9 @@ export const toolSettingsApi = {
   /**
    * Delete a URL from the whitelist
    */
-  deleteUrl: (
-    apiUrl: string,
-    token: string,
-    id: number
-  ): Promise<DeleteResponse> =>
+  deleteUrl: (token: string, id: number): Promise<DeleteResponse> =>
     fetchWithAuth(
-      `${apiUrl}/api/tool-settings/whitelists/urls/${id}`,
+      `/api/tool-settings/whitelists/urls/${id}`,
       {
         method: 'DELETE',
       },
@@ -171,12 +165,11 @@ export const toolSettingsApi = {
    * Add a PDF to the whitelist
    */
   addPdf: (
-    apiUrl: string,
     token: string,
     data: AddWhitelistPdfRequest
   ): Promise<WhitelistPdf> =>
     fetchWithAuth(
-      `${apiUrl}/api/tool-settings/whitelists/pdfs`,
+      '/api/tool-settings/whitelists/pdfs',
       {
         method: 'POST',
         body: JSON.stringify(data),
@@ -187,13 +180,9 @@ export const toolSettingsApi = {
   /**
    * Delete a PDF from the whitelist
    */
-  deletePdf: (
-    apiUrl: string,
-    token: string,
-    id: number
-  ): Promise<DeleteResponse> =>
+  deletePdf: (token: string, id: number): Promise<DeleteResponse> =>
     fetchWithAuth(
-      `${apiUrl}/api/tool-settings/whitelists/pdfs/${id}`,
+      `/api/tool-settings/whitelists/pdfs/${id}`,
       {
         method: 'DELETE',
       },

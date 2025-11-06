@@ -87,7 +87,6 @@ interface ForecastItem {
 }
 
 interface AppState {
-  apiUrl: string;
   authorization: string | null;
   user: User | null;
   systems: System[];
@@ -101,7 +100,6 @@ interface AppState {
 }
 
 interface AppActions {
-  setApiUrl: (url: string) => void;
   setAuthorization: (token: string | null) => void;
   setUser: (user: User | null) => void;
   setSystems: (systems: System[]) => void;
@@ -119,7 +117,6 @@ interface AppActions {
 
 export const useStore = create<AppState & AppActions>((set) => ({
   // State
-  apiUrl: process.env.NEXT_PUBLIC_API_URL || 'http://0.0.0.0:3001',
   authorization: null,
   user: null,
   systems: [],
@@ -132,7 +129,6 @@ export const useStore = create<AppState & AppActions>((set) => ({
   forecast: null,
 
   // Actions
-  setApiUrl: (url) => set({ apiUrl: url }),
   setAuthorization: (token) => set({ authorization: token }),
   setUser: (user) => set({ user }),
   setSystems: (systems) => set({ systems }),

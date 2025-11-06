@@ -75,17 +75,14 @@ const useChatStream = ({
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
       setIsLoading(false);
-      setMessages((prev) => {
-        const filtered = prev.filter((msg) => msg.role !== 'agent');
-        return [
-          ...filtered,
-          {
-            role: 'assistant',
-            content: 'Request cancelled.',
-            timestamp: new Date().toISOString(),
-          },
-        ];
-      });
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: 'Request cancelled.',
+          timestamp: new Date().toISOString(),
+        },
+      ]);
     }
   };
 
@@ -301,10 +298,8 @@ const useChatStream = ({
         processAgentBuffer();
       }
 
-      // Remove agent messages after successful completion
-      setMessages((prev) => prev.filter((msg) => msg.role !== 'agent'));
+      // Keep all messages visible - don't remove tool/agent messages
     } catch (error) {
-      // Don't show error message if request was aborted
       if (error instanceof Error && error.name === 'AbortError') {
         return;
       }
@@ -315,17 +310,14 @@ const useChatStream = ({
           ? 'Session expired. Please refresh the page.'
           : 'Connection interrupted. Please try again.';
 
-      setMessages((prev) => {
-        const filtered = prev.filter((msg) => msg.role !== 'agent');
-        return [
-          ...filtered,
-          {
-            role: 'error',
-            content: errorMessage,
-            timestamp: new Date().toISOString(),
-          },
-        ];
-      });
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'error',
+          content: errorMessage,
+          timestamp: new Date().toISOString(),
+        },
+      ]);
     } finally {
       try {
         await reader.cancel();
@@ -1098,7 +1090,7 @@ export function Assistant() {
       {/* Image Preview Modal */}
       {imagePreview && (
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4"
+          className="fixed inset-0 z-60 flex items-center justify-center bg-black/80 p-4"
           onClick={() => setImagePreview(null)}
         >
           <div className="relative max-w-4xl max-h-[90vh]">

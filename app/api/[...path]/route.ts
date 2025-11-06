@@ -85,7 +85,28 @@ async function handleRequest(
       fetchOptions
     );
 
-    // Get response text
+    // Check if response is a stream (for chat completions)
+    const responseContentType = response.headers.get('content-type') || '';
+
+    // For chat endpoint, always stream the response
+    if (
+      apiPath === 'chat' ||
+      responseContentType.includes('text/event-stream') ||
+      responseContentType.includes('text/plain') ||
+      responseContentType.includes('application/x-ndjson')
+    ) {
+      // Stream the response directly without consuming it
+      return new NextResponse(response.body, {
+        status: response.status,
+        headers: {
+          'Content-Type': responseContentType,
+          'Cache-Control': 'no-cache',
+          Connection: 'keep-alive',
+        },
+      });
+    }
+
+    // Get response text for non-streaming responses
     const responseText = await response.text();
 
     // Try to parse as JSON, otherwise return as text

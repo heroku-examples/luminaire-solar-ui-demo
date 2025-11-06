@@ -430,8 +430,8 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Floating Assistant Button */}
-      <Assistant />
+      {/* Floating Assistant Button - Only show when system is selected */}
+      {selectedSystemId && <Assistant />}
     </div>
   );
 }

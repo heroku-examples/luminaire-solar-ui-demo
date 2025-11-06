@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/lib/store';
+import type { MetricsSummary } from '@/lib/store';
 import { api } from '@/lib/api';
 import {
   Card,
@@ -36,7 +37,9 @@ export default function SolarCalculatorPage() {
   const router = useRouter();
   const { user, authorization, systems, setSystems } = useStore();
   const [selectedSystemId, setSelectedSystemId] = useState<string | null>(null);
-  const [metricsSummary, setMetricsSummary] = useState<any>(null);
+  const [metricsSummary, setMetricsSummary] = useState<MetricsSummary | null>(
+    null
+  );
   const [loading, setLoading] = useState(false);
 
   // User inputs
@@ -255,13 +258,13 @@ export default function SolarCalculatorPage() {
 
             {/* Current Energy Performance */}
             <Card>
-              <CardHeader>
+              <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2">
                   <Zap className="h-5 w-5 text-yellow-500" />
                   1. Current Energy Performance
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="pt-0">
                 <div className="grid md:grid-cols-3 gap-4">
                   <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
                     <p className="text-sm text-blue-900 font-medium mb-2">

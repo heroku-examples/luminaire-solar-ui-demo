@@ -171,10 +171,10 @@ function AnalysisDisplay({
   }
 
   return (
-    <div className="col-span-1 bg-linear-to-br from-green-50 via-emerald-50 to-green-100 border border-green-200 rounded-xl shadow-sm p-4">
+    <div className="col-span-1 bg-white border border-gray-200 rounded-xl shadow-sm p-4">
       <div className="w-full flex items-center gap-2 mb-3">
-        <DollarSign className="h-5 w-5 text-green-700" />
-        <h3 className="font-semibold leading-none tracking-tight text-green-900">
+        <DollarSign className="h-5 w-5 text-green-600" />
+        <h3 className="font-semibold leading-none tracking-tight text-gray-900">
           7 day predicted energy savings
         </h3>
       </div>
@@ -214,15 +214,19 @@ function AnalysisDisplay({
               />
             </svg>
           </div>
-          <p className="text-sm text-green-800 font-medium text-center">
+          <p className="text-sm text-gray-700 font-medium text-center">
             Predicting your system&apos;s efficiency...
           </p>
         </div>
       ) : (
         <div
-          className="px-3 py-2 rounded-md bg-white border-2"
+          className="px-3 py-2 rounded-md border-2"
           style={{
             borderColor: generateAnalysisColor(agentAnalysis.efficiency, 0.3),
+            backgroundColor: generateAnalysisColor(
+              agentAnalysis.efficiency,
+              0.1
+            ),
           }}
         >
           <div className="flex items-center gap-3 mb-2">
@@ -248,8 +252,8 @@ function AnalysisDisplay({
           </p>
         </div>
       )}
-      <div className="flex items-center justify-end gap-1 mt-3 pt-2 border-t border-green-200">
-        <p className="text-xs text-green-700 italic">powered by {source}</p>
+      <div className="flex items-center justify-end gap-1 mt-3 pt-2 border-t border-gray-200">
+        <p className="text-xs text-gray-600 italic">powered by {source}</p>
         <Image
           src="/mia-icon.png"
           alt="Mia AI"
@@ -273,10 +277,10 @@ function EfficiencyForecast({
   const dayOfWeek = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
   return (
-    <div className="col-span-1 bg-linear-to-br from-yellow-50 via-orange-50 to-yellow-100 border border-yellow-200 rounded-xl shadow-sm p-4">
+    <div className="col-span-1 bg-white border border-gray-200 rounded-xl shadow-sm p-4">
       <div className="flex items-center gap-2 mb-4">
         <Zap className="h-5 w-5 text-yellow-600" />
-        <h3 className="font-semibold leading-none tracking-tight text-yellow-900">
+        <h3 className="font-semibold leading-none tracking-tight text-gray-900">
           7 day solar production forecast
         </h3>
       </div>
@@ -302,11 +306,11 @@ function EfficiencyForecast({
           return (
             <div
               key={`forecast-${day.date}`}
-              className="flex justify-center border-r border-yellow-200 px-5 last:border-none"
+              className="flex justify-center border-r border-gray-200 px-5 last:border-none"
             >
               <div className="w-2/5" style={{ minWidth: `${barHeight}rem` }}>
                 <div
-                  className="bg-white relative rounded-md"
+                  className="bg-gray-100 relative rounded-md"
                   style={{ height: `${barHeight}rem` }}
                 >
                   <div
@@ -319,21 +323,19 @@ function EfficiencyForecast({
                     }}
                   />
                 </div>
-                <p className="text-xs text-yellow-900 font-semibold text-center pt-1 capitalize">
+                <p className="text-xs text-gray-900 font-semibold text-center pt-1 capitalize">
                   {dayOfWeek[dayOfWeekNumber]}
                 </p>
-                <p className="text-xs text-yellow-800 text-center font-medium">
+                <p className="text-xs text-gray-700 text-center font-medium">
                   {day.irradiation?.toFixed(1) || '0.0'}
                 </p>
-                <p className="text-[10px] text-yellow-700 text-center">
-                  kWh/m²
-                </p>
+                <p className="text-[10px] text-gray-600 text-center">kWh/m²</p>
               </div>
             </div>
           );
         })}
       </div>
-      <p className="text-xs text-yellow-800 mt-3 text-center font-medium">
+      <p className="text-xs text-gray-700 mt-3 text-center font-medium">
         Solar irradiation measures energy from the sun in kilowatt-hours per
         square meter
       </p>

@@ -202,34 +202,35 @@ export default function DashboardPage() {
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-4">
               {/* Current Energy Performance - Calculator Style */}
-              <Card className="lg:col-span-3 shadow-sm">
-                <CardHeader>
+              <Card className="lg:col-span-3 shadow-sm flex flex-col">
+                <CardHeader className="pb-3 shrink-0">
                   <div className="flex items-center gap-2">
                     <Zap className="h-5 w-5 text-yellow-500" />
                     <CardTitle>Current Energy Performance</CardTitle>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-3 gap-4">
+                <CardContent className="pt-0 pb-6 flex-1 flex items-stretch">
+                  <div className="grid md:grid-cols-3 gap-4 w-full">
                     {/* Daily */}
-                    <div className="bg-linear-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
-                      <p className="text-sm text-blue-900 font-medium mb-2">
-                        Daily
-                      </p>
-                      <p className="text-2xl font-bold text-blue-900">
-                        {metricsSummary?.daily?.total_energy_produced?.toFixed(
-                          2
-                        ) || '0.00'}{' '}
-                        kWh
-                      </p>
-                      <p className="text-xs text-blue-700 mt-1">Produced</p>
-                      <p className="text-xl font-semibold text-blue-800 mt-2">
-                        {metricsSummary?.daily?.total_energy_consumed?.toFixed(
-                          2
-                        ) || '0.00'}{' '}
-                        kWh
-                      </p>
-                      <p className="text-xs text-blue-700">Consumed</p>
+                    <div className="bg-linear-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4 flex flex-col justify-between">
+                      <p className="text-sm text-blue-900 font-medium">Daily</p>
+
+                      <div className="flex-1 flex flex-col justify-center">
+                        <p className="text-3xl font-bold text-blue-900">
+                          {metricsSummary?.daily?.total_energy_produced?.toFixed(
+                            2
+                          ) || '0.00'}{' '}
+                          kWh
+                        </p>
+                        <p className="text-xs text-blue-700 mb-3">Produced</p>
+                        <p className="text-2xl font-semibold text-blue-800">
+                          {metricsSummary?.daily?.total_energy_consumed?.toFixed(
+                            2
+                          ) || '0.00'}{' '}
+                          kWh
+                        </p>
+                        <p className="text-xs text-blue-700">Consumed</p>
+                      </div>
 
                       {(() => {
                         const produced =
@@ -241,15 +242,15 @@ export default function DashboardPage() {
 
                         return (
                           <div
-                            className={`mt-3 pt-3 border-t border-blue-300 flex items-center gap-2 ${isPositive ? 'text-green-700' : 'text-red-700'}`}
+                            className={`pt-3 border-t border-blue-300 flex items-center gap-2 ${isPositive ? 'text-green-700' : 'text-red-700'}`}
                           >
                             {isPositive ? (
-                              <ArrowUp className="h-4 w-4" />
+                              <ArrowUp className="h-5 w-5" />
                             ) : (
-                              <ArrowDown className="h-4 w-4" />
+                              <ArrowDown className="h-5 w-5" />
                             )}
                             <div>
-                              <p className="text-sm font-semibold">
+                              <p className="text-base font-bold">
                                 {Math.abs(net).toFixed(2)} kWh
                               </p>
                               <p className="text-xs">
@@ -262,24 +263,27 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Weekly */}
-                    <div className="bg-linear-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-4">
-                      <p className="text-sm text-purple-900 font-medium mb-2">
+                    <div className="bg-linear-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-4 flex flex-col justify-between">
+                      <p className="text-sm text-purple-900 font-medium">
                         Weekly
                       </p>
-                      <p className="text-2xl font-bold text-purple-900">
-                        {metricsSummary?.weekly?.total_energy_produced?.toFixed(
-                          2
-                        ) || '0.00'}{' '}
-                        kWh
-                      </p>
-                      <p className="text-xs text-purple-700 mt-1">Produced</p>
-                      <p className="text-xl font-semibold text-purple-800 mt-2">
-                        {metricsSummary?.weekly?.total_energy_consumed?.toFixed(
-                          2
-                        ) || '0.00'}{' '}
-                        kWh
-                      </p>
-                      <p className="text-xs text-purple-700">Consumed</p>
+
+                      <div className="flex-1 flex flex-col justify-center">
+                        <p className="text-3xl font-bold text-purple-900">
+                          {metricsSummary?.weekly?.total_energy_produced?.toFixed(
+                            2
+                          ) || '0.00'}{' '}
+                          kWh
+                        </p>
+                        <p className="text-xs text-purple-700 mb-3">Produced</p>
+                        <p className="text-2xl font-semibold text-purple-800">
+                          {metricsSummary?.weekly?.total_energy_consumed?.toFixed(
+                            2
+                          ) || '0.00'}{' '}
+                          kWh
+                        </p>
+                        <p className="text-xs text-purple-700">Consumed</p>
+                      </div>
 
                       {(() => {
                         const produced =
@@ -291,15 +295,15 @@ export default function DashboardPage() {
 
                         return (
                           <div
-                            className={`mt-3 pt-3 border-t border-purple-300 flex items-center gap-2 ${isPositive ? 'text-green-700' : 'text-red-700'}`}
+                            className={`pt-3 border-t border-purple-300 flex items-center gap-2 ${isPositive ? 'text-green-700' : 'text-red-700'}`}
                           >
                             {isPositive ? (
-                              <ArrowUp className="h-4 w-4" />
+                              <ArrowUp className="h-5 w-5" />
                             ) : (
-                              <ArrowDown className="h-4 w-4" />
+                              <ArrowDown className="h-5 w-5" />
                             )}
                             <div>
-                              <p className="text-sm font-semibold">
+                              <p className="text-base font-bold">
                                 {Math.abs(net).toFixed(2)} kWh
                               </p>
                               <p className="text-xs">
@@ -312,24 +316,27 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Monthly */}
-                    <div className="bg-linear-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-4">
-                      <p className="text-sm text-green-900 font-medium mb-2">
+                    <div className="bg-linear-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-4 flex flex-col justify-between">
+                      <p className="text-sm text-green-900 font-medium">
                         Monthly
                       </p>
-                      <p className="text-2xl font-bold text-green-900">
-                        {metricsSummary?.monthly?.total_energy_produced?.toFixed(
-                          2
-                        ) || '0.00'}{' '}
-                        kWh
-                      </p>
-                      <p className="text-xs text-green-700 mt-1">Produced</p>
-                      <p className="text-xl font-semibold text-green-800 mt-2">
-                        {metricsSummary?.monthly?.total_energy_consumed?.toFixed(
-                          2
-                        ) || '0.00'}{' '}
-                        kWh
-                      </p>
-                      <p className="text-xs text-green-700">Consumed</p>
+
+                      <div className="flex-1 flex flex-col justify-center">
+                        <p className="text-3xl font-bold text-green-900">
+                          {metricsSummary?.monthly?.total_energy_produced?.toFixed(
+                            2
+                          ) || '0.00'}{' '}
+                          kWh
+                        </p>
+                        <p className="text-xs text-green-700 mb-3">Produced</p>
+                        <p className="text-2xl font-semibold text-green-800">
+                          {metricsSummary?.monthly?.total_energy_consumed?.toFixed(
+                            2
+                          ) || '0.00'}{' '}
+                          kWh
+                        </p>
+                        <p className="text-xs text-green-700">Consumed</p>
+                      </div>
 
                       {(() => {
                         const produced =
@@ -341,15 +348,15 @@ export default function DashboardPage() {
 
                         return (
                           <div
-                            className={`mt-3 pt-3 border-t border-green-300 flex items-center gap-2 ${isPositive ? 'text-green-700' : 'text-red-700'}`}
+                            className={`pt-3 border-t border-green-300 flex items-center gap-2 ${isPositive ? 'text-green-700' : 'text-red-700'}`}
                           >
                             {isPositive ? (
-                              <ArrowUp className="h-4 w-4" />
+                              <ArrowUp className="h-5 w-5" />
                             ) : (
-                              <ArrowDown className="h-4 w-4" />
+                              <ArrowDown className="h-5 w-5" />
                             )}
                             <div>
-                              <p className="text-sm font-semibold">
+                              <p className="text-base font-bold">
                                 {Math.abs(net).toFixed(2)} kWh
                               </p>
                               <p className="text-xs">
@@ -371,7 +378,7 @@ export default function DashboardPage() {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {/* 30 Day Performance History */}
               <Card className="lg:col-span-2 shadow-sm">
-                <CardHeader>
+                <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <TrendingUp className="h-5 w-5 text-purple-600" />
@@ -380,21 +387,21 @@ export default function DashboardPage() {
                     <div className="flex items-center gap-4 text-xs">
                       <div className="flex items-center gap-2">
                         <div className="h-3 w-3 rounded-full bg-green-500" />
-                        <span className="text-muted-foreground">Output</span>
+                        <span className="text-muted-foreground">Produced</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="h-3 w-3 rounded-full bg-blue-500" />
-                        <span className="text-muted-foreground">Usage</span>
+                        <span className="text-muted-foreground">Consumed</span>
                       </div>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-0 pb-0">
                   {system?.activityHistory?.pastMonth &&
                   system.activityHistory.pastMonth.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={300}>
+                    <ResponsiveContainer width="100%" height={400}>
                       <LineChart
-                        data={system.activityHistory.pastMonth}
+                        data={[...system.activityHistory.pastMonth].reverse()}
                         margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -426,7 +433,7 @@ export default function DashboardPage() {
                         <Line
                           type="monotone"
                           dataKey="total_energy_produced"
-                          name="Output (kWh)"
+                          name="Produced (kWh)"
                           stroke="#22c55e"
                           strokeWidth={3}
                           dot={{ fill: '#22c55e', r: 4 }}
@@ -436,7 +443,7 @@ export default function DashboardPage() {
                         <Line
                           type="monotone"
                           dataKey="total_energy_consumed"
-                          name="Usage (kWh)"
+                          name="Consumed (kWh)"
                           stroke="#3b82f6"
                           strokeWidth={3}
                           dot={{ fill: '#3b82f6', r: 4 }}
@@ -446,7 +453,7 @@ export default function DashboardPage() {
                       </LineChart>
                     </ResponsiveContainer>
                   ) : (
-                    <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+                    <div className="flex items-center justify-center h-[400px] text-muted-foreground">
                       {system?.activityHistory
                         ? 'No data points available'
                         : 'Loading...'}
@@ -459,14 +466,14 @@ export default function DashboardPage() {
               <div className="space-y-4">
                 {/* System Components Card */}
                 <Card className="shadow-sm">
-                  <CardHeader>
+                  <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2">
                       <Cpu className="h-5 w-5 text-purple-600" />
                       System Components
                     </CardTitle>
                     <CardDescription>Installed hardware status</CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="pt-0">
                     <TooltipProvider>
                       <div className="space-y-3">
                         {system?.components?.map(
@@ -517,7 +524,7 @@ export default function DashboardPage() {
 
                 {/* Battery Storage Card */}
                 <Card className="shadow-sm">
-                  <CardHeader>
+                  <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2">
                       <Battery
                         className={`h-5 w-5 ${
@@ -532,7 +539,7 @@ export default function DashboardPage() {
                     </CardTitle>
                     <CardDescription>Current charge level</CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="pt-0">
                     <div className="space-y-4">
                       <div>
                         <div className="text-3xl font-bold text-gray-900">

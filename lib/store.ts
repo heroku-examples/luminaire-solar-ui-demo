@@ -61,7 +61,7 @@ interface Product {
   quantity?: number;
 }
 
-interface MetricsSummary {
+export interface MetricsSummary {
   daily?: {
     total_energy_produced: number;
     total_energy_consumed: number;

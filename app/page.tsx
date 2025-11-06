@@ -1,3 +1,6 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -19,25 +22,53 @@ export default function HomePage() {
   );
 }
 
+const BACKGROUND_IMAGES = [
+  { src: '/home.jpg', alt: 'Solar panels home installation' },
+  { src: '/industrial.jpg', alt: 'Industrial solar installation' },
+  { src: '/residential.jpg', alt: 'Residential solar panels' },
+  { src: '/commercial.jpg', alt: 'Commercial solar installation' },
+];
+
 function Hero() {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % BACKGROUND_IMAGES.length);
+    }, 30000); // Change every 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="relative h-screen flex justify-center items-center overflow-hidden">
+      {/* Background images with fade transition */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-linear-to-b from-black/50 to-black/20" />
-        <Image
-          src="/home.jpg"
-          alt="Solar panels"
-          fill
-          className="object-cover"
-          priority
-        />
+        {BACKGROUND_IMAGES.map((image, index) => (
+          <div
+            key={image.src}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+              index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <Image
+              src={image.src}
+              alt={image.alt}
+              fill
+              className="object-cover"
+              priority={index === 0}
+            />
+          </div>
+        ))}
+        {/* Enhanced overlay for text visibility */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/50" />
       </div>
 
       <div className="relative z-10 text-center space-y-8 px-4">
-        <h1 className="text-5xl md:text-7xl font-bold text-white drop-shadow-2xl">
+        <h1 className="text-5xl md:text-7xl font-bold text-white drop-shadow-2xl [text-shadow:_0_4px_12px_rgb(0_0_0_/_80%),_0_2px_4px_rgb(0_0_0_/_100%)]">
           Leading Provider of Solar Solutions
         </h1>
-        <p className="text-xl md:text-2xl text-white drop-shadow-lg max-w-2xl mx-auto">
+        <p className="text-xl md:text-2xl text-white drop-shadow-lg max-w-2xl mx-auto [text-shadow:_0_2px_8px_rgb(0_0_0_/_70%),_0_1px_3px_rgb(0_0_0_/_100%)]">
           Comprehensive Solar Energy solutions for all your needs.
         </p>
 

@@ -138,115 +138,119 @@ export function WeatherWidget({ weather }: WeatherWidgetProps) {
   const uvColor = solarData ? getUVColor(solarData.uvIndex) : null;
 
   return (
-    <Card className="shadow-sm">
-      <CardHeader className="pb-3">
+    <Card className="shadow-sm flex flex-col h-full">
+      <CardHeader className="pb-3 shrink-0">
         <CardTitle className="flex items-center gap-2">
           <Cloud className="h-5 w-5 text-gray-600" />
           Local Weather
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {/* Temperature and Icon */}
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-4xl font-bold text-gray-900">
-              {weather.temperature || '--'}°
-              <span className="text-xl text-gray-500">F</span>
+      <CardContent className="pb-0 flex-1 flex flex-col">
+        <div className="space-y-3 flex-1">
+          {/* Temperature and Icon */}
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-4xl font-bold text-gray-900">
+                {weather.temperature || '--'}°
+                <span className="text-xl text-gray-500">F</span>
+              </div>
+              <p className="text-sm text-gray-600 capitalize">
+                {weather.description || 'No data'}
+              </p>
             </div>
-            <p className="text-sm text-gray-600 capitalize">
-              {weather.description || 'No data'}
-            </p>
+            <div>{getWeatherIcon(weather.description || '')}</div>
           </div>
-          <div>{getWeatherIcon(weather.description || '')}</div>
+
+          {/* Solar Production Estimate */}
+          {solarData && (
+            <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg p-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold text-yellow-900">
+                  Solar Conditions
+                </span>
+                <span className="text-lg font-bold text-yellow-900">
+                  {solarData.solarEfficiency}%
+                </span>
+              </div>
+              <div className="w-full bg-yellow-200 rounded-full h-2">
+                <div
+                  className="bg-gradient-to-r from-yellow-500 to-orange-500 h-2 rounded-full transition-all"
+                  style={{ width: `${solarData.solarEfficiency}%` }}
+                />
+              </div>
+              <p className="text-xs text-yellow-800 mt-1">
+                {solarData.solarEfficiency >= 80
+                  ? 'Excellent for production'
+                  : solarData.solarEfficiency >= 60
+                    ? 'Good production expected'
+                    : solarData.solarEfficiency >= 40
+                      ? 'Moderate production'
+                      : 'Reduced production expected'}
+              </p>
+            </div>
+          )}
+
+          {/* Solar Metrics Grid */}
+          {solarData && (
+            <div className="grid grid-cols-2 gap-2">
+              {/* UV Index */}
+              <div className="bg-gray-50 rounded-lg p-2">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Sun className="h-3.5 w-3.5 text-gray-600" />
+                  <p className="text-xs text-gray-600 font-medium">UV Index</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`${uvColor?.bg} w-8 h-8 rounded-md flex items-center justify-center`}
+                  >
+                    <span className="text-sm font-bold text-white">
+                      {solarData.uvIndex}
+                    </span>
+                  </div>
+                  <span className="text-xs text-gray-700">{uvColor?.text}</span>
+                </div>
+              </div>
+
+              {/* Cloud Cover */}
+              <div className="bg-gray-50 rounded-lg p-2">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <CloudOff className="h-3.5 w-3.5 text-gray-600" />
+                  <p className="text-xs text-gray-600 font-medium">
+                    Cloud Cover
+                  </p>
+                </div>
+                <p className="text-xl font-bold text-gray-900">
+                  {solarData.cloudCover}%
+                </p>
+              </div>
+
+              {/* Sunrise */}
+              <div className="bg-gray-50 rounded-lg p-2">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Sunrise className="h-3.5 w-3.5 text-orange-500" />
+                  <p className="text-xs text-gray-600 font-medium">Sunrise</p>
+                </div>
+                <p className="text-sm font-semibold text-gray-900">
+                  {solarData.sunrise}
+                </p>
+              </div>
+
+              {/* Sunset */}
+              <div className="bg-gray-50 rounded-lg p-2">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Sunset className="h-3.5 w-3.5 text-purple-500" />
+                  <p className="text-xs text-gray-600 font-medium">Sunset</p>
+                </div>
+                <p className="text-sm font-semibold text-gray-900">
+                  {solarData.sunset}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Solar Production Estimate */}
-        {solarData && (
-          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg p-3">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-yellow-900">
-                Solar Conditions
-              </span>
-              <span className="text-lg font-bold text-yellow-900">
-                {solarData.solarEfficiency}%
-              </span>
-            </div>
-            <div className="w-full bg-yellow-200 rounded-full h-2">
-              <div
-                className="bg-gradient-to-r from-yellow-500 to-orange-500 h-2 rounded-full transition-all"
-                style={{ width: `${solarData.solarEfficiency}%` }}
-              />
-            </div>
-            <p className="text-xs text-yellow-800 mt-1">
-              {solarData.solarEfficiency >= 80
-                ? 'Excellent for production'
-                : solarData.solarEfficiency >= 60
-                  ? 'Good production expected'
-                  : solarData.solarEfficiency >= 40
-                    ? 'Moderate production'
-                    : 'Reduced production expected'}
-            </p>
-          </div>
-        )}
-
-        {/* Solar Metrics Grid */}
-        {solarData && (
-          <div className="grid grid-cols-2 gap-2">
-            {/* UV Index */}
-            <div className="bg-gray-50 rounded-lg p-2">
-              <div className="flex items-center gap-1.5 mb-1">
-                <Sun className="h-3.5 w-3.5 text-gray-600" />
-                <p className="text-xs text-gray-600 font-medium">UV Index</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div
-                  className={`${uvColor?.bg} w-8 h-8 rounded-md flex items-center justify-center`}
-                >
-                  <span className="text-sm font-bold text-white">
-                    {solarData.uvIndex}
-                  </span>
-                </div>
-                <span className="text-xs text-gray-700">{uvColor?.text}</span>
-              </div>
-            </div>
-
-            {/* Cloud Cover */}
-            <div className="bg-gray-50 rounded-lg p-2">
-              <div className="flex items-center gap-1.5 mb-1">
-                <CloudOff className="h-3.5 w-3.5 text-gray-600" />
-                <p className="text-xs text-gray-600 font-medium">Cloud Cover</p>
-              </div>
-              <p className="text-xl font-bold text-gray-900">
-                {solarData.cloudCover}%
-              </p>
-            </div>
-
-            {/* Sunrise */}
-            <div className="bg-gray-50 rounded-lg p-2">
-              <div className="flex items-center gap-1.5 mb-1">
-                <Sunrise className="h-3.5 w-3.5 text-orange-500" />
-                <p className="text-xs text-gray-600 font-medium">Sunrise</p>
-              </div>
-              <p className="text-sm font-semibold text-gray-900">
-                {solarData.sunrise}
-              </p>
-            </div>
-
-            {/* Sunset */}
-            <div className="bg-gray-50 rounded-lg p-2">
-              <div className="flex items-center gap-1.5 mb-1">
-                <Sunset className="h-3.5 w-3.5 text-purple-500" />
-                <p className="text-xs text-gray-600 font-medium">Sunset</p>
-              </div>
-              <p className="text-sm font-semibold text-gray-900">
-                {solarData.sunset}
-              </p>
-            </div>
-          </div>
-        )}
-
         {/* Additional Weather Metrics */}
-        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-gray-200">
+        <div className="grid grid-cols-3 gap-2 pt-3 mt-3 border-t border-gray-200">
           {weather.humidity && (
             <div className="text-center">
               <Droplets className="h-4 w-4 text-blue-500 mx-auto mb-1" />

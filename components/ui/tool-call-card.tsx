@@ -11,6 +11,7 @@ import {
   Wrench,
   ChevronDown,
   ChevronUp,
+  Loader2,
 } from 'lucide-react';
 
 interface ToolCallCardProps {
@@ -197,9 +198,11 @@ const formatResult = (result: string): React.ReactNode => {
                     <div className="text-xs font-medium text-gray-600">
                       Output:
                     </div>
-                    <pre className="bg-gray-900 text-gray-100 p-3 rounded text-xs overflow-x-auto max-h-60 overflow-y-auto whitespace-pre-wrap word-break-word">
-                      <code className="break-words">{nestedParsed.stdout}</code>
-                    </pre>
+                    <div className="bg-gray-900 text-gray-100 p-3 rounded text-xs max-h-60 overflow-y-auto">
+                      <pre className="whitespace-pre-wrap break-words overflow-wrap-anywhere">
+                        <code className="break-words">{nestedParsed.stdout}</code>
+                      </pre>
+                    </div>
                   </div>
                 )}
 
@@ -209,9 +212,11 @@ const formatResult = (result: string): React.ReactNode => {
                     <div className="text-xs font-medium text-red-600">
                       Error output:
                     </div>
-                    <pre className="bg-red-50 text-red-900 p-3 rounded text-xs overflow-x-auto max-h-60 overflow-y-auto whitespace-pre-wrap word-break-word border border-red-200">
-                      <code className="break-words">{nestedParsed.stderr}</code>
-                    </pre>
+                    <div className="bg-red-50 text-red-900 p-3 rounded text-xs max-h-60 overflow-y-auto border border-red-200">
+                      <pre className="whitespace-pre-wrap break-words overflow-wrap-anywhere">
+                        <code className="break-words">{nestedParsed.stderr}</code>
+                      </pre>
+                    </div>
                   </div>
                 )}
               </div>
@@ -220,18 +225,22 @@ const formatResult = (result: string): React.ReactNode => {
 
           // Otherwise display as formatted JSON
           return (
-            <pre className="bg-gray-900 text-gray-100 p-3 rounded text-xs overflow-x-auto max-h-60 overflow-y-auto whitespace-pre-wrap word-break-word">
-              <code className="break-words">
-                {JSON.stringify(nestedParsed, null, 2)}
-              </code>
-            </pre>
+            <div className="bg-gray-900 text-gray-100 p-3 rounded text-xs max-h-60 overflow-y-auto">
+              <pre className="whitespace-pre-wrap break-words overflow-wrap-anywhere">
+                <code className="break-words">
+                  {JSON.stringify(nestedParsed, null, 2)}
+                </code>
+              </pre>
+            </div>
           );
         } catch {
           // Nested text is not JSON, display as plain text
           return (
-            <pre className="bg-gray-900 text-gray-100 p-3 rounded text-xs overflow-x-auto max-h-60 overflow-y-auto whitespace-pre-wrap word-break-word">
-              <code className="break-words">{textContent.text}</code>
-            </pre>
+            <div className="bg-gray-900 text-gray-100 p-3 rounded text-xs max-h-60 overflow-y-auto">
+              <pre className="whitespace-pre-wrap break-words overflow-wrap-anywhere">
+                <code className="break-words">{textContent.text}</code>
+              </pre>
+            </div>
           );
         }
       }
@@ -239,16 +248,20 @@ const formatResult = (result: string): React.ReactNode => {
 
     // Standard JSON formatting
     return (
-      <pre className="bg-gray-900 text-gray-100 p-3 rounded text-xs overflow-x-auto max-h-60 overflow-y-auto whitespace-pre-wrap word-break-word">
-        <code className="break-words">{JSON.stringify(parsed, null, 2)}</code>
-      </pre>
+      <div className="bg-gray-900 text-gray-100 p-3 rounded text-xs max-h-60 overflow-y-auto">
+        <pre className="whitespace-pre-wrap break-words overflow-wrap-anywhere">
+          <code className="break-words">{JSON.stringify(parsed, null, 2)}</code>
+        </pre>
+      </div>
     );
   } catch {
     // Not JSON, display as plain text with wrapping
     return (
-      <pre className="bg-gray-50 p-3 rounded text-xs overflow-x-auto max-h-60 overflow-y-auto whitespace-pre-wrap word-break-word">
-        <code className="text-gray-700 break-words">{cleanResult}</code>
-      </pre>
+      <div className="bg-gray-50 p-3 rounded text-xs max-h-60 overflow-y-auto">
+        <pre className="whitespace-pre-wrap break-words overflow-wrap-anywhere">
+          <code className="text-gray-700 break-words">{cleanResult}</code>
+        </pre>
+      </div>
     );
   }
 };
@@ -292,6 +305,13 @@ export function ToolCallCard({
               {formatTimestamp(timestamp)}
             </span>
           )}
+          {/* Loading indicator when no result yet */}
+          {!result && (
+            <div className="flex items-center gap-1 text-xs text-gray-500 flex-shrink-0">
+              <Loader2 className="w-3 h-3 animate-spin" />
+              <span>Executing...</span>
+            </div>
+          )}
         </div>
         {isExpanded ? (
           <ChevronUp className="w-4 h-4 text-gray-500 flex-shrink-0 ml-2" />
@@ -310,10 +330,15 @@ export function ToolCallCard({
           <div className="overflow-hidden">{formatArguments(name, args)}</div>
 
           {/* Result (if available) */}
-          {result && (
+          {result ? (
             <div className="space-y-2 overflow-hidden">
               <div className="text-xs font-medium text-gray-600">Result:</div>
               <div className="overflow-hidden">{formatResult(result)}</div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-sm text-gray-500 py-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Waiting for results...</span>
             </div>
           )}
         </div>

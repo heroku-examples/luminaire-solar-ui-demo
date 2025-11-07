@@ -527,7 +527,7 @@ const MessageComponent = ({
   // Handle assistant messages with tool calls
   if (role === 'assistant' && tool_calls) {
     return (
-      <div className="max-w-[80%] mb-4">
+      <div className="w-full mb-4 min-w-0">
         {tool_calls.map((toolCall) => {
           try {
             const args = JSON.parse(toolCall.function.arguments);
@@ -1057,8 +1057,8 @@ export function Assistant() {
             </div>
 
             {/* Messages Area */}
-            <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
-              <div className="space-y-2">
+            <ScrollArea ref={scrollAreaRef} className="flex-1 p-4 overflow-x-hidden">
+              <div className="space-y-2 min-w-0">
                 {messages.map((message, index) => (
                   <MessageComponent
                     key={index}
@@ -1071,6 +1071,23 @@ export function Assistant() {
                     onImageClick={setImagePreview}
                   />
                 ))}
+                
+                {/* Loading indicator for inference */}
+                {isLoading && (
+                  <div className="flex items-start gap-3 max-w-[80%]">
+                    <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                      <Bot className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div className="flex items-center gap-2 bg-purple-50 rounded-2xl px-4 py-3 border border-purple-100">
+                      <div className="flex gap-1">
+                        <span className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                        <span className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                        <span className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                      </div>
+                      <span className="text-sm text-purple-600 font-medium">Thinking...</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </ScrollArea>
 

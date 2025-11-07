@@ -4,20 +4,13 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import {
   Check,
-  Wrench,
-  Database,
-  FileText,
-  Globe,
-  FileType,
-  Code,
-  Terminal,
-  Square,
-  RefreshCw,
   Loader2,
+  RefreshCw,
   Send,
   X,
   MessageSquare,
   Bot,
+  Square,
 } from 'lucide-react';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
@@ -27,6 +20,7 @@ import { flushSync } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
+import { ToolCallCard } from '@/components/ui/tool-call-card';
 
 const palette = {
   primary: '#5D3EFF',
@@ -49,11 +43,22 @@ const palette = {
   suggestionText: '#5D3EFF',
 };
 
+interface ToolCall {
+  id: string;
+  type: 'function';
+  function: {
+    name: string;
+    arguments: string; // JSON string
+  };
+}
+
 interface Message {
   role: 'user' | 'assistant' | 'agent' | 'tool' | 'error';
-  content: string;
+  content?: string;
   timestamp: string;
   tool?: string;
+  tool_calls?: ToolCall[];
+  tool_call_id?: string;
 }
 
 const useChatStream = ({
@@ -68,6 +73,9 @@ const useChatStream = ({
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [toolResults, setToolResults] = useState<Map<string, string>>(
+    new Map()
+  );
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const abortRequest = () => {
@@ -163,99 +171,125 @@ const useChatStream = ({
     const reader = stream.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
-    let agentBuffer = '';
-    let isFirstAssistantMessage = true;
+    let currentAssistantMessageIndex: number | null = null;
     const signal = abortControllerRef.current?.signal;
+    const toolCallsMap = new Map<string, ToolCall>();
 
-    const handleAgentMessage = (message: Message) => {
-      const messageWithSession = message as Message & { sessionId?: string };
-      if (messageWithSession.sessionId && !sessionId) {
-        setSessionId(messageWithSession.sessionId);
+    const handleMessage = (message: Message & { sessionId?: string }) => {
+      // Store sessionId if present
+      if (message.sessionId && !sessionId) {
+        setSessionId(message.sessionId);
       }
+
       flushSync(() => {
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { ...message, timestamp: new Date().toISOString() },
-        ]);
-      });
-    };
-
-    const handleAssistantMessage = (content: string) => {
-      setMessages((prevMessages) => {
-        if (!content.startsWith('\n') || !content.endsWith('\n')) {
-          // Add newline if content ends with sentence punctuation, is a markdown heading,
-          // code block, list item or sublist item (asterisk, number, or em-dash)
-          if (
-            /[.!:?]$/.test(content.trim()) ||
-            /^(#{1,6}) /.test(content.trim()) ||
-            /^`{3}.*`{3}$/.test(content.trim()) ||
-            /^(\s*[*-]|\s*\d+\.|\s*-{3,})/.test(content.trim()) ||
-            /^!\[[^\]]*\]\([^)]+\)\s*$/.test(content.trim()) ||
-            /<img\b[^>]*>\s*$/i.test(content.trim())
-          ) {
-            // Ensure a clear block break after images and block endings
-            content += '\n\n';
-          } else {
-            content += ' ';
+        setMessages((prevMessages) => {
+          // Handle agent messages (system messages)
+          if (message.role === 'agent') {
+            return [
+              ...prevMessages,
+              { ...message, timestamp: new Date().toISOString() },
+            ];
           }
-        }
 
-        if (isFirstAssistantMessage) {
-          isFirstAssistantMessage = false;
-          return [
-            ...prevMessages,
-            {
-              role: 'assistant' as const,
-              content,
-              timestamp: new Date().toISOString(),
-            },
-          ];
-        }
+          // Handle assistant messages with tool_calls
+          if (message.role === 'assistant' && message.tool_calls) {
+            // Store tool calls for later correlation with results
+            message.tool_calls.forEach((tc) => toolCallsMap.set(tc.id, tc));
 
-        const lastMessage = prevMessages[prevMessages.length - 1];
-        if (lastMessage?.role === 'assistant') {
-          // Create a new array with updated last message
-          return [
-            ...prevMessages.slice(0, -1),
-            { ...lastMessage, content: lastMessage.content + content },
-          ];
-        }
+            return [
+              ...prevMessages,
+              {
+                ...message,
+                timestamp: new Date().toISOString(),
+              },
+            ];
+          }
 
-        return prevMessages;
+          // Handle assistant text content (streaming)
+          if (message.role === 'assistant' && message.content) {
+            let content = message.content;
+
+            // Add spacing for better markdown rendering
+            if (!content.startsWith('\n') && !content.endsWith('\n')) {
+              if (
+                /[.!:?]$/.test(content.trim()) ||
+                /^(#{1,6}) /.test(content.trim()) ||
+                /^`{3}.*`{3}$/.test(content.trim()) ||
+                /^(\s*[*-]|\s*\d+\.|\s*-{3,})/.test(content.trim()) ||
+                /^!\[[^\]]*\]\([^)]+\)\s*$/.test(content.trim()) ||
+                /<img\b[^>]*>\s*$/i.test(content.trim())
+              ) {
+                content += '\n\n';
+              } else {
+                content += ' ';
+              }
+            }
+
+            if (currentAssistantMessageIndex === null) {
+              // Start new assistant message
+              currentAssistantMessageIndex = prevMessages.length;
+              return [
+                ...prevMessages,
+                {
+                  role: 'assistant' as const,
+                  content,
+                  timestamp: new Date().toISOString(),
+                },
+              ];
+            }
+
+            // Append to existing assistant message
+            const lastMessage = prevMessages[prevMessages.length - 1];
+            if (lastMessage?.role === 'assistant' && !lastMessage.tool_calls) {
+              return [
+                ...prevMessages.slice(0, -1),
+                {
+                  ...lastMessage,
+                  content: (lastMessage.content || '') + content,
+                },
+              ];
+            }
+
+            // If last message is not assistant text, start new message
+            return [
+              ...prevMessages,
+              {
+                role: 'assistant' as const,
+                content,
+                timestamp: new Date().toISOString(),
+              },
+            ];
+          }
+
+          // Handle tool response messages - store result but don't display separately
+          if (message.role === 'tool') {
+            if (message.tool_call_id) {
+              // Store the tool result for correlation with tool call
+              setToolResults((prev) => {
+                const newMap = new Map(prev);
+                newMap.set(message.tool_call_id || '', message.content || '');
+                return newMap;
+              });
+            }
+
+            // Never add tool messages to the message list - they're shown in the tool card
+            return prevMessages;
+          }
+
+          // Handle error messages
+          if (message.role === 'error') {
+            return [
+              ...prevMessages,
+              {
+                ...message,
+                timestamp: new Date().toISOString(),
+              },
+            ];
+          }
+
+          return prevMessages;
+        });
       });
-    };
-
-    const processAgentBuffer = () => {
-      try {
-        const message = JSON.parse(agentBuffer);
-        if (message.role === 'agent' || message.role === 'tool') {
-          handleAgentMessage(message);
-        } else {
-          buffer += agentBuffer;
-        }
-        agentBuffer = '';
-      } catch (_e) {
-        if (agentBuffer.length > 1000) {
-          buffer += agentBuffer;
-          agentBuffer = '';
-        }
-      }
-    };
-
-    const processChunk = (chunk: string) => {
-      if (!chunk.trim()) return;
-
-      try {
-        const message = JSON.parse(chunk);
-        if (message.sessionId && !sessionId) {
-          setSessionId(message.sessionId);
-        }
-        if (message.role === 'assistant') {
-          handleAssistantMessage(message.content || '');
-        }
-      } catch (_e) {
-        handleAssistantMessage(chunk);
-      }
     };
 
     try {
@@ -271,34 +305,57 @@ const useChatStream = ({
         if (done) break;
 
         const decodedChunk = decoder.decode(value, { stream: true });
+        buffer += decodedChunk;
 
-        for (const char of decodedChunk) {
-          if (char === '{') {
-            agentBuffer = char;
-          } else if (agentBuffer) {
-            agentBuffer += char;
-            if (char === '}') {
-              processAgentBuffer();
+        // Process SSE format: event: TYPE\ndata: JSON\n\n
+        const lines = buffer.split('\n');
+        buffer = '';
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+
+          // Check if we have a complete event
+          if (line.startsWith('event: ')) {
+            // Event type - we don't need to track it currently
+            continue;
+          } else if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+
+            // Skip empty data (used for "done" event)
+            if (data === '{}') {
+              continue;
             }
-          } else {
-            buffer += char;
+
+            try {
+              const message = JSON.parse(data);
+              handleMessage(message);
+            } catch (e) {
+              console.error('Failed to parse SSE data:', data, e);
+            }
+          } else if (line === '' && i === lines.length - 1) {
+            // Empty line at the end, keep remaining buffer
+            buffer = line;
+          } else if (
+            line !== '' &&
+            !line.startsWith('event:') &&
+            !line.startsWith('data:')
+          ) {
+            // Incomplete line, add back to buffer
+            buffer += (buffer ? '\n' : '') + line;
           }
         }
-
-        const chunks = buffer.split(/(?<=\n)/);
-        buffer = chunks.pop() || '';
-        chunks.forEach(processChunk);
       }
 
-      // Process any remaining buffer
-      if (buffer.trim()) {
-        processChunk(buffer);
-      }
-      if (agentBuffer.trim()) {
-        processAgentBuffer();
-      }
-
-      // Keep all messages visible - don't remove tool/agent messages
+      // Remove agent "processing" messages
+      setMessages((prev) =>
+        prev.filter(
+          (msg) =>
+            !(
+              msg.role === 'agent' &&
+              msg.content?.includes('processing your request')
+            )
+        )
+      );
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
         return;
@@ -334,6 +391,7 @@ const useChatStream = ({
     isLoading,
     sendMessage,
     abortRequest,
+    toolResults,
   };
 };
 
@@ -352,33 +410,14 @@ const IconWrapper = ({ isLast }: { isLast: boolean }) => {
   );
 };
 
-const getToolIcon = (toolName: string) => {
-  const iconMap: Record<
-    string,
-    React.ComponentType<{ className?: string; style?: React.CSSProperties }>
-  > = {
-    html_to_markdown: Globe,
-    pdf_to_markdown: FileType,
-    code_exec_python: Code,
-    code_exec_ruby: Code,
-    code_exec_node: Code,
-    code_exec_go: Code,
-    postgres_get_schema: FileText,
-    postgres_run_query: Database,
-    dyno_run_command: Terminal,
-    unknown: Wrench,
-  };
-
-  return iconMap[toolName] || Wrench;
-};
-
 interface MessageProps {
   role: string;
-  content: string;
+  content?: string;
   isLast: boolean;
   onImageClick?: (src: string) => void;
   timestamp?: string;
-  tool?: string;
+  tool_calls?: ToolCall[];
+  toolResults?: Map<string, string>;
 }
 
 const MessageComponent = ({
@@ -387,7 +426,8 @@ const MessageComponent = ({
   isLast,
   onImageClick,
   timestamp,
-  tool,
+  tool_calls,
+  toolResults,
 }: MessageProps) => {
   const formatTimestamp = (isoString?: string) => {
     if (!isoString) return '';
@@ -470,20 +510,9 @@ const MessageComponent = ({
     ...messageStyles[role],
   };
 
+  // Don't render tool messages - they're shown inside tool call cards
   if (role === 'tool') {
-    const ToolIcon = getToolIcon(tool || 'unknown');
-    return (
-      <div style={style}>
-        <div className="flex items-center gap-2">
-          <ToolIcon
-            className="w-3.5 h-3.5"
-            style={{ color: palette.primary }}
-          />
-          <span className="text-xs flex-1 truncate">{content}</span>
-          <IconWrapper isLast={isLast} />
-        </div>
-      </div>
-    );
+    return null;
   }
 
   if (role === 'agent') {
@@ -491,6 +520,33 @@ const MessageComponent = ({
       <div style={style}>
         <span className="text-xs">{content}</span>
         <IconWrapper isLast={isLast} />
+      </div>
+    );
+  }
+
+  // Handle assistant messages with tool calls
+  if (role === 'assistant' && tool_calls) {
+    return (
+      <div className="max-w-[80%] mb-4">
+        {tool_calls.map((toolCall) => {
+          try {
+            const args = JSON.parse(toolCall.function.arguments);
+            const result = toolResults?.get(toolCall.id);
+            return (
+              <ToolCallCard
+                key={toolCall.id}
+                id={toolCall.id}
+                name={toolCall.function.name}
+                arguments={args}
+                result={result}
+                timestamp={timestamp}
+              />
+            );
+          } catch (e) {
+            console.error('Failed to parse tool arguments:', e);
+            return null;
+          }
+        })}
       </div>
     );
   }
@@ -518,7 +574,7 @@ const MessageComponent = ({
           </span>
         </div>
       )}
-      {role === 'assistant' ? (
+      {role === 'assistant' && content ? (
         <div className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
@@ -636,9 +692,9 @@ const MessageComponent = ({
             {content}
           </ReactMarkdown>
         </div>
-      ) : (
+      ) : content ? (
         <div className="whitespace-pre-wrap">{content}</div>
-      )}
+      ) : null}
     </div>
   );
 };
@@ -654,7 +710,8 @@ interface ToolSettings {
 
 export function Assistant() {
   const { authorization, system } = useStore();
-  const { messages, isLoading, sendMessage, abortRequest } = useChatStream();
+  const { messages, isLoading, sendMessage, abortRequest, toolResults } =
+    useChatStream();
   const [input, setInput] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -879,7 +936,8 @@ export function Assistant() {
     // Get context from last few messages
     const lastFewMessages = messages.slice(-6);
     const contextText = lastFewMessages
-      .map((m) => m.content.toLowerCase())
+      .filter((m) => m.content) // Filter out messages without content
+      .map((m) => (m.content || '').toLowerCase())
       .join(' ');
 
     // Score suggestions by relevance
@@ -972,7 +1030,7 @@ export function Assistant() {
           />
 
           {/* Panel */}
-          <div className="fixed top-0 right-0 h-full w-full md:w-[650px] bg-white shadow-2xl z-50 flex flex-col animate-in slide-in-from-right">
+          <div className="fixed top-0 right-0 h-full w-full md:w-[800px] bg-white shadow-2xl z-50 flex flex-col animate-in slide-in-from-right">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b">
               <div className="flex items-center gap-3">
@@ -1007,7 +1065,8 @@ export function Assistant() {
                     role={message.role}
                     content={message.content}
                     timestamp={message.timestamp}
-                    tool={message.tool}
+                    tool_calls={message.tool_calls}
+                    toolResults={toolResults}
                     isLast={index === messages.length - 1 && isLoading}
                     onImageClick={setImagePreview}
                   />

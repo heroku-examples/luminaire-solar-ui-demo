@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
-import { User, LogOut } from 'lucide-react';
+import { User, LogOut, Menu, X } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,11 +16,13 @@ import {
 import { LoginDialog } from '@/components/ui/login-dialog';
 import { CartSheet } from '@/components/ui/cart-sheet';
 import Logo from '@/components/icons/logo';
+import { useState } from 'react';
 
 export function Header() {
   const pathname = usePathname();
   const { user, logout } = useStore();
   const loggedIn = user && user.username != null;
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const links = [
     { href: '/', label: 'Home' },
@@ -39,14 +41,21 @@ export function Header() {
     logout();
   };
 
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+  };
+
   return (
     <header className="z-20 w-full h-16 bg-white fixed top-0 border-b">
-      <div className="px-12 h-full flex justify-between items-center">
+      <div className="px-4 sm:px-6 lg:px-12 h-full flex justify-between items-center">
+        {/* Logo */}
         <div className="flex items-center">
           <Link href="/demo" className="flex items-center">
             <Logo />
           </Link>
-          <nav className="flex items-center ml-10 gap-2">
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center ml-6 lg:ml-10 gap-1 lg:gap-2">
             {visibleLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
@@ -54,7 +63,7 @@ export function Header() {
                   key={link.href}
                   href={link.href}
                   className={`
-                    relative px-4 py-2 font-medium text-sm
+                    relative px-3 lg:px-4 py-2 font-medium text-sm
                     transition-all duration-300 ease-out
                     rounded-lg
                     ${
@@ -76,7 +85,8 @@ export function Header() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-4">
+        {/* Right side actions */}
+        <div className="flex items-center gap-2 sm:gap-4">
           <CartSheet />
 
           {loggedIn ? (
@@ -106,8 +116,51 @@ export function Header() {
           ) : (
             <LoginDialog />
           )}
+
+          {/* Mobile menu button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </Button>
         </div>
       </div>
+
+      {/* Mobile Navigation Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-x-0 top-16 bg-white border-b shadow-lg">
+          <nav className="flex flex-col py-4">
+            {visibleLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={closeMobileMenu}
+                  className={`
+                    px-6 py-3 font-medium text-base
+                    transition-colors duration-200
+                    ${
+                      isActive
+                        ? 'text-purple-600 bg-purple-50'
+                        : 'text-gray-600 hover:text-purple-600 hover:bg-purple-50'
+                    }
+                  `}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+      )}
     </header>
   );
 }
